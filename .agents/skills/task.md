@@ -1,0 +1,31 @@
+# Phase 1 Implementation Task List
+
+- [x] Project Initialization
+  - [x] Run `npx create-next-app --help` to identify non-interactive initialization flags
+  - [x] Initialize Next.js project with TypeScript, ESLint, App Router, and no Tailwind (using vanilla CSS/CSS modules)
+  - [x] Install dependencies (Zustand, Lucide-React, etc.)
+  - [x] Configure `tsconfig.json`, `.gitignore`, and verify project builds and runs
+- [x] Core Data Models and State Management
+  - [x] Create TypeScript types/schemas for the templates (`src/templates/schema.ts`)
+  - [x] Create Zustand document store with undo/redo capabilities (`src/hooks/useDocumentStore.ts`)
+  - [x] Verify state updates and local persistence in browser localStorage
+- [x] Template Registry and Base Templates
+  - [x] Build Template Registry layout (`src/templates/index.ts`)
+  - [x] Implement `resume-modern` template structure & static dummy data (`src/templates/resume-modern`)
+  - [x] Implement `biodata-classic` template structure & static dummy data (`src/templates/biodata-classic`)
+- [x] App Shell and Navigation Pages
+  - [x] Create Global Header, Footer, and App Navigation Layout (`src/components/shared`)
+  - [x] Create Homepage (`src/app/page.tsx`)
+  - [x] Create Template Gallery (`src/app/templates/page.tsx`)
+  - [x] Create PDF Tools Hub & Merge/Split Placeholders (`src/app/pdf-tools/page.tsx`)
+- [x] Dynamic Browser-Based Editor
+  - [x] Create Editor Layout (`src/app/editor/[templateId]/page.tsx`) with Split View (Desktop side-by-side, Mobile Tabs)
+  - [x] Create General Form Sections (Personal, Education, Experience, Skills, Theme Customizer)
+  - [x] Create Dynamic Biodata Form Section (conditional styling for Biodata fields)
+  - [x] Create Client-side Photo Uploader with image compression using HTML Canvas
+  - [x] Implement Live Dynamic Preview linking Zustand state to active template view
+- [x] Polish, Verification and Deployment Validation
+  - [x] Test form interactions, undo/redo states, and item additions/removals
+  - [x] Test local storage persistence on page refresh
+  - [x] Test responsiveness (Desktop and Mobile viewports)
+  - [x] Run typescript compiler and production build (`npm run build`) to ensure zero errors

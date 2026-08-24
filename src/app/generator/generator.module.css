@@ -1,0 +1,538 @@
+/* ============================================================
+   Resume Generator Page — Layout & UI Styles
+   ============================================================ */
+
+/* ─── Full-page workspace ────────────────────────────────── */
+.workspace {
+  /* Theme tokens: Light theme defaults */
+  --bg-workspace: #f1f5f9;
+  --bg-sidebar: #ffffff;
+  --bg-sidebar-header: #ffffff;
+  --border-sidebar: #e2e8f0;
+  --bg-toolbar: #ffffff;
+  --border-toolbar: #e2e8f0;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --bg-card: #ffffff;
+  --bg-card-header: #f8fafc;
+  --border-card: #e2e8f0;
+  --bg-input: #ffffff;
+  --border-input: #e2e8f0;
+  --text-input: #1e293b;
+  --bg-btn: #ffffff;
+  --border-btn: #e2e8f0;
+  --text-btn: #475569;
+  --bg-btn-hover: #f8fafc;
+  --border-btn-hover: #cbd5e1;
+  --bg-add-btn: #f5f7ff;
+  --border-add-btn: #c7d2fe;
+  --text-add-btn: #6366f1;
+  --bg-add-btn-hover: #eef2ff;
+  --border-add-btn-hover: #a5b4fc;
+
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg-workspace);
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+.workspace[data-theme='dark'] {
+  --bg-workspace: #0f172a;
+  --bg-sidebar: #1e293b;
+  --bg-sidebar-header: #1e293b;
+  --border-sidebar: #334155;
+  --bg-toolbar: #1e293b;
+  --border-toolbar: #334155;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
+  --bg-card: #1e293b;
+  --bg-card-header: #0f172a;
+  --border-card: #334155;
+  --bg-input: #0f172a;
+  --border-input: #334155;
+  --text-input: #f8fafc;
+  --bg-btn: #0f172a;
+  --border-btn: #334155;
+  --text-btn: #cbd5e1;
+  --bg-btn-hover: #1e293b;
+  --border-btn-hover: #475569;
+  --bg-add-btn: #1e1b4b;
+  --border-add-btn: #312e81;
+  --text-add-btn: #818cf8;
+  --bg-add-btn-hover: #2e1065;
+  --border-add-btn-hover: #4c1d95;
+}
+
+/* ─── Top Toolbar ─────────────────────────────────────────── */
+.toolbar {
+  height: 58px;
+  background: var(--bg-toolbar);
+  border-bottom: 1px solid var(--border-sidebar);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  flex-shrink: 0;
+  z-index: 50;
+  gap: 12px;
+}
+
+.toolbarBrand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text-primary);
+}
+
+.toolbarBrandIcon {
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(135deg, #1e3a8a, #0d9488);
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.toolbarTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.toolbarSub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 400;
+  display: block;
+}
+
+.toolbarActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.saveStatus {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.saveDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  flex-shrink: 0;
+}
+
+.iconBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 10px;
+  font-size: 0.8rem;
+  border: 1px solid var(--border-btn);
+  border-radius: 7px;
+  background: var(--bg-btn);
+  cursor: pointer;
+  color: var(--text-btn);
+  font-family: inherit;
+  font-weight: 500;
+  transition: background 0.15s, border-color 0.15s;
+}
+.iconBtn:hover:not(:disabled) {
+  background: var(--bg-btn-hover);
+  border-color: var(--border-btn-hover);
+}
+.iconBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.downloadBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 7px;
+  background: linear-gradient(135deg, #1e3a8a, #0d9488);
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.downloadBtn:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+.downloadBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ─── Main Body ───────────────────────────────────────────── */
+.main {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0; /* Allow the grid container to shrink and fit flex layout height */
+}
+
+/* ─── Left Sidebar ────────────────────────────────────────── */
+.sidebar {
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-sidebar);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+}
+
+.sidebarHeader {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border-sidebar);
+  flex-shrink: 0;
+}
+
+.sidebarHeading {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin: 0;
+}
+
+.sidebarScroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0; /* Critical flexbox property to enable scrolling */
+  padding: 12px 14px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ─── Fixed section card (Contact, Style) ─────────────────── */
+.fixedSection {
+  border: 1px solid var(--border-card);
+  border-radius: 10px;
+  background: var(--bg-card);
+}
+
+.fixedSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: var(--bg-card-header);
+  cursor: pointer;
+  border: none;
+  width: 100%;
+  font-family: inherit;
+  border-top-left-radius: 9px;
+  border-top-right-radius: 9px;
+}
+
+.fixedSectionTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.fixedBadge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: var(--bg-workspace);
+  color: var(--text-muted);
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.fixedSectionBody {
+  padding: 14px 14px 24px;
+  border-top: 1px solid var(--border-card);
+  max-height: 260px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  border-bottom-left-radius: 9px;
+  border-bottom-right-radius: 9px;
+}
+
+/* ─── Add Section button ──────────────────────────────────── */
+.addSectionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 11px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-add-btn);
+  border: 2px dashed var(--border-add-btn);
+  border-radius: 10px;
+  background: var(--bg-add-btn);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+  width: 100%;
+}
+.addSectionBtn:hover {
+  background: var(--bg-add-btn-hover);
+  border-color: var(--border-add-btn-hover);
+}
+
+/* ─── Right Preview Panel ─────────────────────────────────── */
+.previewPanel {
+  overflow-y: auto;
+  background: var(--bg-workspace);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 30px 20px;
+}
+
+.previewOuter {
+  transform-origin: top center;
+  /* scale set inline by JS */
+}
+
+.previewShadow {
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+/* ─── Mobile tabs ─────────────────────────────────────────── */
+.mobileTabs {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-sidebar);
+  border-top: 1px solid var(--border-sidebar);
+  z-index: 100;
+}
+
+.mobileTabBtn {
+  flex: 1;
+  padding: 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-family: inherit;
+  transition: color 0.15s;
+}
+.mobileTabBtnActive {
+  color: var(--text-primary);
+  border-top: 2px solid var(--text-primary);
+}
+
+/* ─── Modal overlay ───────────────────────────────────────── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+  backdrop-filter: blur(2px);
+}
+
+.modal {
+  background: var(--bg-sidebar);
+  border-radius: 14px;
+  padding: 28px;
+  max-width: 440px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-sidebar);
+}
+
+.modalTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+}
+
+.modalBody {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin-bottom: 20px;
+}
+
+.modalActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.btnPrimary {
+  padding: 9px 18px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #1e3a8a, #0d9488);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+.btnPrimary:hover { opacity: 0.9; }
+
+.btnSecondary {
+  padding: 9px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--border-btn);
+  background: var(--bg-btn);
+  color: var(--text-btn);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.btnSecondary:hover { background: var(--bg-btn-hover); }
+
+.btnDanger {
+  padding: 9px 18px;
+  border-radius: 8px;
+  border: none;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+.btnDanger:hover { opacity: 0.9; }
+
+/* ─── Add Section modal list ──────────────────────────────── */
+.addSectionList {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.addSectionOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-card);
+  border-radius: 8px;
+  background: var(--bg-card-header);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.82rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  transition: background 0.15s, border-color 0.15s;
+  text-align: left;
+}
+.addSectionOption:hover,
+.addSectionOptionSelected {
+  background: var(--bg-btn-hover);
+  border-color: var(--border-btn-hover);
+  color: var(--text-primary);
+}
+
+/* ─── Photo crop modal ────────────────────────────────────── */
+.cropViewport {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #6366f1;
+  cursor: grab;
+  position: relative;
+  background: #e2e8f0;
+  flex-shrink: 0;
+}
+.cropViewport:active { cursor: grabbing; }
+
+/* ─── Error bar ───────────────────────────────────────────── */
+.errorBar {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 10px 16px;
+  font-size: 0.83rem;
+  border-radius: 8px;
+  text-align: center;
+}
+.successBar {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #16a34a;
+  padding: 10px 16px;
+  font-size: 0.83rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* ─── Responsive ──────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .main {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .previewPanel {
+    display: none;
+  }
+
+  .showEditor .sidebar {
+    display: flex;
+  }
+
+  .showPreview .previewPanel {
+    display: flex;
+  }
+
+  .mobileTabs {
+    display: flex;
+  }
+
+  .workspace {
+    padding-bottom: 56px;
+  }
+
+  .toolbarTitle { display: none; }
+  .toolbarSub { display: none; }
+  .saveStatus { display: none; }
+}
