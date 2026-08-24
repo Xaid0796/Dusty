@@ -181,6 +181,18 @@ export const templateMetadataRegistry: Record<string, TemplateDefinition> = {
     isPremium: true,
     description: 'An editorial-style premium resume template featuring an ultra-premium warm cream background, deep charcoal typography, geometric gold corner accent frames, and a meticulously balanced two-column layout.',
   },
+  'resume-emerald-luxury': {
+    id: 'resume-emerald-luxury',
+    name: 'Emerald Luxury',
+    category: 'resume',
+    thumbnailText: 'Emerald Luxury',
+    thumbnailGradient: 'linear-gradient(135deg, #064e3b, #10b981)',
+    defaultData: defaultResumeData,
+    Component: ResumeModernLayout,
+    photoShape: 'circle',
+    isPremium: true,
+    description: 'A luxurious, executive-grade resume template featuring a striking deep emerald accent ribbon, precise asymmetric two-column layout, circular profile frame, and sophisticated typography tailored for senior leaders and corporate professionals.',
+  },
 };
 
 // Helper to get combined registry including any dynamically published templates from templateRegistry
