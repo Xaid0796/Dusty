@@ -113,8 +113,7 @@ export default function GenericCanvasEditorPage() {
         resume: 'Resume',
         cv: 'CV',
         biodata: 'Biodata',
-        'cover-letter': 'Cover Letter',
-        portfolio: 'Portfolio'
+        'cover-letter': 'Cover Letter'
       };
       const catName = categoryNames[cat] || 'Document';
       return {

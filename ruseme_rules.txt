@@ -1,0 +1,13 @@
+## 📋 Professional Resume Structural Rules (Strict Constraints)
+When generating elements for templates tagged with `category: "resume"`, you must strictly apply these UX/UI and formatting constraints to the JSON/Object arrays:
+
+### Layout & Canvas Typography Metrics
+1. Body Text Elements: Force `style.textAlign` to 'left', `style.fontSize` between 10 and 12, and set a clean font family (like Arial, Calibri, or Garamond if available).
+2. Heading Text Elements: Section headers must stand out clearly with `style.fontSize` mapped between 14 and 16.
+3. Canvas Spacing Layout: Balance element coordinate structures (`x`, `y`, `width`, `height`) to maintain distinct framing padding and preserve roughly 30% breathing room (whitespace) across the `CanvasPage`.
+4. Page Constraints: Limit coordinates so text blocks do not spill over awkwardly, ensuring the entire structure fits neatly within standard 1 or 2 page dimensions.
+
+### Mock Content Placeholder Requirements
+1. Direct Language: All template placeholder content strings (`content`) must omit personal pronouns ("I", "me", "my"). 
+2. Header Standard: Use strictly recognizable, professional labels for tracking fields (e.g., "Work Experience", "Education", "Skills", "Projects") rather than informal names.
+3. Profile Masking: Contact placeholder nodes must feature only City, State/Country, and ZIP code—do not include physical street lines, ages, or photo templates to ensure strict professional design compliance.

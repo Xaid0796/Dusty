@@ -10,7 +10,7 @@ import styles from './page.module.css';
 import { TemplateThumbnail } from '@/components/shared/TemplateThumbnail';
 
 export default function TemplatesPage() {
-  const [selectedCategory, setSelectedCategory] = useState<'all' | 'resume' | 'cv' | 'biodata' | 'cover-letter' | 'portfolio'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<'all' | 'resume' | 'cv' | 'biodata' | 'cover-letter'>('all');
   const [priceFilter, setPriceFilter] = useState<'all' | 'free' | 'paid'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const templates = getAllTemplates();
@@ -19,7 +19,7 @@ export default function TemplatesPage() {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const cat = params.get('category');
-      if (cat && ['all', 'resume', 'cv', 'biodata', 'cover-letter', 'portfolio'].includes(cat)) {
+      if (cat && ['all', 'resume', 'cv', 'biodata', 'cover-letter'].includes(cat)) {
         setSelectedCategory(cat as any);
       }
     }
@@ -30,7 +30,7 @@ export default function TemplatesPage() {
     const handlePop = () => {
       const params = new URLSearchParams(window.location.search);
       const cat = params.get('category');
-      if (cat && ['all', 'resume', 'cv', 'biodata', 'cover-letter', 'portfolio'].includes(cat)) {
+      if (cat && ['all', 'resume', 'cv', 'biodata', 'cover-letter'].includes(cat)) {
         setSelectedCategory(cat as any);
       } else {
         setSelectedCategory('all');
@@ -40,7 +40,7 @@ export default function TemplatesPage() {
     return () => window.removeEventListener('popstate', handlePop);
   }, []);
 
-  const handleSelectCategory = (category: 'all' | 'resume' | 'cv' | 'biodata' | 'cover-letter' | 'portfolio') => {
+  const handleSelectCategory = (category: 'all' | 'resume' | 'cv' | 'biodata' | 'cover-letter') => {
     setSelectedCategory(category);
     if (typeof window !== 'undefined') {
       const url = category === 'all' ? '/templates' : `/templates?category=${category}`;
@@ -62,13 +62,12 @@ export default function TemplatesPage() {
     return true;
   });
 
-  const categoryLabels: { id: 'all' | 'resume' | 'cv' | 'biodata' | 'cover-letter' | 'portfolio'; label: string; icon: any }[] = [
+  const categoryLabels: { id: 'all' | 'resume' | 'cv' | 'biodata' | 'cover-letter'; label: string; icon: any }[] = [
     { id: 'all', label: 'All Templates', icon: Sparkles },
     { id: 'resume', label: 'Resumes', icon: Edit3 },
     { id: 'cv', label: 'CVs', icon: FileText },
     { id: 'biodata', label: 'Biodatas', icon: Sparkles },
     { id: 'cover-letter', label: 'Cover Letters', icon: Mail },
-    { id: 'portfolio', label: 'Portfolios', icon: Briefcase },
   ];
 
   return (
@@ -81,7 +80,7 @@ export default function TemplatesPage() {
           <div className={styles.header}>
             <h1 className={styles.title}>Template Marketplace</h1>
             <p className={styles.subtitle}>
-              Browse our complete collection of professional, pixel-perfect resumes, CVs, biodatas, cover letters, and portfolios.
+              Browse our complete collection of professional, pixel-perfect resumes, CVs, biodatas, and cover letters.
             </p>
           </div>
 
@@ -281,9 +280,7 @@ export default function TemplatesPage() {
                             ? 'Biodata'
                             : selectedCategory === 'cover-letter'
                               ? 'Cover Letter'
-                              : selectedCategory === 'portfolio'
-                                ? 'Portfolio'
-                                : 'Document'}
+                              : 'Document'}
                     </h3>
                     <p className={styles.cardDesc}>
                       Start with a completely blank canvas and build your document from scratch using custom elements.

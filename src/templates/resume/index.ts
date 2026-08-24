@@ -12,6 +12,8 @@ import { resumeExecutiveNavyTemplate } from './resume-executive-navy';
 import { resumeCreativeTerracottaTemplate } from './resume-creative-terracotta';
 import { resumeProfessionalTemplate } from './resume-professional';
 import { sampleResumeDocument } from './modern';
+import { resumeAcademicLavenderTemplate } from './academic-lavender';
+import { resumeEmeraldLuxuryTemplate } from './resume-emerald-luxury';
 export const resumeTemplates: Record<string, CanvasDocument> = {
   'resume-creative': resumeCreativeTemplate,
   'resume-modern-elegant': resumeModernElegantTemplate,
@@ -25,5 +27,7 @@ export const resumeTemplates: Record<string, CanvasDocument> = {
   'resume-executive-navy': resumeExecutiveNavyTemplate,
   'resume-creative-terracotta': resumeCreativeTerracottaTemplate,
   'resume-professional': resumeProfessionalTemplate,
+  'resume-academic-lavender': resumeAcademicLavenderTemplate,
+  'resume-emerald-luxury': resumeEmeraldLuxuryTemplate,
   'resume-modern': sampleResumeDocument,
 };

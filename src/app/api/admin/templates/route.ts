@@ -49,7 +49,7 @@ export async function POST(request: Request) {
         }
 
         // Smart Update / Overwrite if template already exists
-        const categories = ['resume', 'biodata', 'cv', 'cover-letter', 'portfolio'];
+        const categories = ['resume', 'biodata', 'cv', 'cover-letter'];
         for (const cat of categories) {
             const catDir = path.join(process.cwd(), 'src', 'templates', cat);
             if (!fs.existsSync(catDir)) continue;

@@ -19,16 +19,19 @@ When creating template nodes, enforce type literals explicitly:
 2. Write the strongly typed configuration export structure into the appropriate isolated target folder array.
 3. Dynamically insert the template reference key export entry into the local path directory `index.ts`. Do not impact existing array references.
 
-## 📋 Professional Resume Structural Rules (Strict Constraints)
-When generating elements for templates tagged with `category: "resume"`, you must strictly apply these UX/UI and formatting constraints to the JSON/Object arrays:
+# Context: Canvas Portfolio Template Core Rules
 
-### Layout & Canvas Typography Metrics
-1. Body Text Elements: Force `style.textAlign` to 'left', `style.fontSize` between 10 and 12, and set a clean font family (like Arial, Calibri, or Garamond if available).
-2. Heading Text Elements: Section headers must stand out clearly with `style.fontSize` mapped between 14 and 16.
-3. Canvas Spacing Layout: Balance element coordinate structures (`x`, `y`, `width`, `height`) to maintain distinct framing padding and preserve roughly 30% breathing room (whitespace) across the `CanvasPage`.
-4. Page Constraints: Limit coordinates so text blocks do not spill over awkwardly, ensuring the entire structure fits neatly within standard 1 or 2 page dimensions.
+## Data Schema Rules
+- Every template array must strictly resolve to the `CanvasDocument` schema tree interface. 
+- Mandatory fields for all elements: id, x, y, width, height, rotation: 0, zIndex, visible: true, locked: false.
+- Ensure 'text' elements always have complete `style` blocks (padding, lineHeight, letterSpacing).
 
-### Mock Content Placeholder Requirements
-1. Direct Language: All template placeholder content strings (`content`) must omit personal pronouns ("I", "me", "my"). 
-2. Header Standard: Use strictly recognizable, professional labels for tracking fields (e.g., "Work Experience", "Education", "Skills", "Projects") rather than informal names.
-3. Profile Masking: Contact placeholder nodes must feature only City, State/Country, and ZIP code—do not include physical street lines, ages, or photo templates to ensure strict professional design compliance.
+## Automated Execution Pipeline
+- Check category: Since this is a portfolio, write the config file into the `/portfolio` folder.
+- Dynamically register and map its export reference inside the portfolio directory's `index.ts`.
+- NEVER modify or touch any core canvas engine calculations, event listeners, or rendering functions.
+
+## 🎨 Portfolio Layout Constraints
+1. Image Focus: Require at least 2 to 4 distinct container layout blocks using `FrameElement` nodes to act as mock visual image slots.
+2. Grid Alignment: Enforce strict multi-column math tracking (e.g., an exact 2x2 grid or horizontal rows) with fixed coordinate offsets to completely prevent element overlay or chaotic layout disorder.
+3. Typography Scale: Set main headlines and project names to a much larger, impactful scale, mapping `style.fontSize` cleanly between 24 and 36 with `fontWeight: "bold"`.

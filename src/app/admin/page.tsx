@@ -11,7 +11,7 @@ import styles from '@/app/templates/page.module.css';
 export default function AdminDashboardPage() {
     const router = useRouter();
     const [templates, setTemplates] = useState<TemplateDefinition[]>(() => getAllTemplates());
-    const [selectedCategory, setSelectedCategory] = useState<'all' | 'resume' | 'cv' | 'biodata' | 'cover-letter' | 'portfolio'>('all');
+    const [selectedCategory, setSelectedCategory] = useState<'all' | 'resume' | 'cv' | 'biodata' | 'cover-letter'>('all');
     const [priceFilter, setPriceFilter] = useState<'all' | 'free' | 'paid'>('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -64,13 +64,12 @@ export default function AdminDashboardPage() {
         return true;
     });
 
-    const categoryLabels: { id: 'all' | 'resume' | 'cv' | 'biodata' | 'cover-letter' | 'portfolio'; label: string; icon: any }[] = [
+    const categoryLabels: { id: 'all' | 'resume' | 'cv' | 'biodata' | 'cover-letter'; label: string; icon: any }[] = [
         { id: 'all', label: 'All Templates', icon: Sparkles },
         { id: 'resume', label: 'Resumes', icon: Edit3 },
         { id: 'cv', label: 'CVs', icon: FileText },
         { id: 'biodata', label: 'Biodatas', icon: Sparkles },
         { id: 'cover-letter', label: 'Cover Letters', icon: Mail },
-        { id: 'portfolio', label: 'Portfolios', icon: Briefcase },
     ];
 
     return (

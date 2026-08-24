@@ -7,7 +7,7 @@ import { templateRegistry } from './registry';
 export interface TemplateDefinition {
   id: string;
   name: string;
-  category: 'resume' | 'cv' | 'biodata' | 'cover-letter' | 'portfolio' | 'basic';
+  category: 'resume' | 'cv' | 'biodata' | 'cover-letter' | 'basic';
   thumbnailText: string;
   thumbnailGradient: string; // Dynamic placeholder colors for Version 1
   thumbnail?: string;
@@ -29,6 +29,18 @@ export const templateMetadataRegistry: Record<string, TemplateDefinition> = {
     Component: ResumeModernLayout,
     photoShape: 'circle',
     isPremium: false,
+  }, 'resume-creative-terracotta': {
+    id: 'resume-creative-terracotta',
+    name: 'Creative Terracotta',
+    category: 'resume',
+    thumbnailText: 'Terracotta',
+    thumbnailGradient: 'linear-gradient(135deg, #C2410C, #9a3412)',
+    thumbnail: '/thumbnails/teracotta.png',
+    defaultData: defaultResumeData,
+    Component: ResumeModernLayout,
+    photoShape: 'circle',
+    isPremium: false,
+    description: 'A sophisticated professional-grade architectural resume template featuring a dark header band, structured grid columns, precision design elements, and clean layout sections for senior technical professionals.',
   },
   'resume-professional': {
     id: 'resume-professional',
@@ -43,18 +55,7 @@ export const templateMetadataRegistry: Record<string, TemplateDefinition> = {
     isPremium: false,
     description: 'A premium, modern, professional one-page A4 Resume template suitable for real job applications with a sidebar layout.',
   },
-  'resume-creative': {
-    id: 'resume-creative',
-    name: 'Creative Resume',
-    category: 'resume',
-    thumbnailText: 'Creative Resume',
-    thumbnailGradient: 'linear-gradient(135deg, #ec4899, #f43f5e)',
-    defaultData: defaultResumeData,
-    Component: ResumeModernLayout,
-    photoShape: 'circle',
-    isPremium: false,
-    description: 'A high-impact, modern visual resume template featuring structured columns, technical skills list, education details, and key professional project showcases.',
-  },
+
   'resume-alex-turner': {
     id: 'resume-alex-turner',
     name: 'Professional Software Engineer Resume',
@@ -92,18 +93,17 @@ export const templateMetadataRegistry: Record<string, TemplateDefinition> = {
     isPremium: false,
     description: 'A minimalist, elegant resume template featuring gold accent frames, profile photo, and comprehensive structured sections.',
   },
-  'resume-creative-terracotta': {
-    id: 'resume-creative-terracotta',
-    name: 'Creative Terracotta',
+  'resume-creative': {
+    id: 'resume-creative',
+    name: 'Creative Resume',
     category: 'resume',
-    thumbnailText: 'Terracotta',
-    thumbnailGradient: 'linear-gradient(135deg, #C2410C, #9a3412)',
-    thumbnail: '/thumbnails/teracotta.png',
+    thumbnailText: 'Creative Resume',
+    thumbnailGradient: 'linear-gradient(135deg, #ec4899, #f43f5e)',
     defaultData: defaultResumeData,
     Component: ResumeModernLayout,
     photoShape: 'circle',
     isPremium: false,
-    description: 'A modern creative resume template featuring warm terracotta accents, an asymmetric header band, and clean layout sections.',
+    description: 'A high-impact, modern visual resume template featuring structured columns, technical skills list, education details, and key professional project showcases.',
   },
   'resume-executive-navy': {
     id: 'resume-executive-navy',
@@ -143,6 +143,31 @@ export const templateMetadataRegistry: Record<string, TemplateDefinition> = {
     photoShape: 'circle',
     isPremium: true,
     description: 'A highly advanced, premium executive resume template featuring an asymmetric layout, subtle background container sidebar, circular profile frame, Garamond-Arial typography, minimalist QR code, and custom diamond section splitters.',
+  },
+  'resume-architect-pro': {
+    id: 'resume-architect-pro',
+    name: 'Architect Pro',
+    category: 'resume',
+    thumbnailText: 'Architect Pro',
+    thumbnailGradient: 'linear-gradient(135deg, #0f172a, #334155)',
+    thumbnail: '/thumbnails/architech.png',
+    defaultData: defaultResumeData,
+    Component: ResumeModernLayout,
+    photoShape: 'circle',
+    isPremium: true,
+    description: 'A sophisticated professional-grade architectural resume template featuring a dark header band, structured grid columns, precision design elements, and clean layout sections for senior technical professionals.',
+  },
+  'resume-academic-lavender': {
+    id: 'resume-academic-lavender',
+    name: 'Academic Lavender',
+    category: 'resume',
+    thumbnailText: 'Academic Lavender',
+    thumbnailGradient: 'linear-gradient(135deg, #F4F4F6, #5C5992)',
+    defaultData: defaultResumeData,
+    Component: ResumeModernLayout,
+    photoShape: 'circle',
+    isPremium: true,
+    description: 'A premium asymmetric college student resume template featuring a soft lavender sidebar background, profile photo frame, serif name typography, and structured academic sections.',
   },
   'resume-vogue-editorial': {
     id: 'resume-vogue-editorial',
@@ -184,7 +209,7 @@ export const getTemplateById = (id: string): TemplateDefinition | undefined => {
   return getCombinedRegistry()[id];
 };
 
-export const getTemplatesByCategory = (category: 'resume' | 'cv' | 'biodata' | 'cover-letter' | 'portfolio' | 'basic'): TemplateDefinition[] => {
+export const getTemplatesByCategory = (category: 'resume' | 'cv' | 'biodata' | 'cover-letter' | 'basic'): TemplateDefinition[] => {
   return Object.values(getCombinedRegistry()).filter(tpl => tpl.category === category);
 };
 

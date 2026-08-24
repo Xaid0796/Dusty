@@ -38,7 +38,7 @@ export default function AdminTemplateBuilderPage() {
     const [filename, setFilename] = useState('my-new-template.ts');
     const [exportName, setExportName] = useState('myNewTemplate');
     const [templateId, setTemplateId] = useState('resume-custom');
-    const [category, setCategory] = useState<'resume' | 'biodata' | 'cv' | 'cover-letter' | 'portfolio'>('resume');
+    const [category, setCategory] = useState<'resume' | 'biodata' | 'cv' | 'cover-letter'>('resume');
     const [displayName, setDisplayName] = useState('My Custom Template');
     const [isPremium, setIsPremium] = useState(false);
     const [thumbnail, setThumbnail] = useState('');
@@ -327,7 +327,6 @@ export const ${exportName}: CanvasDocument = ${JSON.stringify(
                         <option value="biodata">Biodata</option>
                         <option value="cv">CV</option>
                         <option value="cover-letter">Cover Letter</option>
-                        <option value="portfolio">Portfolio</option>
                     </select>
 
                     <select
