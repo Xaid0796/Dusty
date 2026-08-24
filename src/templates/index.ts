@@ -193,6 +193,19 @@ export const templateMetadataRegistry: Record<string, TemplateDefinition> = {
     isPremium: true,
     description: 'A luxurious, executive-grade resume template featuring a striking deep emerald accent ribbon, precise asymmetric two-column layout, circular profile frame, and sophisticated typography tailored for senior leaders and corporate professionals.',
   },
+  'resume-modern-executive-block': {
+    id: 'resume-modern-executive-block',
+    name: 'Modern Executive Block',
+    category: 'resume',
+    thumbnailText: 'Executive Block',
+    thumbnailGradient: 'linear-gradient(135deg, #008ca6, #1e293b)',
+    thumbnail: '/thumbnails/block.png',
+    defaultData: defaultResumeData,
+    Component: ResumeModernLayout,
+    photoShape: 'circle',
+    isPremium: false,
+    description: 'A robust modern executive resume template featuring a bold teal top block banner, structured two-column layout, clear visual hierarchy, and professional experience sections.',
+  },
 };
 
 // Helper to get combined registry including any dynamically published templates from templateRegistry
