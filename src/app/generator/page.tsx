@@ -19,6 +19,7 @@ import {
   X,
   Sun,
   Moon,
+  Sparkles,
 } from 'lucide-react';
 import {
   useGeneratorStore,
@@ -74,6 +75,7 @@ export default function GeneratorPage() {
     }
   };
   const [activeMobileTab, setActiveMobileTab] = useState<'edit' | 'preview'>('edit');
+  const [isPickingTemplate, setIsPickingTemplate] = useState(true);
 
   // Modal states
   const [showDraftModal, setShowDraftModal] = useState(false);
@@ -139,6 +141,7 @@ export default function GeneratorPage() {
         if (JSON.stringify(parsed) !== JSON.stringify(defaultDoc)) {
           setPendingDraft(parsed);
           setShowDraftModal(true);
+          setIsPickingTemplate(false);
         }
       }
     } catch {
@@ -167,14 +170,21 @@ export default function GeneratorPage() {
 
   // ── Draft recovery ─────────────────────────────────────────────────────────
   const handleContinueDraft = () => {
-    if (pendingDraft) setDocument(pendingDraft, true);
+    if (pendingDraft) {
+      setDocument(pendingDraft, true);
+      setIsPickingTemplate(false);
+    }
     setShowDraftModal(false);
     setPendingDraft(null);
   };
 
   const handleStartFresh = () => {
     clearDraft();
-    setDocument(createDefaultDocument(), true);
+    const currentTemplateId = pendingDraft?.style?.templateId || doc?.style?.templateId || 'classic';
+    const newDoc = createDefaultDocument();
+    newDoc.style.templateId = currentTemplateId;
+    setDocument(newDoc, true);
+    setIsPickingTemplate(false);
     setShowDraftModal(false);
     setPendingDraft(null);
   };
@@ -182,7 +192,10 @@ export default function GeneratorPage() {
   // ── Reset ──────────────────────────────────────────────────────────────────
   const handleReset = () => {
     clearDraft();
-    setDocument(createDefaultDocument(), false);
+    const currentTemplateId = doc?.style?.templateId || 'classic';
+    const newDoc = createDefaultDocument();
+    newDoc.style.templateId = currentTemplateId;
+    setDocument(newDoc, false);
     setShowResetModal(false);
   };
 
@@ -319,6 +332,389 @@ export default function GeneratorPage() {
     );
   }
 
+  if (isPickingTemplate) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#f8fafc', padding: '40px 20px', fontFamily: 'Inter, sans-serif' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px' }}>
+            <div>
+              <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', margin: '0 0 8px 0' }}>Choose Resume Template Model</h1>
+              <p style={{ color: '#64748b', fontSize: '0.95rem', margin: 0 }}>Select a design model for your resume before filling in your details.</p>
+            </div>
+            <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#2563eb', textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem' }}>
+              <ArrowLeft size={16} /> Back to Home
+            </Link>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
+            {/* Classic Template Card */}
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', transition: 'all 0.2s', cursor: 'pointer' }}
+              onClick={() => {
+                useGeneratorStore.getState().updateStyle({ templateId: 'classic' });
+                useGeneratorStore.getState().updateContact({ photoUrl: '/resume-photo-1.jpeg' });
+                setIsPickingTemplate(false);
+              }}
+            >
+              <div>
+                <div style={{ height: '140px', background: '#f1f5f9', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', border: '1px solid #cbd5e1' }}>
+                  <FileText size={40} color="#1e3a8a" />
+                </div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f172a', margin: '0 0 6px 0' }}>Classic Professional</h3>
+                <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 16px 0', lineHeight: 1.5 }}>Traditional single-column layout with refined typography and professional header styling.</p>
+              </div>
+              <button style={{ width: '100%', padding: '10px', background: '#1e3a8a', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                Use this template →
+              </button>
+            </div>
+
+            {/* Modern Template Card */}
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', transition: 'all 0.2s', cursor: 'pointer' }}
+              onClick={() => {
+                useGeneratorStore.getState().updateStyle({ templateId: 'modern' });
+                useGeneratorStore.getState().updateContact({ photoUrl: '/resume-photo-2.jpeg' });
+                setIsPickingTemplate(false);
+              }}
+            >
+              <div>
+                <div style={{ height: '140px', background: '#f1f5f9', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', border: '1px solid #cbd5e1' }}>
+                  <Sparkles size={40} color="#0284c7" />
+                </div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f172a', margin: '0 0 6px 0' }}>Modern Minimalist</h3>
+                <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 16px 0', lineHeight: 1.5 }}>Clean modern layout with top accent bar, modern badges, and sleek visual hierarchy.</p>
+              </div>
+              <button style={{ width: '100%', padding: '10px', background: '#0284c7', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                Use this template →
+              </button>
+            </div>
+
+            {/* Executive Sidebar Template Card */}
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', transition: 'all 0.2s', cursor: 'pointer' }}
+              onClick={() => {
+                useGeneratorStore.getState().updateStyle({ templateId: 'sidebar', primaryColor: '#004d1a' });
+                useGeneratorStore.getState().updateContact({ photoUrl: '/resume-photo-3.jpeg' });
+                setIsPickingTemplate(false);
+              }}
+            >
+              <div>
+                <div style={{ height: '140px', background: '#f0fdf4', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', border: '1px solid #bbf7d0' }}>
+                  <User size={40} color="#004d1a" />
+                </div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f172a', margin: '0 0 6px 0' }}>Executive Sidebar</h3>
+                <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 16px 0', lineHeight: 1.5 }}>Two-column layout featuring a striking colored sidebar for photo, contact details, skills, and languages.</p>
+              </div>
+              <button style={{ width: '100%', padding: '10px', background: '#004d1a', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                Use this template →
+              </button>
+            </div>
+
+            {/* Greta Student Minimalist Sidebar Template Card */}
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', transition: 'all 0.2s', cursor: 'pointer' }}
+              onClick={() => {
+                useGeneratorStore.getState().setDocument({
+                  id: 'generator-document',
+                  contact: {
+                    fullName: 'ELENA ROOTS',
+                    title: 'Business Administration Graduate',
+                    email: 'elena.roots@reallygreatsite.com',
+                    phone: '+1 (555) 382-9102',
+                    location: '742 Evergreen Terrace, Springfield',
+                    website: 'elenaroots.dev',
+                    linkedin: 'linkedin.com/in/elena-roots',
+                    photoUrl: '/resume-photo-4.jpeg',
+                  },
+                  style: {
+                    templateId: 'greta',
+                    primaryColor: '#f2e6dc',
+                    secondaryColor: '#111111',
+                    fontFamily: 'Calibri',
+                    fontSizeName: 26,
+                    fontSizeHeading: 11.5,
+                    fontSizeBody: 10,
+                    lineHeight: 1.4,
+                    sectionSpacing: 16,
+                  },
+                  sections: [
+                    {
+                      id: 'sec-summary',
+                      kind: 'summary',
+                      title: 'Profile',
+                      isDeletable: false,
+                      isReorderable: true,
+                      content: 'Dedicated Business Administration student and aspiring professional. Possesses a strong work ethic, exceptional organizational skills, and a proactive mindset toward corporate leadership and operational efficiency.',
+                    },
+                    {
+                      id: 'sec-education',
+                      kind: 'education',
+                      title: 'Education',
+                      isDeletable: false,
+                      isReorderable: true,
+                      educationItems: [
+                        {
+                          id: 'edu-1',
+                          institution: 'BORCELLE UNIVERSITY',
+                          degree: 'B.S. in Business Administration',
+                          field: 'Management & Marketing',
+                          startDate: '2020',
+                          endDate: '2024',
+                          grade: '3.9 GPA · Magna Cum Laude',
+                        },
+                        {
+                          id: 'edu-2',
+                          institution: 'BORCELLE SCHOOL',
+                          degree: 'High School Diploma with Honors',
+                          startDate: '2015',
+                          endDate: '2019',
+                          grade: 'Valedictorian',
+                        },
+                      ],
+                    },
+                    {
+                      id: 'sec-languages',
+                      kind: 'languages',
+                      title: 'Language',
+                      isDeletable: true,
+                      isReorderable: true,
+                      genericItems: [
+                        { id: 'lang-1', title: 'Native English.' },
+                        { id: 'lang-2', title: 'Advanced Spanish.' },
+                        { id: 'lang-3', title: 'Conversational French.' },
+                      ],
+                    },
+                    {
+                      id: 'sec-skills',
+                      kind: 'skills',
+                      title: 'Computer Skills',
+                      isDeletable: true,
+                      isReorderable: true,
+                      skillItems: [
+                        { id: 'sk-1', name: 'Text processor (Word / Docs).' },
+                        { id: 'sk-2', name: 'Spreadsheets (Advanced Excel & Formulas).' },
+                        { id: 'sk-3', name: 'Slide presentations (PowerPoint / Canva).' },
+                        { id: 'sk-4', name: 'Database management & CRM software.' },
+                      ],
+                    },
+                    {
+                      id: 'sec-volunteer',
+                      kind: 'volunteer',
+                      title: 'Volunteer Experience',
+                      isDeletable: true,
+                      isReorderable: true,
+                      experienceItems: [
+                        {
+                          id: 'vol-1',
+                          position: 'INGOUDE COMPANY',
+                          company: 'Community Outreach',
+                          startDate: '2024',
+                          endDate: 'present',
+                          current: true,
+                          description: 'Participation in collections to distribute educational supplies and books in low-income schools.',
+                        },
+                        {
+                          id: 'vol-2',
+                          position: 'STUDENT MENTOR',
+                          company: 'Campus Youth Initiative',
+                          startDate: '2022',
+                          endDate: '2023',
+                          current: false,
+                          description: 'Guided incoming freshman students on academic planning and campus resource navigation.',
+                        },
+                      ],
+                    },
+                    {
+                      id: 'sec-certifications',
+                      kind: 'certifications',
+                      title: 'Certifications',
+                      isDeletable: true,
+                      isReorderable: true,
+                      genericItems: [
+                        {
+                          id: 'cert-1',
+                          title: 'Digital Marketing Fundamentals',
+                          subtitle: 'Google Career Certificates',
+                          dateRange: '2023',
+                          description: 'Mastery of SEO, social media strategy, and e-commerce analytics.',
+                        },
+                        {
+                          id: 'cert-2',
+                          title: 'Project Management Associate (CAPM)',
+                          subtitle: 'Project Management Institute',
+                          dateRange: '2024',
+                          description: 'Comprehensive training in agile methodologies, risk management, and scheduling.',
+                        },
+                      ],
+                    },
+                    {
+                      id: 'sec-awards',
+                      kind: 'awards',
+                      title: 'Awards & Honors',
+                      isDeletable: true,
+                      isReorderable: true,
+                      genericItems: [
+                        {
+                          id: 'aw-1',
+                          title: 'Dean’s List Excellence Award',
+                          subtitle: 'Borcelle University',
+                          dateRange: '2021 – 2024',
+                          description: 'Awarded consecutively for maintaining top academic standing across 8 semesters.',
+                        },
+                      ],
+                    },
+                  ],
+                });
+                setIsPickingTemplate(false);
+              }}
+            >
+              <div>
+                <div style={{ height: '140px', background: '#f2e6dc', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', border: '1px solid #d1c4b8' }}>
+                  <User size={40} color="#8c6d53" />
+                </div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f172a', margin: '0 0 6px 0' }}>Greta Student Minimalist</h3>
+                <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 16px 0', lineHeight: 1.5 }}>Warm beige sidebar layout featuring updated name, profile, contact, education, languages, computer skills, volunteer experience, certifications, and awards.</p>
+              </div>
+              <button style={{ width: '100%', padding: '10px', background: '#8c6d53', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                Use this template →
+              </button>
+            </div>
+
+            {/* William Executive Designer Template Card */}
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', transition: 'all 0.2s', cursor: 'pointer' }}
+              onClick={() => {
+                useGeneratorStore.getState().setDocument({
+                  id: 'generator-document',
+                  contact: {
+                    fullName: 'WILLIAM ALEXANDER',
+                    title: 'Managing Chairman',
+                    email: 'youremail@here',
+                    phone: '+123 456 7890',
+                    location: 'Your Location Here 00',
+                    website: 'your website here',
+                    photoUrl: '/resume-photo-5.jpeg',
+                  },
+                  style: {
+                    templateId: 'william',
+                    primaryColor: '#f8f9fa',
+                    secondaryColor: '#0f172a',
+                    fontFamily: 'Calibri',
+                    fontSizeName: 26,
+                    fontSizeHeading: 11.5,
+                    fontSizeBody: 10,
+                    lineHeight: 1.4,
+                    sectionSpacing: 16,
+                  },
+                  sections: [
+                    {
+                      id: 'sec-summary',
+                      kind: 'summary',
+                      title: 'Personal Profile',
+                      isDeletable: false,
+                      isReorderable: true,
+                      content: 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.',
+                    },
+                    {
+                      id: 'sec-experience',
+                      kind: 'experience',
+                      title: 'Work Experience',
+                      isDeletable: false,
+                      isReorderable: true,
+                      experienceItems: [
+                        {
+                          id: 'exp-1',
+                          position: 'Senior Graphic Designer',
+                          company: 'Name of Company',
+                          startDate: '2028',
+                          endDate: 'Present',
+                          current: true,
+                          description: 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem.\n\n• Lorem ipsum dolor sit amet, consectetuer adipiscing elit\n• Lorem ipsum dolor sit amet, consectetuer adipiscing elit',
+                        },
+                        {
+                          id: 'exp-2',
+                          position: 'Senior Graphic Designer',
+                          company: 'Name of Company',
+                          startDate: '2026',
+                          endDate: '2027',
+                          current: false,
+                          description: 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.\n\n• Lorem ipsum dolor sit amet, consectetuer adipiscing elit',
+                        },
+                        {
+                          id: 'exp-3',
+                          position: 'Senior Graphic Designer',
+                          company: 'Name of Company',
+                          startDate: '2024',
+                          endDate: '2026',
+                          current: false,
+                          description: 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.',
+                        },
+                      ],
+                    },
+                    {
+                      id: 'sec-education',
+                      kind: 'education',
+                      title: 'Education',
+                      isDeletable: false,
+                      isReorderable: true,
+                      educationItems: [
+                        {
+                          id: 'edu-1',
+                          institution: 'University Name - Canada',
+                          degree: 'Degree Title',
+                          startDate: '2024',
+                          endDate: '2029',
+                        },
+                        {
+                          id: 'edu-2',
+                          institution: 'University Name - London',
+                          degree: 'Degree Title',
+                          startDate: '2024',
+                          endDate: '2029',
+                        },
+                      ],
+                    },
+                    {
+                      id: 'sec-skills',
+                      kind: 'skills',
+                      title: 'Skills',
+                      isDeletable: true,
+                      isReorderable: true,
+                      skillItems: [
+                        { id: 'sk-1', name: 'Digital Marketing' },
+                        { id: 'sk-2', name: 'Web Development' },
+                        { id: 'sk-3', name: 'Data Analysis' },
+                        { id: 'sk-4', name: 'Project Management' },
+                        { id: 'sk-5', name: 'Graphic Design' },
+                        { id: 'sk-6', name: 'Content Creation' },
+                        { id: 'sk-7', name: 'Programming' },
+                      ],
+                    },
+                    {
+                      id: 'sec-reference',
+                      kind: 'custom',
+                      title: 'Reference',
+                      isDeletable: true,
+                      isReorderable: true,
+                      content: 'Robert Maverick\nCompany\nP: (+123) 456 7890\nE: youremail@here',
+                    },
+                  ],
+                });
+                setIsPickingTemplate(false);
+              }}
+            >
+              <div>
+                <div style={{ height: '140px', background: '#f8f9fa', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', border: '1px solid #cbd5e1' }}>
+                  <User size={40} color="#0f172a" />
+                </div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f172a', margin: '0 0 6px 0' }}>William Executive Designer</h3>
+                <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 16px 0', lineHeight: 1.5 }}>Precise layout matching William Alexander resume with box image frame (no circle), left sidebar contact, education, skills, references, and right personal profile & experience with diamond bullets.</p>
+              </div>
+              <button style={{ width: '100%', padding: '10px', background: '#0f172a', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                Use this template →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const previewWrapperStyle: React.CSSProperties = {
     transform: `scale(${scale})`,
     transformOrigin: 'top center',
@@ -353,6 +749,7 @@ export default function GeneratorPage() {
             <span className={styles.saveDot} />
             Auto-saved
           </div>
+
 
           <button className={styles.iconBtn} onClick={toggleTheme} title="Toggle Theme">
             {theme === 'light' ? <Moon size={15} /> : <Sun size={15} />}

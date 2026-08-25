@@ -34,8 +34,9 @@ export const createDefaultDocument = (): GeneratorDocument => ({
     photoUrl: DEFAULT_AVATAR,
   },
   style: {
+    templateId: 'classic',
     primaryColor: '#1e3a8a',
-    secondaryColor: '#0d9488',
+    secondaryColor: '#000000',
     fontFamily: 'Times New Roman',
     fontSizeName: 28,
     fontSizeHeading: 13,
@@ -116,6 +117,27 @@ export const createDefaultDocument = (): GeneratorDocument => ({
         { id: 'sk-6', name: 'REST APIs & GraphQL' },
         { id: 'sk-7', name: 'Git & CI/CD' },
         { id: 'sk-8', name: 'Docker & Kubernetes' },
+      ],
+    },
+    {
+      id: 'sec-certifications',
+      kind: 'certifications',
+      title: 'Certifications',
+      isDeletable: true,
+      isReorderable: true,
+      genericItems: [
+        {
+          id: 'cert-1',
+          title: 'Certified Sales Professional',
+          subtitle: 'National Association of Sales Professionals',
+          description: 'Advanced certification in enterprise sales strategy and closing techniques.',
+        },
+        {
+          id: 'cert-2',
+          title: 'CRM Specialist',
+          subtitle: 'Salesforce Academy',
+          description: 'Expertise in CRM administration, customer lifecycle tracking, and workflow automation.',
+        },
       ],
     },
   ],

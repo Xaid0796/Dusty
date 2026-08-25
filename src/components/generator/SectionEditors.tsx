@@ -8,6 +8,7 @@
 import React, { useState, useRef } from 'react';
 import { Plus, Trash2, GripVertical, ChevronDown, ChevronUp } from 'lucide-react';
 import { useGeneratorStore } from '@/hooks/useGeneratorStore';
+import { getEffectiveColors } from '@/types/generator';
 import type {
   GeneratorContact,
   GeneratorStyle,
@@ -212,6 +213,8 @@ interface StyleEditorProps {
 export const StyleEditor: React.FC<StyleEditorProps> = ({ style }) => {
   const { updateStyle } = useGeneratorStore();
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const effColors = getEffectiveColors(style);
+  const tId = style.templateId || 'classic';
   const fonts = [
     'Times New Roman',
     'Calibri',
@@ -230,7 +233,9 @@ export const StyleEditor: React.FC<StyleEditorProps> = ({ style }) => {
       <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted, #94a3b8)', lineHeight: 1.5 }}>
         Choose a professional typography style and accent colors for your resume.
       </p>
-      
+
+
+
       <FormGroup>
         <Label>Font Family</Label>
         <select
@@ -263,12 +268,25 @@ export const StyleEditor: React.FC<StyleEditorProps> = ({ style }) => {
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <input
               type="color"
-              value={style.primaryColor || '#1e3a8a'}
-              onChange={(e) => updateStyle({ primaryColor: e.target.value })}
+              value={effColors.primaryColor}
+              onChange={(e) => {
+                const val = e.target.value;
+                const templateColors = style.templateColors || {};
+                updateStyle({
+                  templateColors: {
+                    ...templateColors,
+                    [tId]: {
+                      primaryColor: val,
+                      secondaryColor: effColors.secondaryColor,
+                    },
+                  },
+                  primaryColor: val,
+                });
+              }}
               style={{ width: 36, height: 36, border: 'none', padding: 0, cursor: 'pointer', borderRadius: '6px', flexShrink: 0 }}
             />
             <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #64748b)', fontFamily: 'monospace' }}>
-              {style.primaryColor}
+              {effColors.primaryColor}
             </span>
           </div>
         </FormGroup>
@@ -277,12 +295,25 @@ export const StyleEditor: React.FC<StyleEditorProps> = ({ style }) => {
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <input
               type="color"
-              value={style.secondaryColor || '#0d9488'}
-              onChange={(e) => updateStyle({ secondaryColor: e.target.value })}
+              value={effColors.secondaryColor}
+              onChange={(e) => {
+                const val = e.target.value;
+                const templateColors = style.templateColors || {};
+                updateStyle({
+                  templateColors: {
+                    ...templateColors,
+                    [tId]: {
+                      primaryColor: effColors.primaryColor,
+                      secondaryColor: val,
+                    },
+                  },
+                  secondaryColor: val,
+                });
+              }}
               style={{ width: 36, height: 36, border: 'none', padding: 0, cursor: 'pointer', borderRadius: '6px', flexShrink: 0 }}
             />
             <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #64748b)', fontFamily: 'monospace' }}>
-              {style.secondaryColor}
+              {effColors.secondaryColor}
             </span>
           </div>
         </FormGroup>

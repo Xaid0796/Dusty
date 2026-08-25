@@ -1,4 +1,7 @@
 import { CanvasDocument } from '@/canvas/types';
+import { resumeDaniMartinezTemplate } from './resume-dani-martinez';
+import { resumeEmeraldLuxuryTemplate } from './resume-emerald-luxury';
+import { resumeAcademicLavenderTemplate } from './resume-academic-lavender';
 import { resumeCreativeTemplate } from './resume-creative';
 import { resumeModernElegantTemplate } from './resume-modern-elegant';
 import { resumeAlexTurnerTemplate } from './resume-alex-turner';
@@ -12,9 +15,10 @@ import { resumeExecutiveNavyTemplate } from './resume-executive-navy';
 import { resumeCreativeTerracottaTemplate } from './resume-creative-terracotta';
 import { resumeProfessionalTemplate } from './resume-professional';
 import { sampleResumeDocument } from './modern';
-import { resumeAcademicLavenderTemplate } from './academic-lavender';
-import { resumeEmeraldLuxuryTemplate } from './resume-emerald-luxury';
 export const resumeTemplates: Record<string, CanvasDocument> = {
+  'resume-dani-martinez': resumeDaniMartinezTemplate,
+  'resume-emerald-luxury': resumeEmeraldLuxuryTemplate,
+  'resume-academic-lavender': resumeAcademicLavenderTemplate,
   'resume-creative': resumeCreativeTemplate,
   'resume-modern-elegant': resumeModernElegantTemplate,
   'resume-alex-turner': resumeAlexTurnerTemplate,
@@ -27,7 +31,5 @@ export const resumeTemplates: Record<string, CanvasDocument> = {
   'resume-executive-navy': resumeExecutiveNavyTemplate,
   'resume-creative-terracotta': resumeCreativeTerracottaTemplate,
   'resume-professional': resumeProfessionalTemplate,
-  'resume-academic-lavender': resumeAcademicLavenderTemplate,
-  'resume-emerald-luxury': resumeEmeraldLuxuryTemplate,
   'resume-modern': sampleResumeDocument,
 };

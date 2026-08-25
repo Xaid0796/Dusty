@@ -117,8 +117,10 @@ export interface GeneratorContact {
 
 /** Deliberately minimal — generator controls design, user controls content */
 export interface GeneratorStyle {
+  templateId?: 'classic' | 'modern' | 'sidebar' | 'greta' | 'william';
   primaryColor: string;
   secondaryColor: string;
+  templateColors?: Record<string, { primaryColor: string; secondaryColor: string }>;
   fontFamily?: string;
   fontSizeName?: number;
   fontSizeHeading?: number;
@@ -126,6 +128,24 @@ export interface GeneratorStyle {
   fontSizeSupport?: number;
   lineHeight?: number;
   sectionSpacing?: number;
+}
+
+export const TEMPLATE_DEFAULT_COLORS: Record<string, { primaryColor: string; secondaryColor: string }> = {
+  classic: { primaryColor: '#1e3a8a', secondaryColor: '#000000' },
+  modern: { primaryColor: '#0284c7', secondaryColor: '#0f172a' },
+  sidebar: { primaryColor: '#004d1a', secondaryColor: '#0f172a' },
+  greta: { primaryColor: '#f2e6dc', secondaryColor: '#111111' },
+  william: { primaryColor: '#f8f9fa', secondaryColor: '#0f172a' },
+};
+
+export function getEffectiveColors(style: GeneratorStyle) {
+  const tId = style?.templateId || 'classic';
+  const defaults = TEMPLATE_DEFAULT_COLORS[tId] || TEMPLATE_DEFAULT_COLORS['classic'];
+  const custom = style?.templateColors?.[tId];
+  return {
+    primaryColor: custom?.primaryColor ?? defaults.primaryColor,
+    secondaryColor: custom?.secondaryColor ?? defaults.secondaryColor,
+  };
 }
 
 export interface GeneratorDocument {

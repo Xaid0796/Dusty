@@ -11,6 +11,11 @@ import type {
   SkillEntry,
   GenericEntry,
 } from '@/types/generator';
+import { getEffectiveColors } from '@/types/generator';
+import { ResumePreviewModern } from './ResumePreviewModern';
+import { ResumePreviewSidebar } from './ResumePreviewSidebar';
+import { ResumePreviewGreta } from './ResumePreviewGreta';
+import { ResumePreviewWilliam } from './ResumePreviewWilliam';
 
 // ─── Contact field helper ────────────────────────────────────────────────────
 // ─── Contact field helper ────────────────────────────────────────────────────
@@ -201,12 +206,29 @@ interface ResumePreviewProps {
 export const ResumePreview: React.FC<ResumePreviewProps> = ({ document }) => {
   const { contact, style, sections } = document;
 
+  if (style.templateId === 'modern') {
+    return <ResumePreviewModern document={document} />;
+  }
+
+  if (style.templateId === 'sidebar') {
+    return <ResumePreviewSidebar document={document} />;
+  }
+
+  if (style.templateId === 'greta') {
+    return <ResumePreviewGreta document={document} />;
+  }
+
+  if (style.templateId === 'william') {
+    return <ResumePreviewWilliam document={document} />;
+  }
+
+  const effColors = getEffectiveColors(style);
   const selectedFont = style.fontFamily || 'Times New Roman';
   const fontFamilyValue = FONT_STACKS[selectedFont] || '"Times New Roman", Times, serif';
 
   const cssVars = {
-    '--primary': style.primaryColor,
-    '--secondary': style.secondaryColor,
+    '--primary': effColors.primaryColor,
+    '--secondary': effColors.secondaryColor,
     fontFamily: fontFamilyValue,
     '--size-name': style.fontSizeName ? `${style.fontSizeName}px` : undefined,
     '--size-heading': style.fontSizeHeading ? `${style.fontSizeHeading}px` : undefined,
