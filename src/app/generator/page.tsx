@@ -241,9 +241,15 @@ export default function GeneratorPage() {
     const { naturalWidth, naturalHeight } = e.currentTarget;
     const vw = 180;
     const vh = 180;
-    const scale = Math.max(vw / naturalWidth, vh / naturalHeight);
-    setDisplaySize({ width: naturalWidth * scale, height: naturalHeight * scale });
-    setCropOffset({ x: 0, y: 0 });
+    const baseScale = Math.max(vw / naturalWidth, vh / naturalHeight);
+    const dw = naturalWidth * baseScale;
+    const dh = naturalHeight * baseScale;
+    setDisplaySize({ width: dw, height: dh });
+    setCropOffset({
+      x: (vw - dw) / 2,
+      y: (vh - dh) / 2,
+    });
+    setCropZoom(1);
   };
 
   const handleCropMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -253,36 +259,75 @@ export default function GeneratorPage() {
   };
 
   const handleCropMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isDraggingCrop) return;
-    setCropOffset({ x: e.clientX - dragStartCrop.x, y: e.clientY - dragStartCrop.y });
+    if (!isDraggingCrop || !displaySize.width) return;
+    const nextX = e.clientX - dragStartCrop.x;
+    const nextY = e.clientY - dragStartCrop.y;
+
+    const vw = 180;
+    const vh = 180;
+    const dw = displaySize.width * cropZoom;
+    const dh = displaySize.height * cropZoom;
+
+    const minX = vw - dw;
+    const minY = vh - dh;
+
+    const clampedX = Math.max(minX, Math.min(0, nextX));
+    const clampedY = Math.max(minY, Math.min(0, nextY));
+
+    setCropOffset({ x: clampedX, y: clampedY });
   };
 
   const handleCropMouseUp = () => setIsDraggingCrop(false);
 
+  const handleZoomChange = (newZoom: number) => {
+    const nextZoom = Math.max(1, Math.min(3, newZoom));
+    setCropZoom(nextZoom);
+
+    const vw = 180;
+    const vh = 180;
+    const dw = displaySize.width * nextZoom;
+    const dh = displaySize.height * nextZoom;
+
+    const minX = vw - dw;
+    const minY = vh - dh;
+
+    setCropOffset((prev) => ({
+      x: Math.max(minX, Math.min(0, prev.x)),
+      y: Math.max(minY, Math.min(0, prev.y)),
+    }));
+  };
+
   const handleApplyCrop = () => {
-    if (!cropImageSrc) return;
+    if (!cropImageSrc || !displaySize.width) return;
     const img = new Image();
     img.onload = () => {
       const vw = 180;
       const vh = 180;
-      const baseScale = Math.max(vw / img.naturalWidth, vh / img.naturalHeight);
-      const dw = img.naturalWidth * baseScale * cropZoom;
-      const dh = img.naturalHeight * baseScale * cropZoom;
-      const dx = (dw - vw) / 2 - cropOffset.x;
-      const dy = (dh - vh) / 2 - cropOffset.y;
+      const dw = displaySize.width * cropZoom;
+      const dh = displaySize.height * cropZoom;
+
+      const dx = -cropOffset.x;
+      const dy = -cropOffset.y;
+
       const sf = img.naturalWidth / dw;
+
       const sx = dx * sf;
       const sy = dy * sf;
       const sw = vw * sf;
       const sh = vh * sf;
+
+      const clampedSx = Math.max(0, Math.min(img.naturalWidth, sx));
+      const clampedSy = Math.max(0, Math.min(img.naturalHeight, sy));
+      const clampedSw = Math.max(1, Math.min(img.naturalWidth - clampedSx, sw));
+      const clampedSh = Math.max(1, Math.min(img.naturalHeight - clampedSy, sh));
 
       const canvas = document.createElement('canvas');
       canvas.width = 200;
       canvas.height = 200;
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, 200, 200);
-        const b64 = canvas.toDataURL('image/jpeg', 0.85);
+        ctx.drawImage(img, clampedSx, clampedSy, clampedSw, clampedSh, 0, 0, 200, 200);
+        const b64 = canvas.toDataURL('image/jpeg', 0.90);
         useGeneratorStore.getState().updateContact({ photoUrl: b64 });
         setShowCropModal(false);
         setCropImageSrc('');
@@ -1014,22 +1059,22 @@ export default function GeneratorPage() {
               {/* Zoom controls */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <button
-                  onClick={() => setCropZoom((z) => Math.max(0.5, z - 0.1))}
+                  onClick={() => handleZoomChange(cropZoom - 0.1)}
                   style={{ background: '#f1f5f9', border: 'none', borderRadius: '6px', padding: '8px', cursor: 'pointer', display: 'flex' }}
                 >
                   <ZoomOut size={16} color="#475569" />
                 </button>
                 <input
                   type="range"
-                  min="0.5"
+                  min="1"
                   max="3"
                   step="0.05"
                   value={cropZoom}
-                  onChange={(e) => setCropZoom(parseFloat(e.target.value))}
+                  onChange={(e) => handleZoomChange(parseFloat(e.target.value))}
                   style={{ width: '160px' }}
                 />
                 <button
-                  onClick={() => setCropZoom((z) => Math.min(3, z + 0.1))}
+                  onClick={() => handleZoomChange(cropZoom + 0.1)}
                   style={{ background: '#f1f5f9', border: 'none', borderRadius: '6px', padding: '8px', cursor: 'pointer', display: 'flex' }}
                 >
                   <ZoomIn size={16} color="#475569" />

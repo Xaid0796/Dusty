@@ -3,6 +3,12 @@ import fs from 'fs';
 import path from 'path';
 import { templateRegistry } from '@/templates/registry';
 
+const isTemplateFile = (content: string, templateId: string): boolean => {
+    const idPattern = new RegExp(`"id"\\s*:\\s*["']${templateId}["']`);
+    const idPatternSingle = new RegExp(`'id'\\s*:\\s*["']${templateId}["']`);
+    return idPattern.test(content) || idPatternSingle.test(content);
+};
+
 export async function GET(request: Request) {
     const url = new URL(request.url);
     const id = url.searchParams.get('id');
@@ -20,7 +26,7 @@ export async function GET(request: Request) {
                 if (f === 'index.ts') continue;
                 const filePath = path.join(categoryDir, f);
                 const content = fs.readFileSync(filePath, 'utf8');
-                if (content.includes(`id: "${id}"`) || content.includes(`id: '${id}'`) || f.includes(id)) {
+                if (isTemplateFile(content, id) || f === `resume-${id}.ts` || f === `${id}.ts`) {
                     const jsonMatch = content.match(/=\s*({[\s\S]*});?\s*$/);
                     if (jsonMatch) {
                         const parsed = Function(`return ${jsonMatch[1]}`)();
@@ -58,7 +64,7 @@ export async function POST(request: Request) {
                 if (f === 'index.ts') continue;
                 const filePath = path.join(catDir, f);
                 const content = fs.readFileSync(filePath, 'utf8');
-                if (content.includes(`id: "${templateId}"`) || content.includes(`id: '${templateId}'`) || content.includes(templateId)) {
+                if (isTemplateFile(content, templateId) || f === `resume-${templateId}.ts` || f === `${templateId}.ts`) {
                     const constMatch = content.match(/export\s+const\s+(\w+)\s*:/);
                     const constName = constMatch ? constMatch[1] : null;
                     try {
@@ -114,22 +120,32 @@ export const ${exportName}: CanvasDocument = ${JSON.stringify(
         if (fs.existsSync(indexPath)) {
             let indexContent = fs.readFileSync(indexPath, 'utf8');
 
-            // Add import statement after CanvasDocument import
+            // Add import statement only if it doesn't already exist
             const importStatement = `import { ${exportName} } from './${baseName}';`;
-            if (indexContent.includes("import { CanvasDocument } from '@/canvas/types';")) {
-                indexContent = indexContent.replace(
-                    "import { CanvasDocument } from '@/canvas/types';",
-                    `import { CanvasDocument } from '@/canvas/types';\n${importStatement}`
-                );
-            } else {
-                indexContent = importStatement + '\n' + indexContent;
+            if (!indexContent.includes(`from './${baseName}'`)) {
+                if (indexContent.includes("import { CanvasDocument } from '@/canvas/types';")) {
+                    indexContent = indexContent.replace(
+                        "import { CanvasDocument } from '@/canvas/types';",
+                        `import { CanvasDocument } from '@/canvas/types';\n${importStatement}`
+                    );
+                } else {
+                    indexContent = importStatement + '\n' + indexContent;
+                }
             }
 
-            // Add template entry into the record object
+            // Add template entry into the record object only if it doesn't already exist
             const targetStr = `export const ${category}Templates: Record<string, CanvasDocument> = {`;
             if (indexContent.includes(targetStr)) {
-                const entryString = `\n  '${templateId}': ${exportName},`;
-                indexContent = indexContent.replace(targetStr, targetStr + entryString);
+                const entryPattern = new RegExp(`['"]?${templateId}['"]?\\s*:\\s*${exportName}`);
+                if (!entryPattern.test(indexContent)) {
+                    const existingEntryPattern = new RegExp(`(['"]?${templateId}['"]?\\s*:\\s*)\\w+,?`);
+                    if (existingEntryPattern.test(indexContent)) {
+                        indexContent = indexContent.replace(existingEntryPattern, `$1${exportName},`);
+                    } else {
+                        const entryString = `\n  '${templateId}': ${exportName},`;
+                        indexContent = indexContent.replace(targetStr, targetStr + entryString);
+                    }
+                }
             }
 
             fs.writeFileSync(indexPath, indexContent, 'utf8');
@@ -169,12 +185,7 @@ export async function DELETE(request: Request) {
                     const filePath = path.join(categoryDir, f);
                     try {
                         const content = fs.readFileSync(filePath, 'utf8');
-                        if (
-                            content.includes(`id: "${templateId}"`) ||
-                            content.includes(`id: '${templateId}'`) ||
-                            f.includes(templateId) ||
-                            content.includes(templateId)
-                        ) {
+                        if (isTemplateFile(content, templateId) || f === `resume-${templateId}.ts` || f === `${templateId}.ts`) {
                             targetFilename = f;
                             break;
                         }
@@ -263,7 +274,7 @@ export async function DELETE(request: Request) {
         if (fs.existsSync(thumbnailsDir)) {
             const thumbFiles = fs.readdirSync(thumbnailsDir);
             for (const tf of thumbFiles) {
-                if (tf.includes(templateId) || (filename && tf.includes(filename.replace(/\.ts$/, '')))) {
+                if (tf === `${templateId}.png` || tf === `resume-${templateId}.png` || (filename && tf === `${filename.replace(/\.ts$/, '')}.png`)) {
                     try {
                         fs.unlinkSync(path.join(thumbnailsDir, tf));
                     } catch (e) { }

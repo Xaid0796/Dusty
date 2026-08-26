@@ -275,6 +275,7 @@ export interface FrameElement extends BaseElement {
   cropY: number;
   zoom: number;
   opacity: number;
+  backgroundColor?: string;
 }
 
 export type QRCodeDesignPreset =
@@ -325,4 +326,5 @@ export interface CanvasDocument {
   elements: CanvasElement[];
   isPremium?: boolean;
   thumbnail?: string;
+  description?: string;
 }

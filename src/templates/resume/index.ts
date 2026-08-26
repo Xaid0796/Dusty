@@ -1,4 +1,7 @@
 import { CanvasDocument } from '@/canvas/types';
+import { resumeOrangeVanguardTemplate } from './resume-orange-vanguard';
+import { resumeCobaltFrameTemplate } from './resume-cobalt-frame';
+import { resumeExecutiveNavyTemplate } from './resume-executive-navy';
 import { resumeDaniMartinezTemplate } from './resume-dani-martinez';
 import { resumeEmeraldLuxuryTemplate } from './resume-emerald-luxury';
 import { resumeAcademicLavenderTemplate } from './resume-academic-lavender';
@@ -7,15 +10,18 @@ import { resumeModernElegantTemplate } from './resume-modern-elegant';
 import { resumeAlexTurnerTemplate } from './resume-alex-turner';
 import { resumeModernExecutiveBlockTemplate } from './resume-modern-executive-block';
 import { resumeVogueEditorialTemplate } from './resume-vogue-editorial';
-import { resumeArchitectProTemplate } from './architect-pro';
+import { resumeArchitectProTemplate } from './resume-architect-pro';
 import { resumeMonacoLuxuryTemplate } from './resume-monaco-luxury';
 import { resumeTechMinimalistTemplate } from './resume-tech-minimalist';
 import { resumeModernTechExecutiveTemplate } from './resume-modern-tech-executive';
-import { resumeExecutiveNavyTemplate } from './resume-executive-navy';
 import { resumeCreativeTerracottaTemplate } from './resume-creative-terracotta';
 import { resumeProfessionalTemplate } from './resume-professional';
-import { sampleResumeDocument } from './modern';
+import { resumeModernTemplate } from './resume-modern';
+import { resumeAcademicBlueprintTemplate } from './resume-academic-blueprint';
 export const resumeTemplates: Record<string, CanvasDocument> = {
+  'resume-orange-vanguard': resumeOrangeVanguardTemplate,
+  'resume-cobalt-frame': resumeCobaltFrameTemplate,
+  'resume-executive-navy': resumeExecutiveNavyTemplate,
   'resume-dani-martinez': resumeDaniMartinezTemplate,
   'resume-emerald-luxury': resumeEmeraldLuxuryTemplate,
   'resume-academic-lavender': resumeAcademicLavenderTemplate,
@@ -28,8 +34,8 @@ export const resumeTemplates: Record<string, CanvasDocument> = {
   'resume-monaco-luxury': resumeMonacoLuxuryTemplate,
   'resume-tech-minimalist': resumeTechMinimalistTemplate,
   'resume-modern-tech-executive': resumeModernTechExecutiveTemplate,
-  'resume-executive-navy': resumeExecutiveNavyTemplate,
   'resume-creative-terracotta': resumeCreativeTerracottaTemplate,
   'resume-professional': resumeProfessionalTemplate,
-  'resume-modern': sampleResumeDocument,
-};
+  'resume-modern': resumeModernTemplate,
+  'resume-academic-blueprint': resumeAcademicBlueprintTemplate,
+  };

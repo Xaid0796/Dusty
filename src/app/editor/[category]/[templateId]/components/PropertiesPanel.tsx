@@ -1,4 +1,5 @@
 'use client';
+
 import React, { useState } from 'react';
 import {
   Bold,
@@ -26,8 +27,8 @@ import {
 } from 'lucide-react';
 import { CanvasElement, TextElement, TextStyle, ChartElement } from '@/canvas/types';
 import { useCanvasStore } from '@/canvas/store';
+import { AdvancedColorPickerPopup } from './AdvancedColorPickerPopup';
 import styles from '../editor.module.css';
-
 interface PropertiesPanelProps {
   element: CanvasElement | null;
   onUploadClick: () => void;
@@ -71,26 +72,55 @@ const ColorField: React.FC<{
   label: string;
   value: string;
   onChange: (v: string) => void;
-}> = ({ label, value, onChange }) => (
-  <div className={styles.fieldGroup}>
-    <label className={styles.fieldLabel}>{label}</label>
-    <div className={styles.colorRow}>
-      <div className={styles.colorSwatch}>
-        <input type="color" value={value || '#000000'} onChange={(e) => onChange(e.target.value)} />
-        <div style={{ position: 'absolute', inset: 0, background: value, borderRadius: 5, pointerEvents: 'none' }} />
+}> = ({ label, value, onChange }) => {
+  const [showPopup, setShowPopup] = useState(false);
+  const [currentColor, setCurrentColor] = useState(value);
+
+  return (
+    <>
+      <div className={styles.fieldGroup}>
+        <label className={styles.fieldLabel}>{label}</label>
+        <div className={styles.colorRow}>
+          <div className={styles.colorSwatch}>
+            <button
+              onClick={() => setShowPopup(true)}
+              style={{
+                width: 24,
+                height: 24,
+                backgroundColor: currentColor,
+                border: 'none',
+                borderRadius: 4,
+                cursor: 'pointer',
+              }}
+            />
+            <div style={{ position: 'absolute', inset: 0, background: currentColor, borderRadius: 5, pointerEvents: 'none' }} />
+          </div>
+          <input
+            type="text"
+            className={`${styles.input} ${styles.colorHex}`}
+            value={currentColor || ''}
+            onChange={(e) => {
+              setCurrentColor(e.target.value);
+              onChange(e.target.value);
+            }}
+            placeholder="#000000"
+            spellCheck={false}
+          />
+        </div>
       </div>
-      <input
-        type="text"
-        className={`${styles.input} ${styles.colorHex}`}
-        value={value || ''}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="#000000"
-        maxLength={7}
-        spellCheck={false}
-      />
-    </div>
-  </div>
-);
+      {showPopup && (
+        <AdvancedColorPickerPopup
+          color={currentColor}
+          onChange={(newColor) => {
+            setCurrentColor(newColor);
+            onChange(newColor);
+          }}
+          onClose={() => setShowPopup(false)}
+        />
+      )}
+    </>
+  );
+};
 
 // ── Number input field ─────────────────────────────────────
 const NumField: React.FC<{

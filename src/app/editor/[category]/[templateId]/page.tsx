@@ -54,6 +54,7 @@ export default function GenericCanvasEditorPage() {
   const [pendingIconPanel, setPendingIconPanel] = useState(false);
 
   // Modal states
+  const [notFound, setNotFound] = useState(false);
   const [showRecoveryModal, setShowRecoveryModal] = useState(false);
   const [pendingDraft, setPendingDraft] = useState<CanvasDocument | null>(null);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
@@ -155,8 +156,18 @@ export default function GenericCanvasEditorPage() {
         }
       }
 
-      if (defaultDoc) setOriginalDocument(defaultDoc);
-      else console.warn(`Template "${templateId}" not found.`);
+      if (defaultDoc) {
+        defaultDoc = {
+          ...defaultDoc,
+          id: templateId,
+          category: category as any
+        };
+        setOriginalDocument(defaultDoc);
+      } else {
+        console.warn(`Template "${templateId}" not found.`);
+        setNotFound(true);
+        return;
+      }
 
       const draftKey = `dusty_canvas_draft_${category}_${templateId}`;
       const draftTimestampKey = `${draftKey}_savedAt`;
@@ -205,16 +216,6 @@ export default function GenericCanvasEditorPage() {
 
       if (defaultDoc) {
         loadDocument(defaultDoc, true);
-        setSaveStatus('saved');
-      } else {
-        const blankDoc: CanvasDocument = {
-          id: templateId,
-          name: templateId,
-          category: category as any,
-          page: { id: 'page-1', width: 210, height: 297, background: '#ffffff' },
-          elements: []
-        };
-        loadDocument(blankDoc, true);
         setSaveStatus('saved');
       }
     };
@@ -479,6 +480,31 @@ export default function GenericCanvasEditorPage() {
   };
 
   // ── Loading screens ───────────────────────────────────
+  if (notFound) {
+    return (
+      <div className={styles.loadingScreen} style={{ flexDirection: 'column', gap: '20px' }}>
+        <h2 style={{ color: '#ef4444', fontWeight: 700 }}>Template Not Found</h2>
+        <p style={{ maxWidth: '400px', textAlign: 'center', color: '#64748b' }}>
+          The template you are trying to open ("{templateId}") does not exist or may have been removed.
+        </p>
+        <button
+          onClick={() => router.replace('/templates')}
+          style={{
+            padding: '10px 20px',
+            backgroundColor: '#2563eb',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontWeight: 700,
+            cursor: 'pointer'
+          }}
+        >
+          Back to Marketplace
+        </button>
+      </div>
+    );
+  }
+
   if (!isClient) {
     return (
       <div className={styles.loadingScreen}>

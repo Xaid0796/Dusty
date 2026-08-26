@@ -19,12 +19,63 @@ export interface TemplateDefinition {
 }
 
 export const templateMetadataRegistry: Record<string, TemplateDefinition> = {
+  'resume-academic-blueprint': {
+    id: 'resume-academic-blueprint',
+    name: 'Academic Blueprint',
+    category: 'resume',
+    thumbnailText: 'Blueprint',
+    thumbnailGradient: 'linear-gradient(135deg, #1E293B, #475569)',
+    thumbnail: '/thumbnails/blueprint.png',
+    defaultData: defaultResumeData,
+    Component: ResumeModernLayout,
+    photoShape: 'circle',
+    isPremium: false,
+    description: 'A structured academic and professional resume template featuring a clean header banner, structured education and publication sections, and clean typography designed for researchers, students, and academics.',
+  },
+  'resume-dani-martinez': {
+    id: 'resume-dani-martinez',
+    name: 'Dani Martinez Modern',
+    category: 'resume',
+    thumbnailText: 'Dani Martinez',
+    thumbnailGradient: 'linear-gradient(135deg, #333333, #737373)',
+    thumbnail: '/thumbnails/dani.png',
+    defaultData: defaultResumeData,
+    Component: ResumeModernLayout,
+    photoShape: 'circle',
+    isPremium: false,
+    description: 'A sleek, professional modern resume template featuring a distinct sidebar with profile picture, contact details, education, skills, and languages. The main content area highlights work experience and professional references in a clean two-column layout.',
+  },
+  'resume-cobalt-frame': {
+    id: 'resume-cobalt-frame',
+    name: 'Cobalt Frame',
+    category: 'resume',
+    thumbnailText: 'Cobalt Frame',
+    thumbnailGradient: 'linear-gradient(135deg, #1e3a8a, #3b82f6)',
+    defaultData: defaultResumeData,
+    Component: ResumeModernLayout,
+    photoShape: 'circle',
+    isPremium: false,
+    description: 'A professional and clean resume template featuring a distinct cobalt blue border frame, structured layout, and typography tailored for job applications.',
+  },
+  'resume-orange-vanguard': {
+    id: 'resume-orange-vanguard',
+    name: 'Orange Vanguard',
+    category: 'resume',
+    thumbnailText: 'Orange Vanguard',
+    thumbnailGradient: 'linear-gradient(135deg, #ea580c, #f97316)',
+    defaultData: defaultResumeData,
+    Component: ResumeModernLayout,
+    photoShape: 'circle',
+    isPremium: false,
+    description: 'A high-impact creative resume template featuring a bold orange accent bar and a modern two-column layout.',
+  },
   'resume-modern': {
     id: 'resume-modern',
     name: 'Modern Executive Resume',
     category: 'resume',
     thumbnailText: 'Resume Modern',
     thumbnailGradient: 'linear-gradient(135deg, #1e3a8a, #3b82f6)',
+    thumbnail: '/thumbnails/samantha.png',
     defaultData: defaultResumeData,
     Component: ResumeModernLayout,
     photoShape: 'circle',
@@ -210,14 +261,25 @@ export const templateMetadataRegistry: Record<string, TemplateDefinition> = {
 
 // Helper to get combined registry including any dynamically published templates from templateRegistry
 const getCombinedRegistry = (): Record<string, TemplateDefinition> => {
-  const combined = { ...templateMetadataRegistry };
+  const combined: Record<string, TemplateDefinition> = {};
+
+  // 1. Add and validate from templateMetadataRegistry
+  for (const [id, tpl] of Object.entries(templateMetadataRegistry)) {
+    if (tpl.id !== id) {
+      console.error(`ERROR: Template ID mismatch in metadata registry! Key is "${id}", but tpl.id is "${tpl.id}". Forcing to match.`);
+      tpl.id = id;
+    }
+    combined[id] = tpl;
+  }
+
+  // 2. Add/fallback from templateRegistry
   for (const [id, doc] of Object.entries(templateRegistry)) {
     if (!combined[id]) {
       combined[id] = {
-        id: doc.id,
-        name: doc.name,
+        id: id,
+        name: doc.name || id,
         category: (doc.category || 'resume') as any,
-        thumbnailText: doc.name,
+        thumbnailText: doc.name || id,
         thumbnailGradient: 'linear-gradient(135deg, #4f46e5, #9333ea)',
         defaultData: defaultResumeData,
         Component: ResumeModernLayout,
@@ -227,6 +289,14 @@ const getCombinedRegistry = (): Record<string, TemplateDefinition> => {
       };
     }
   }
+
+  // 3. Guarantee that tpl.id matches the combined key
+  for (const [id, tpl] of Object.entries(combined)) {
+    if (tpl.id !== id) {
+      tpl.id = id;
+    }
+  }
+
   return combined;
 };
 
