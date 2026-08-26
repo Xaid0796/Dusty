@@ -82,7 +82,28 @@ export default function AdminDashboardPage() {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <Link
+                        href="/generator"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                            background: '#0ea5e9',
+                            color: '#fff',
+                            padding: '8px 16px',
+                            borderRadius: '8px',
+                            fontWeight: 700,
+                            fontSize: '0.88rem',
+                            textDecoration: 'none',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                        }}
+                    >
+                        <FileText size={16} /> Resume Generator
+                    </Link>
+                    <Link
                         href="/admin/templates"
+                        target="_blank"
+                        rel="noopener noreferrer"
                         style={{
                             background: '#6366f1',
                             color: '#fff',
@@ -292,8 +313,10 @@ export default function AdminDashboardPage() {
                                     >
                                         <Trash2 size={15} />
                                     </button>
-                                    <button
-                                        onClick={() => router.push(`/admin/templates?edit=${tpl.id}`)}
+                                    <Link
+                                        href={`/admin/templates?edit=${tpl.id}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
                                         title="Edit Template"
                                         style={{
                                             position: 'absolute',
@@ -312,12 +335,13 @@ export default function AdminDashboardPage() {
                                             cursor: 'pointer',
                                             boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
                                             transition: 'transform 0.15s',
+                                            textDecoration: 'none',
                                         }}
                                         onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.1)'; }}
                                         onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
                                     >
                                         <Edit3 size={15} />
-                                    </button>
+                                    </Link>
 
                                     <div className={styles.thumbnail} style={{ overflow: 'hidden', height: '280px', position: 'relative', background: '#f8fafc' }}>
                                         <TemplateThumbnail template={tpl} />

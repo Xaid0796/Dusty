@@ -517,9 +517,12 @@ export const ExperienceEditor: React.FC<{ section: ResumeSection }> = ({ section
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
       {items.map((item, idx) => (
         <div key={item.id} style={{ border: '1px solid var(--border-card, #e2e8f0)', borderRadius: '8px', overflow: 'hidden' }}>
-          <button
+          <div
+            role="button"
+            tabIndex={0}
             onClick={() => setExpanded(expanded === item.id ? null : item.id)}
-            style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: 'var(--bg-card-header, #f8fafc)', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setExpanded(expanded === item.id ? null : item.id); }}
+            style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: 'var(--bg-card-header, #f8fafc)', border: 'none', cursor: 'pointer', fontFamily: 'inherit', boxSizing: 'border-box' }}
           >
             <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary, #334155)', textAlign: 'left' }}>
               {item.position || `Experience ${idx + 1}`}
@@ -532,7 +535,7 @@ export const ExperienceEditor: React.FC<{ section: ResumeSection }> = ({ section
               </button>
               {expanded === item.id ? <ChevronUp size={14} color="var(--text-muted, #94a3b8)" /> : <ChevronDown size={14} color="var(--text-muted, #94a3b8)" />}
             </div>
-          </button>
+          </div>
 
           {expanded === item.id && (
             <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px', borderTop: '1px solid var(--border-card, #f1f5f9)' }}>
@@ -624,9 +627,12 @@ export const EducationEditor: React.FC<{ section: ResumeSection }> = ({ section 
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
       {items.map((item, idx) => (
         <div key={item.id} style={{ border: '1px solid var(--border-card, #e2e8f0)', borderRadius: '8px', overflow: 'hidden' }}>
-          <button
+          <div
+            role="button"
+            tabIndex={0}
             onClick={() => setExpanded(expanded === item.id ? null : item.id)}
-            style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: 'var(--bg-card-header, #f8fafc)', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setExpanded(expanded === item.id ? null : item.id); }}
+            style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: 'var(--bg-card-header, #f8fafc)', border: 'none', cursor: 'pointer', fontFamily: 'inherit', boxSizing: 'border-box' }}
           >
             <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary, #334155)', textAlign: 'left' }}>
               {item.degree || `Education ${idx + 1}`}
@@ -639,7 +645,7 @@ export const EducationEditor: React.FC<{ section: ResumeSection }> = ({ section 
               </button>
               {expanded === item.id ? <ChevronUp size={14} color="var(--text-muted, #94a3b8)" /> : <ChevronDown size={14} color="var(--text-muted, #94a3b8)" />}
             </div>
-          </button>
+          </div>
 
           {expanded === item.id && (
             <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px', borderTop: '1px solid var(--border-card, #f1f5f9)' }}>
@@ -797,9 +803,12 @@ export const GenericSectionEditor: React.FC<{ section: ResumeSection }> = ({ sec
 
       {items.map((item, idx) => (
         <div key={item.id} style={{ border: '1px solid var(--border-card, #e2e8f0)', borderRadius: '8px', overflow: 'hidden' }}>
-          <button
+          <div
+            role="button"
+            tabIndex={0}
             onClick={() => setExpanded(expanded === item.id ? null : item.id)}
-            style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: 'var(--bg-card-header, #f8fafc)', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setExpanded(expanded === item.id ? null : item.id); }}
+            style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: 'var(--bg-card-header, #f8fafc)', border: 'none', cursor: 'pointer', fontFamily: 'inherit', boxSizing: 'border-box' }}
           >
             <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary, #334155)', textAlign: 'left' }}>
               {item.title || `Entry ${idx + 1}`}
@@ -811,7 +820,7 @@ export const GenericSectionEditor: React.FC<{ section: ResumeSection }> = ({ sec
               </button>
               {expanded === item.id ? <ChevronUp size={14} color="var(--text-muted, #94a3b8)" /> : <ChevronDown size={14} color="var(--text-muted, #94a3b8)" />}
             </div>
-          </button>
+          </div>
 
           {expanded === item.id && (
             <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px', borderTop: '1px solid var(--border-card, #f1f5f9)' }}>

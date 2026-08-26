@@ -218,7 +218,7 @@ export default function TemplatesPage() {
           <div className={styles.grid}>
             {/* Blank Template / Start from Scratch Option (shown when specific category is selected and price allows) */}
             {selectedCategory !== 'all' && priceFilter !== 'paid' && (
-              <div className={styles.card}>
+              <Link href={`/editor/${selectedCategory}/blank`} target="_blank" rel="noopener noreferrer" className={styles.card} style={{ textDecoration: 'none' }}>
                 <div
                   className={styles.thumbnail}
                   style={{
@@ -286,14 +286,8 @@ export default function TemplatesPage() {
                       Start with a completely blank canvas and build your document from scratch using custom elements.
                     </p>
                   </div>
-
-                  <div className={styles.btnGroup}>
-                    <Link href={`/editor/${selectedCategory}/blank`} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', backgroundColor: '#475569', borderColor: '#475569', width: '100%' }}>
-                      <Plus size={16} /> Create Blank
-                    </Link>
-                  </div>
                 </div>
-              </div>
+              </Link>
             )}
 
             {filteredTemplates.length === 0 ? (
@@ -304,7 +298,7 @@ export default function TemplatesPage() {
               </div>
             ) : (
               filteredTemplates.map((tpl) => (
-                <div key={tpl.id} className={styles.card}>
+                <Link href={`/editor/${tpl.category}/${tpl.id}`} target="_blank" rel="noopener noreferrer" key={tpl.id} className={styles.card} style={{ textDecoration: 'none' }}>
                   <div
                     className={styles.thumbnail}
                     style={{ overflow: 'hidden', height: '280px', position: 'relative', background: '#f8fafc' }}
@@ -342,14 +336,8 @@ export default function TemplatesPage() {
                           : 'Classic layout containing professional document details.')}
                       </p>
                     </div>
-
-                    <div className={styles.btnGroup}>
-                      <Link href={`/editor/${tpl.category}/${tpl.id}`} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', width: '100%' }}>
-                        <Edit3 size={16} /> Use Template
-                      </Link>
-                    </div>
                   </div>
-                </div>
+                </Link>
               ))
             )}
           </div>

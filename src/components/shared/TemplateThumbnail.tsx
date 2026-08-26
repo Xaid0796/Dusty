@@ -75,7 +75,7 @@ export const TemplateThumbnail: React.FC<ThumbnailProps> = ({ template }) => {
         backgroundColor: '#f8fafc',
         display: 'flex',
         justifyContent: 'center',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         borderBottom: '1px solid var(--border-color)',
         userSelect: 'none',
       }}
@@ -83,13 +83,17 @@ export const TemplateThumbnail: React.FC<ThumbnailProps> = ({ template }) => {
       <div
         style={{
           transform: `scale(${scale})`,
-          transformOrigin: 'top center',
+          transformOrigin: 'center center',
           width: '794px',
           height: '1123px',
           flexShrink: 0,
           pointerEvents: 'none', // Prevent form fields inside thumbnail from stealing click/focus
           boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-          position: 'relative',
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          marginLeft: '-397px',
+          marginTop: '-561.5px',
           backgroundColor: canvasDoc ? canvasDoc.page.background : '#ffffff',
         }}
       >

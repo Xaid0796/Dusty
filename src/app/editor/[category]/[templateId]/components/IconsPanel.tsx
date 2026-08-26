@@ -1,8 +1,11 @@
 'use client';
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useCanvasStore } from '@/canvas/store';
 import { X, Search } from 'lucide-react';
 import { RESUME_ICONS } from '@/canvas/resumeIcons';
+import { AdvancedColorPickerPopup } from './AdvancedColorPickerPopup';
+import styles from '../editor.module.css';
 
 interface IconsPanelProps {
   onClose: () => void;
@@ -11,30 +14,37 @@ interface IconsPanelProps {
 const uid = (prefix: string) =>
   `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-const ICON_COLORS = [
-  { label: 'Navy Deep', value: '#0f172a' },
-  { label: 'Muted Slate', value: '#64748b' },
-  { label: 'Indigo Accent', value: '#6366f1' },
-  { label: 'Cyan Teal', value: '#14b8a6' },
-  { label: 'Success Green', value: '#10b981' },
-  { label: 'Alert Gold', value: '#f59e0b' },
-  { label: 'Danger Red', value: '#ef4444' },
-];
-
 export const IconsPanel: React.FC<IconsPanelProps> = ({ onClose }) => {
-  const { document: doc, addElement } = useCanvasStore();
+  const { document: doc, addElement, selectedIds, updateElement } = useCanvasStore();
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<'All' | 'Contact' | 'Social' | 'Work' | 'Education' | 'General'>('All');
   const [iconColor, setIconColor] = useState('#64748b');
+  const [showColorPopup, setShowColorPopup] = useState(false);
 
   const categories = ['All', 'Contact', 'Social', 'Work', 'Education', 'General'] as const;
 
   const svgToDataUri = (svgStr: string, color: string) => {
-    // Replace currentColor with actual selected color hex
+    // Replace currentColor with actual selected color hex/rgb/hsl
     const coloredSvg = svgStr.replace(/currentColor/g, color);
     return `data:image/svg+xml;utf8,${encodeURIComponent(coloredSvg)}`;
   };
 
+  // Real-time update for selected canvas icon elements when iconColor changes
+  useEffect(() => {
+    if (!doc) return;
+    selectedIds.forEach((id) => {
+      const el = doc.elements.find((e) => e.id === id);
+      if (el && el.type === 'image' && el.src && el.src.startsWith('data:image/svg+xml')) {
+        const matchedIcon = RESUME_ICONS.find((i) => i.name === el.label);
+        if (matchedIcon) {
+          const newSrc = svgToDataUri(matchedIcon.svg, iconColor);
+          if (el.src !== newSrc) {
+            updateElement(id, { src: newSrc });
+          }
+        }
+      }
+    });
+  }, [iconColor, selectedIds, doc, updateElement]);
 
   const addIcon = (iconId: string) => {
     if (!doc) return;
@@ -153,38 +163,55 @@ export const IconsPanel: React.FC<IconsPanelProps> = ({ onClose }) => {
         ))}
       </div>
 
-      {/* Color picker */}
+      {/* Advanced Color Selection Tool */}
       <div style={{ padding: '8px 12px', borderBottom: '1px solid var(--border-panel)', flexShrink: 0 }}>
-        <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-panel-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 }}>Icon Color</div>
-        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-          {ICON_COLORS.map((c) => (
-            <button
-              key={c.value}
-              title={c.label}
-              onClick={() => setIconColor(c.value)}
-              style={{
-                width: 22,
-                height: 22,
-                borderRadius: 6,
-                border: iconColor === c.value ? '2px solid var(--primary-color)' : '2px solid transparent',
-                background: c.value,
-                cursor: 'pointer',
-                transition: 'border-color 0.12s',
-                padding: 0,
-                outline: 'none',
-                boxShadow: iconColor === c.value ? '0 0 0 2px var(--bg-popover-active)' : 'none',
-              }}
-            />
-          ))}
+        <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-panel-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 }}>
+          Element Color (HEX, RGB, HSL)
+        </div>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {/* Visual color swatch triggering advanced picker popup */}
+          <button
+            onClick={() => setShowColorPopup(true)}
+            title="Open Advanced Color Picker"
+            style={{
+              width: 32,
+              height: 28,
+              borderRadius: 6,
+              backgroundColor: iconColor,
+              border: '1px solid var(--border-panel)',
+              cursor: 'pointer',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            }}
+          />
+          {/* Direct text input supporting HEX, RGB, HSL */}
           <input
-            type="color"
+            type="text"
             value={iconColor}
             onChange={(e) => setIconColor(e.target.value)}
-            title="Custom color"
-            style={{ width: 22, height: 22, borderRadius: 6, border: 'none', padding: 0, cursor: 'pointer', background: 'transparent' }}
+            placeholder="#64748b, rgb(...), hsl(...)"
+            style={{
+              flex: 1,
+              height: 28,
+              background: 'var(--bg-panel-input)',
+              border: '1px solid var(--border-panel)',
+              borderRadius: 6,
+              padding: '0 8px',
+              fontSize: 11,
+              color: 'var(--text-panel)',
+              fontFamily: 'monospace',
+              outline: 'none',
+            }}
           />
         </div>
       </div>
+
+      {showColorPopup && (
+        <AdvancedColorPickerPopup
+          color={iconColor}
+          onChange={(newCol) => setIconColor(newCol)}
+          onClose={() => setShowColorPopup(false)}
+        />
+      )}
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '10px 12px' }}>
         {filteredIcons.length === 0 ? (

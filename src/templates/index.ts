@@ -2,6 +2,8 @@ import React from 'react';
 import { DocumentSchema } from './schema';
 import { ResumeModernLayout } from './resume-modern/layout';
 import { defaultResumeData } from './resume-modern/defaultData';
+import { BiodataClassicLayout } from './biodata-classic/layout';
+import { defaultBiodataData } from './biodata-classic/defaultData';
 import { templateRegistry } from './registry';
 
 export interface TemplateDefinition {
@@ -19,6 +21,32 @@ export interface TemplateDefinition {
 }
 
 export const templateMetadataRegistry: Record<string, TemplateDefinition> = {
+  'resume-academic-blueprint': {
+    id: 'resume-academic-blueprint',
+    name: 'Academic Blueprint',
+    category: 'resume',
+    thumbnailText: 'Blueprint',
+    thumbnailGradient: 'linear-gradient(135deg, #1E293B, #475569)',
+    thumbnail: '/thumbnails/blueprint.png',
+    defaultData: defaultResumeData,
+    Component: ResumeModernLayout,
+    photoShape: 'circle',
+    isPremium: false,
+    description: 'A structured academic and professional resume template featuring a clean header banner, structured education and publication sections, and clean typography designed for researchers, students, and academics.',
+  },
+  'resume-dani-martinez': {
+    id: 'resume-dani-martinez',
+    name: 'Dani Martinez Modern',
+    category: 'resume',
+    thumbnailText: 'Dani Martinez',
+    thumbnailGradient: 'linear-gradient(135deg, #333333, #737373)',
+    thumbnail: '/thumbnails/dani.png',
+    defaultData: defaultResumeData,
+    Component: ResumeModernLayout,
+    photoShape: 'circle',
+    isPremium: false,
+    description: 'A sleek, professional modern resume template featuring a distinct sidebar with profile picture, contact details, education, skills, and languages. The main content area highlights work experience and professional references in a clean two-column layout.',
+  },
   'resume-modern': {
     id: 'resume-modern',
     name: 'Modern Executive Resume',
@@ -208,24 +236,56 @@ export const templateMetadataRegistry: Record<string, TemplateDefinition> = {
   },
 };
 
-// Helper to get combined registry including any dynamically published templates from templateRegistry
+// Helper to get combined registry including any dynamically published templates from templateRegistry with strict deduplication by ID and name
 const getCombinedRegistry = (): Record<string, TemplateDefinition> => {
-  const combined = { ...templateMetadataRegistry };
+  const map = new Map<string, TemplateDefinition>();
+
+  // 1. Add from templateMetadataRegistry
+  for (const [id, tpl] of Object.entries(templateMetadataRegistry)) {
+    if (tpl && tpl.id) {
+      map.set(tpl.id, tpl);
+    } else {
+      map.set(id, tpl);
+    }
+  }
+
+  // 2. Add/fallback from templateRegistry
   for (const [id, doc] of Object.entries(templateRegistry)) {
-    if (!combined[id]) {
-      combined[id] = {
-        id: doc.id,
-        name: doc.name,
+    const templateId = doc.id || id;
+    if (!map.has(templateId)) {
+      map.set(templateId, {
+        id: templateId,
+        name: doc.name || templateId,
         category: (doc.category || 'resume') as any,
-        thumbnailText: doc.name,
+        thumbnailText: doc.name || templateId,
         thumbnailGradient: 'linear-gradient(135deg, #4f46e5, #9333ea)',
         defaultData: defaultResumeData,
         Component: ResumeModernLayout,
         photoShape: 'circle',
         isPremium: doc.isPremium || false,
-        description: `Custom ${doc.category || 'resume'} template created via Admin Builder.`,
-      };
+        description: doc.description || `Custom ${doc.category || 'resume'} template created via Admin Builder.`,
+      });
     }
+  }
+
+  // 3. Strict deduplication by normalized name to prevent duplicate template cards in UI
+  const dedupByName = new Map<string, TemplateDefinition>();
+  for (const tpl of map.values()) {
+    const normName = (tpl.name || '').trim().toLowerCase();
+    if (!dedupByName.has(normName)) {
+      dedupByName.set(normName, tpl);
+    } else {
+      // If duplicate name exists, prefer the one with richer metadata (e.g. has description or thumbnail)
+      const existing = dedupByName.get(normName)!;
+      if ((!existing.thumbnail && tpl.thumbnail) || (!existing.description && tpl.description)) {
+        dedupByName.set(normName, tpl);
+      }
+    }
+  }
+
+  const combined: Record<string, TemplateDefinition> = {};
+  for (const tpl of dedupByName.values()) {
+    combined[tpl.id] = tpl;
   }
   return combined;
 };

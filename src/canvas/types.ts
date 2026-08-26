@@ -321,6 +321,7 @@ export interface CanvasDocument {
   id: string;
   category: string;
   name: string;
+  description?: string;
   page: CanvasPage;
   elements: CanvasElement[];
   isPremium?: boolean;
