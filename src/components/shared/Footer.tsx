@@ -10,6 +10,9 @@ export const Footer: React.FC = () => {
           © {new Date().getFullYear()} Dusty. All rights reserved.
         </div>
         <div className={styles.links}>
+          <Link href="/feedback" className={styles.link}>
+            Feedback
+          </Link>
           <Link href="/privacy-policy" className={styles.link}>
             Privacy Policy
           </Link>

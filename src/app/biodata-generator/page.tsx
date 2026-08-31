@@ -248,7 +248,7 @@ export default function BiodataGeneratorPage() {
                 <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
                     <div style={{ textAlign: 'center', marginBottom: '40px' }}>
                         <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#0f172a', margin: '0 0 10px 0' }}>Choose Biodata Template</h1>
-                        <p style={{ color: '#64748b', fontSize: '1rem', margin: 0 }}>Select a template to generate your matrimonial biodata.</p>
+                        <p style={{ color: '#64748b', fontSize: '1rem', margin: 0 }}>Select a template to generate your biodata.</p>
                         <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#1e3a8a', textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem', marginTop: '16px' }}>
                             <ArrowLeft size={16} /> Back to Home
                         </Link>
@@ -303,14 +303,7 @@ export default function BiodataGeneratorPage() {
         <div className={styles.workspace}>
             <header className={styles.toolbar}>
                 <div className={styles.toolbarBrand}>
-                    <button
-                        onClick={() => setIsPickingTemplate(true)}
-                        style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', color: '#1e3a8a', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
-                    >
-                        <ArrowLeft size={16} /> Change Template
-                    </button>
-                    <span style={{ color: '#cbd5e1' }}>|</span>
-                    <h1 className={styles.toolbarTitle}>Matrimonial Biodata Generator</h1>
+                    <h1 className={styles.toolbarTitle}>{doc.style.templateId === 'modern' ? 'Modern Biodata' : doc.style.templateId === 'floral' ? 'Floral Biodata' : 'Classic Biodata'}</h1>
                 </div>
 
                 <div className={styles.toolbarActions}>

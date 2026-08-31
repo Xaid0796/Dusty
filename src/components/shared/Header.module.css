@@ -4,9 +4,10 @@
   left: 0;
   right: 0;
   height: var(--header-height);
-  background-color: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(8px);
+  background-color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
   z-index: 100;
   display: flex;
   align-items: center;
@@ -19,14 +20,14 @@
   justify-content: space-between;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 24px;
   width: 100%;
 }
 
 .logo {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-size: 1.5rem;
   font-weight: 800;
   color: var(--text-primary);
@@ -41,57 +42,61 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-  border-radius: 8px;
+  border-radius: 10px;
   color: white;
   font-weight: bold;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
 }
 
 .nav {
   display: flex;
   align-items: center;
-  gap: 25px;
+  gap: 8px;
 }
 
 .navLink {
-  font-size: 0.95rem;
+  font-size: 0.93rem;
   font-weight: 500;
   color: var(--text-secondary);
-  transition: color 0.2s ease;
+  transition: all 0.2s ease;
   position: relative;
-  padding: 4px 0;
+  padding: 8px 14px;
+  border-radius: 8px;
 }
 
 .navLink:hover {
   color: var(--primary-color);
+  background: rgba(37, 99, 235, 0.06);
 }
 
 .navLinkActive {
   color: var(--primary-color);
   font-weight: 600;
-}
-
-.navLinkActive::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background-color: var(--primary-color);
-  border-radius: 2px;
+  background: rgba(37, 99, 235, 0.08);
 }
 
 .ctaBtn {
-  font-size: 0.85rem;
-  padding: 8px 16px;
+  font-size: 0.88rem;
+  padding: 9px 20px;
+  margin-left: 10px;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
 
 @media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+
   .nav {
-    gap: 15px;
+    gap: 4px;
+  }
+
+  .navLink {
+    padding: 6px 10px;
+    font-size: 0.88rem;
   }
 
   .ctaBtn {

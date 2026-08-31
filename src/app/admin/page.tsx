@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getAllTemplates, TemplateDefinition } from '@/templates/index';
 import { TemplateThumbnail } from '@/components/shared/TemplateThumbnail';
-import { Trash2, Plus, Edit3, Layers, Sparkles, FileText, Mail, Briefcase, Search } from 'lucide-react';
+import { Trash2, Plus, Edit3, Layers, Sparkles, FileText, Mail, Briefcase, Search, MessageSquare } from 'lucide-react';
 import styles from '@/app/templates/page.module.css';
 
 export default function AdminDashboardPage() {
@@ -81,6 +81,23 @@ export default function AdminDashboardPage() {
                     <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, letterSpacing: '0.5px' }}>Admin Template Dashboard</h1>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <Link
+                        href="/admin/feedback"
+                        style={{
+                            background: '#f59e0b',
+                            color: '#fff',
+                            padding: '8px 16px',
+                            borderRadius: '8px',
+                            fontWeight: 700,
+                            fontSize: '0.88rem',
+                            textDecoration: 'none',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                        }}
+                    >
+                        <MessageSquare size={16} /> View Feedback
+                    </Link>
                     <Link
                         href="/admin/templates"
                         style={{

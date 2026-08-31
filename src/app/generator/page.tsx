@@ -33,6 +33,7 @@ import {
   StyleEditor,
 } from '@/components/generator/SectionEditors';
 import { generatePDF } from '@/utils/pdfGenerator';
+import { detectGender, getPhotoForGender } from '@/utils/genderPhoto';
 import {
   ADDABLE_SECTION_KINDS,
   SECTION_KIND_LABELS,
@@ -336,21 +337,33 @@ const WILLIAM_TEMPLATE_DOC: GeneratorDocument = {
 function applyTemplate(id: string) {
   const store = useGeneratorStore.getState();
   switch (id) {
-    case 'classic':
+    case 'classic': {
+      const gender = detectGender('Aravind Sharma');
       store.updateStyle({ templateId: 'classic' });
-      store.updateContact({ photoUrl: '/resume-photo-1.jpeg' });
-      store.updateName('Classic Professional');
+      store.updateContact({
+        fullName: 'Aravind Sharma',
+        photoUrl: getPhotoForGender('/resume-photo-1.jpeg', gender) ?? '/resume-photo-1.jpeg',
+      });
       break;
-    case 'modern':
+    }
+    case 'modern': {
+      const gender = detectGender('Elena Roots');
       store.updateStyle({ templateId: 'modern' });
-      store.updateContact({ photoUrl: '/resume-photo-2.jpeg' });
-      store.updateName('Modern Minimalist');
+      store.updateContact({
+        fullName: 'Elena Roots',
+        photoUrl: getPhotoForGender('/resume-photo-2.jpeg', gender) ?? '/resume-photo-2.jpeg',
+      });
       break;
-    case 'sidebar':
+    }
+    case 'sidebar': {
+      const gender = detectGender('Daniel Cooper');
       store.updateStyle({ templateId: 'sidebar', primaryColor: '#004d1a' });
-      store.updateContact({ photoUrl: '/resume-photo-3.jpeg' });
-      store.updateName('Executive Sidebar');
+      store.updateContact({
+        fullName: 'Daniel Cooper',
+        photoUrl: getPhotoForGender('/resume-photo-3.jpeg', gender) ?? '/resume-photo-3.jpeg',
+      });
       break;
+    }
     case 'greta':
       store.setDocument(GRETA_TEMPLATE_DOC, true);
       break;
@@ -437,6 +450,18 @@ export default function GeneratorPage() {
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // ─── Auto-switch photo when name changes ────────────────────────────────────
+  const contactFullName = useGeneratorStore((s) => s.document?.contact?.fullName);
+  const contactPhotoUrl = useGeneratorStore((s) => s.document?.contact?.photoUrl);
+  useEffect(() => {
+    if (!contactFullName || !contactPhotoUrl) return;
+    const gender = detectGender(contactFullName);
+    const newPhoto = getPhotoForGender(contactPhotoUrl, gender);
+    if (newPhoto && newPhoto !== contactPhotoUrl) {
+      useGeneratorStore.getState().updateContact({ photoUrl: newPhoto });
+    }
+  }, [contactFullName, contactPhotoUrl]);
 
   // ── Initialize store + check for existing draft ───────────────────────────
   useEffect(() => {

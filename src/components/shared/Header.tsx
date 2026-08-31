@@ -23,7 +23,10 @@ export const Header: React.FC = () => {
           <span className={styles.logoIcon}>
             <FileText size={18} color="white" />
           </span>
-          <span>Dusty</span>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span>Dusty</span>
+            <span style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--primary-color)', letterSpacing: '0.5px', textTransform: 'uppercase', marginTop: '-3px' }}>Pro Docs</span>
+          </div>
         </Link>
 
         <nav className={styles.nav}>
@@ -44,6 +47,12 @@ export const Header: React.FC = () => {
             className={`${styles.navLink} ${isActive('/pdf-tools') ? styles.navLinkActive : ''}`}
           >
             PDF Tools
+          </Link>
+          <Link
+            href="/feedback"
+            className={`${styles.navLink} ${isActive('/feedback') ? styles.navLinkActive : ''}`}
+          >
+            Feedback
           </Link>
 
           <Link href="/templates" className="btn btn-primary btn-sm ctaBtn">

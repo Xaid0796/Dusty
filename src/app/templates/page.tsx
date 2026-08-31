@@ -6,17 +6,41 @@ import { useRouter } from 'next/navigation';
 import { Header } from '@/components/shared/Header';
 import { Footer } from '@/components/shared/Footer';
 import { getAllTemplates } from '@/templates/index';
-import { Edit3, Sparkles, ArrowRight, Search, Plus, FileText, Mail, Briefcase, Filter } from 'lucide-react';
+import { Edit3, Zap, ArrowRight, Search, Plus, FileText, Mail, Briefcase, Filter, ArrowLeft, X, FileCheck, User } from 'lucide-react';
 import styles from './page.module.css';
 import { TemplateThumbnail } from '@/components/shared/TemplateThumbnail';
+
+// Resume template picker options (mirrored from Home)
+const RESUME_OPTIONS = [
+  { id: 'classic', name: 'Classic Professional', desc: 'Timeless professional layout with a clean, formal structure.', gradient: 'linear-gradient(135deg, #1e3a8a, #3b82f6)', emoji: '📄' },
+  { id: 'modern', name: 'Modern Minimalist', desc: 'Clean, contemporary design with subtle accents.', gradient: 'linear-gradient(135deg, #0f766e, #14b8a6)', emoji: '✨' },
+  { id: 'sidebar', name: 'Executive Sidebar', desc: 'Structured two-column layout highlighting key skills and experience.', gradient: 'linear-gradient(135deg, #312e81, #6366f1)', emoji: '📊' },
+  { id: 'greta', name: 'Greta Student Minimalist', desc: 'Soft pastel tones tailored for graduates and early professionals.', gradient: 'linear-gradient(135deg, #9a3412, #f97316)', emoji: '🎓' },
+  { id: 'william', name: 'William Executive Designer', desc: 'Bold, high-impact header for creative and executive leaders.', gradient: 'linear-gradient(135deg, #581c87, #c084fc)', emoji: '💼' },
+];
+
+// Biodata template picker options (mirrored from Home)
+const BIODATA_OPTIONS = [
+  { id: 'classic' as const, name: 'Classic', desc: 'Timeless professional layout with a clean, formal structure.', gradient: 'linear-gradient(135deg, #1e3a8a, #3b82f6)', emoji: '📄' },
+  { id: 'modern' as const, name: 'Modern', desc: 'Contemporary two-tone design with a fresh, balanced look.', gradient: 'linear-gradient(135deg, #0f766e, #14b8a6)', emoji: '✨' },
+  { id: 'floral' as const, name: 'Floral', desc: 'Elegant wedding-style floral background.', gradient: 'linear-gradient(135deg, #881337, #f472b6)', emoji: '🌸' },
+];
 
 export default function TemplatesPage() {
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'resume' | 'cv' | 'biodata' | 'cover-letter'>('all');
   const [priceFilter, setPriceFilter] = useState<'all' | 'free' | 'paid'>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [showQuickModal, setShowQuickModal] = useState(false);
+  const [modalStep, setModalStep] = useState<'choice' | 'resume' | 'biodata' | null>(null);
   const router = useRouter();
   const templates = getAllTemplates();
+
+  const openResumeTemplate = (templateId: string) => {
+    window.open(`/generator?template=${templateId}`, '_blank');
+  };
+
+  const openBiodataTemplate = (templateId: 'classic' | 'modern' | 'floral') => {
+    window.open(`/biodata-generator?template=${templateId}`, '_blank');
+  };
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -66,10 +90,10 @@ export default function TemplatesPage() {
   });
 
   const categoryLabels: { id: 'all' | 'resume' | 'cv' | 'biodata' | 'cover-letter'; label: string; icon: any }[] = [
-    { id: 'all', label: 'All Templates', icon: Sparkles },
+    { id: 'all', label: 'All Templates', icon: FileText },
     { id: 'resume', label: 'Resumes', icon: Edit3 },
     { id: 'cv', label: 'CVs', icon: FileText },
-    { id: 'biodata', label: 'Biodatas', icon: Sparkles },
+    { id: 'biodata', label: 'Biodatas', icon: User },
     { id: 'cover-letter', label: 'Cover Letters', icon: Mail },
   ];
 
@@ -198,7 +222,7 @@ export default function TemplatesPage() {
           }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <Sparkles size={18} color="#fbbf24" />
+                <Zap size={18} color="#fbbf24" />
                 <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#fbbf24', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Recommended Quick tool</span>
               </div>
               <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, color: '#fff' }}>Quick Document Generator</h2>
@@ -206,7 +230,7 @@ export default function TemplatesPage() {
                 No canvas adjustments. Fill in your fields and export polished resumes or biodatas instantly.
               </p>
             </div>
-            <button onClick={() => setShowQuickModal(true)} style={{
+            <button onClick={() => setModalStep('choice')} style={{
               display: 'inline-flex', alignItems: 'center', gap: '7px',
               padding: '11px 22px', borderRadius: '8px', background: '#fff',
               color: '#1e3a8a', fontWeight: 700, fontSize: '0.88rem', border: 'none',
@@ -217,131 +241,94 @@ export default function TemplatesPage() {
             </button>
           </div>
 
-          {/* Quick Start Modal */}
-          {showQuickModal && (
-            <div style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(15, 23, 42, 0.5)',
-              backdropFilter: 'blur(6px)',
-              zIndex: 1000,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '20px'
-            }}>
-              <div style={{
-                background: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '16px',
-                padding: '32px',
-                maxWidth: '480px',
-                width: '100%',
-                color: '#0f172a',
-                position: 'relative',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)'
-              }}>
-                <button
-                  onClick={() => setShowQuickModal(false)}
-                  style={{
-                    position: 'absolute',
-                    top: '20px',
-                    right: '20px',
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#64748b',
-                    cursor: 'pointer',
-                    padding: '4px',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  ✕
-                </button>
-
-                <h2 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '10px', color: '#0f172a' }}>
-                  What would you like to create?
-                </h2>
-                <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '24px', lineHeight: '1.5' }}>
-                  Choose the document type you want to build. You can switch templates anytime.
-                </p>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {/* Quick Start Modal (Unified with Home Page design) */}
+          {modalStep && (
+            <div className={styles.modalBackdrop} onClick={() => setModalStep(null)}>
+              <div
+                className={styles.modalDialog}
+                onClick={(e) => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+              >
+                <div className={styles.modalHeader}>
+                  {modalStep === 'resume' || modalStep === 'biodata' ? (
+                    <button
+                      className={styles.modalBackBtn}
+                      onClick={() => setModalStep('choice')}
+                      aria-label="Go back"
+                    >
+                      <ArrowLeft size={18} />
+                    </button>
+                  ) : (
+                    <span className={styles.modalHeaderIcon}>
+                      <Zap size={18} />
+                    </span>
+                  )}
+                  <h2 className={styles.modalTitle}>
+                    {modalStep === 'choice' && 'What would you like to build?'}
+                    {modalStep === 'resume' && 'Choose a Resume Template'}
+                    {modalStep === 'biodata' && 'Choose a Biodata Template'}
+                  </h2>
                   <button
-                    onClick={() => router.push('/generator')}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '16px',
-                      padding: '16px 20px',
-                      background: '#f8fafc',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '12px',
-                      color: '#0f172a',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      transition: 'all 0.2s'
-                    }}
+                    className={styles.modalCloseBtn}
+                    onClick={() => setModalStep(null)}
+                    aria-label="Close"
                   >
-                    <div style={{
-                      width: '44px',
-                      height: '44px',
-                      borderRadius: '10px',
-                      background: '#2563eb',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#fff',
-                      flexShrink: 0
-                    }}>
-                      📄
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: '700', fontSize: '1.1rem', marginBottom: '2px', color: '#0f172a' }}>Resume</div>
-                      <div style={{ color: '#64748b', fontSize: '0.85rem' }}>Professional CV & job application resume</div>
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => router.push('/biodata-generator')}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '16px',
-                      padding: '16px 20px',
-                      background: '#f8fafc',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '12px',
-                      color: '#0f172a',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      transition: 'all 0.2s'
-                    }}
-                  >
-                    <div style={{
-                      width: '44px',
-                      height: '44px',
-                      borderRadius: '10px',
-                      background: '#9333ea',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#fff',
-                      flexShrink: 0
-                    }}>
-                      👤
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: '700', fontSize: '1.1rem', marginBottom: '2px', color: '#0f172a' }}>Biodata</div>
-                      <div style={{ color: '#64748b', fontSize: '0.85rem' }}>Traditional & modern marriage or personal biodata</div>
-                    </div>
+                    <X size={20} />
                   </button>
                 </div>
+
+                <div className={styles.modalBody}>
+                  {modalStep === 'choice' && (
+                    <div className={styles.choiceGrid}>
+                      <button className={styles.choiceCard} onClick={() => setModalStep('resume')}>
+                        <span className={styles.choiceIcon} style={{ background: 'linear-gradient(135deg, #2563eb, #60a5fa)' }}>
+                          <FileText size={28} />
+                        </span>
+                        <span className={styles.choiceName}>Resume</span>
+                        <span className={styles.choiceDesc}>Pick from professional resume designs and start editing instantly.</span>
+                        <span className={styles.choiceCta}>Choose Resume <ArrowRight size={16} /></span>
+                      </button>
+
+                      <button className={styles.choiceCard} onClick={() => setModalStep('biodata')}>
+                        <span className={styles.choiceIcon} style={{ background: 'linear-gradient(135deg, #9d174d, #f472b6)' }}>
+                          <User size={28} />
+                        </span>
+                        <span className={styles.choiceName}>Biodata</span>
+                        <span className={styles.choiceDesc}>Choose a classic, modern, or floral biodata layout for marriage & profiles.</span>
+                        <span className={styles.choiceCta}>Choose Biodata <ArrowRight size={16} /></span>
+                      </button>
+                    </div>
+                  )}
+
+                  {modalStep === 'resume' && (
+                    <div className={styles.pickerGrid}>
+                      {RESUME_OPTIONS.map((opt) => (
+                        <button key={opt.id} className={styles.pickerCard} onClick={() => openResumeTemplate(opt.id)}>
+                          <span className={styles.pickerThumbPlaceholder} style={{ background: opt.gradient, fontSize: '3rem' }}>{opt.emoji}</span>
+                          <span className={styles.pickerName}>{opt.name}</span>
+                          <span className={styles.pickerDesc}>{opt.desc}</span>
+                          <span className={styles.pickerSelect}>Select <ArrowRight size={14} /></span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {modalStep === 'biodata' && (
+                    <div className={styles.pickerGrid}>
+                      {BIODATA_OPTIONS.map((opt) => (
+                        <button key={opt.id} className={styles.pickerCard} onClick={() => openBiodataTemplate(opt.id)}>
+                          <span className={styles.pickerThumbPlaceholder} style={{ background: opt.gradient, fontSize: '3rem' }}>{opt.emoji}</span>
+                          <span className={styles.pickerName}>{opt.name}</span>
+                          <span className={styles.pickerDesc}>{opt.desc}</span>
+                          <span className={styles.pickerSelect}>Select <ArrowRight size={14} /></span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer section removed */}
               </div>
             </div>
           )}

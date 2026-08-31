@@ -1,7 +1,7 @@
 .hero {
   background: radial-gradient(circle at 80% 20%, rgba(37, 99, 235, 0.15), transparent 45%),
-              radial-gradient(circle at 15% 80%, rgba(79, 70, 229, 0.1), transparent 50%),
-              #0f172a;
+    radial-gradient(circle at 15% 80%, rgba(79, 70, 229, 0.1), transparent 50%),
+    #0f172a;
   color: #ffffff;
   padding: 100px 20px 80px 20px;
   text-align: center;
@@ -38,12 +38,14 @@
   margin-bottom: 20px;
   letter-spacing: -0.5px;
   background: linear-gradient(135deg, #ffffff 40%, #cbd5e1 100%);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .titleAccent {
   background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -175,23 +177,635 @@
   color: var(--primary-hover);
 }
 
+/* ── Quick Start Modal ─────────────────────────────────────── */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+.modalDialog {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 720px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.25s ease;
+  overflow: hidden;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px 16px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.modalHeaderIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.modalBackBtn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: #f1f5f9;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.modalBackBtn:hover {
+  background: #e2e8f0;
+}
+
+.modalTitle {
+  flex: 1;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.modalCloseBtn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.modalCloseBtn:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.modalBody {
+  padding: 20px 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modalFooter {
+  padding: 12px 24px 16px 24px;
+  border-top: 1px solid #e2e8f0;
+  font-size: 0.78rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Choice Step (Resume / Biodata) */
+.choiceGrid {
+  display: flex;
+  gap: 16px;
+}
+
+.choiceCard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 20px;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  background: #fafafa;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+  text-align: center;
+}
+
+.choiceCard:hover {
+  border-color: #2563eb;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.12);
+  transform: translateY(-2px);
+}
+
+.choiceIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.choiceName {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.choiceDesc {
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.choiceCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+/* Template Picker Grid */
+.pickerGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.pickerCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0 0 14px 0;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  background: #fafafa;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  text-align: center;
+}
+
+.pickerCard:hover {
+  border-color: #2563eb;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.1);
+}
+
+.pickerThumb {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  object-position: top;
+  display: block;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.pickerThumbPlaceholder {
+  width: 100%;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.pickerName {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #0f172a;
+  padding: 0 8px;
+}
+
+.pickerDesc {
+  font-size: 0.75rem;
+  color: #64748b;
+  padding: 0 8px;
+  line-height: 1.3;
+}
+
+.pickerSelect {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  .modalDialog {
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: 16px;
+  }
+
+  .choiceGrid {
+    flex-direction: column;
+  }
+
+  .pickerGrid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+  }
+
+  .pickerThumb,
+  .pickerThumbPlaceholder {
+    height: 140px;
+  }
+}
+
 @media (max-width: 768px) {
   .title {
     font-size: 2.5rem;
   }
+
   .subtitle {
     font-size: 1.1rem;
   }
+
   .hero {
     padding: 80px 20px 60px 20px;
   }
+
   .heroActions {
     flex-direction: column;
     width: 100%;
     max-width: 320px;
     margin: 0 auto;
   }
+
   .heroActions a {
     width: 100%;
   }
+}
+
+/* ── Dual Row Infinite Marquee Carousel ─────────────────────── */
+.carouselSection {
+  padding: 60px 0 80px 0;
+  background: var(--bg-color);
+  overflow: hidden;
+  position: relative;
+}
+
+.carouselHeader {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 0 20px;
+}
+
+.carouselTitle {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.carouselSubtitle {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.marqueeContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  padding: 10px 0;
+}
+
+.marqueeContainer::before,
+.marqueeContainer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.marqueeContainer::before {
+  left: 0;
+  background: linear-gradient(to right, var(--bg-color), transparent);
+}
+
+.marqueeContainer::after {
+  right: 0;
+  background: linear-gradient(to left, var(--bg-color), transparent);
+}
+
+.marqueeRow {
+  display: flex;
+  gap: 20px;
+  width: max-content;
+  animation: scrollLeft 40s linear infinite;
+}
+
+.marqueeRowReverse {
+  display: flex;
+  gap: 20px;
+  width: max-content;
+  animation: scrollRight 40s linear infinite;
+}
+
+.marqueeContainer:hover .marqueeRow,
+.marqueeContainer:hover .marqueeRowReverse {
+  animation-play-state: paused;
+}
+
+@keyframes scrollLeft {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes scrollRight {
+  0% {
+    transform: translateX(-50%);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.carouselCard {
+  width: 270px;
+  height: 88px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  position: relative;
+  flex-shrink: 0;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  text-decoration: none;
+}
+
+.carouselCard:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.12);
+  border-color: var(--primary-color);
+}
+
+.carouselAvatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid var(--primary-color);
+}
+
+.carouselInfo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.carouselName {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.carouselRole {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.carouselBadgeRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 3px;
+}
+
+.carouselTag {
+  font-size: 0.68rem;
+  font-weight: 600;
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--primary-color);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+/* ── FAQ Section ────────────────────────────────────────────── */
+.faqSection {
+  padding: 80px 20px;
+  background: var(--bg-color);
+  border-top: 1px solid var(--border-color);
+}
+
+.faqContainer {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.timelineContainer {
+  position: relative;
+  max-width: 900px;
+  margin: 50px auto 0 auto;
+  padding: 20px 0;
+}
+
+.timelineContainer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 3px;
+  background: linear-gradient(to bottom, var(--primary-color), #0d9488, var(--primary-color));
+  transform: translateX(-50%);
+  border-radius: 3px;
+}
+
+.timelineItem {
+  position: relative;
+  width: 50%;
+  padding: 20px 40px;
+  box-sizing: border-box;
+}
+
+.timelineItem.left {
+  left: 0;
+  text-align: right;
+}
+
+.timelineItem.right {
+  left: 50%;
+  text-align: left;
+}
+
+.timelineNode {
+  position: absolute;
+  top: 32px;
+  width: 36px;
+  height: 36px;
+  background: var(--primary-color);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 6px var(--bg-color), 0 4px 10px rgba(0, 0, 0, 0.15);
+  z-index: 2;
+  transition: transform 0.3s ease;
+}
+
+.timelineItem.left .timelineNode {
+  right: -18px;
+}
+
+.timelineItem.right .timelineNode {
+  left: -18px;
+}
+
+.timelineItem:hover .timelineNode {
+  transform: scale(1.15);
+  background: #0d9488;
+}
+
+.timelineContent {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.timelineItem:hover .timelineContent {
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+}
+
+.faqQuestion {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+  line-height: 1.4;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.timelineItem.left .faqQuestion {
+  justify-content: flex-end;
+}
+
+.faqAnswer {
+  font-size: 0.93rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .timelineContainer::before {
+    left: 20px;
+  }
+
+  .timelineItem {
+    width: 100%;
+    padding-left: 55px;
+    padding-right: 20px;
+    text-align: left !important;
+  }
+
+  .timelineItem.left,
+  .timelineItem.right {
+    left: 0;
+  }
+
+  .timelineItem.left .timelineNode,
+  .timelineItem.right .timelineNode {
+    left: 2px;
+    right: auto;
+  }
+
+  .timelineItem.left .faqQuestion {
+    justify-content: flex-start;
+  }
+}
+
+.exploreMoreWrapper {
+  text-align: center;
+  margin-top: 45px;
+  padding: 0 20px;
 }
