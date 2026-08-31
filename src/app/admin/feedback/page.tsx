@@ -16,6 +16,7 @@ import {
     TrendingUp,
     Search,
     Filter,
+    Trash2,
 } from 'lucide-react'
 
 interface FeedbackRecord {
@@ -129,6 +130,27 @@ export default function AdminFeedbackPage() {
             setError('Failed to fetch feedback')
         } finally {
             setIsLoading(false)
+        }
+    }
+
+    const handleDelete = async (id: number) => {
+        if (!confirm('Are you sure you want to delete this feedback?')) return
+
+        try {
+            const res = await fetch('/api/feedback', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id }),
+            })
+
+            if (res.ok) {
+                setFeedbackList((prev) => prev.filter((item) => item.id !== id))
+            } else {
+                const json = await res.json()
+                alert(json.error || 'Failed to delete feedback')
+            }
+        } catch {
+            alert('Failed to delete feedback')
         }
     }
 
@@ -663,7 +685,7 @@ export default function AdminFeedbackPage() {
                                                             {item.rating === 1 && 'Poor'}
                                                         </span>
                                                     </div>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                                         <span
                                                             style={{
                                                                 display: 'inline-flex',
@@ -690,6 +712,36 @@ export default function AdminFeedbackPage() {
                                                         >
                                                             {item.status || 'new'}
                                                         </span>
+                                                        <button
+                                                            onClick={() => handleDelete(item.id)}
+                                                            title="Delete feedback"
+                                                            style={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                width: '28px',
+                                                                height: '28px',
+                                                                borderRadius: '6px',
+                                                                border: '1px solid #fecaca',
+                                                                background: '#fef2f2',
+                                                                color: '#dc2626',
+                                                                cursor: 'pointer',
+                                                                transition: 'all 0.2s ease',
+                                                                padding: 0,
+                                                            }}
+                                                            onMouseOver={(e) => {
+                                                                e.currentTarget.style.background = '#dc2626'
+                                                                e.currentTarget.style.color = '#ffffff'
+                                                                e.currentTarget.style.borderColor = '#dc2626'
+                                                            }}
+                                                            onMouseOut={(e) => {
+                                                                e.currentTarget.style.background = '#fef2f2'
+                                                                e.currentTarget.style.color = '#dc2626'
+                                                                e.currentTarget.style.borderColor = '#fecaca'
+                                                            }}
+                                                        >
+                                                            <Trash2 size={13} />
+                                                        </button>
                                                     </div>
                                                 </div>
 

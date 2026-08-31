@@ -52,6 +52,44 @@ export async function POST(request: NextRequest) {
     }
 }
 
+export async function DELETE(request: NextRequest) {
+    try {
+        // Verify admin authentication via cookie
+        const token = request.cookies.get('admin_token')?.value
+        if (!token) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+
+        const decoded = Buffer.from(token, 'base64').toString('utf-8')
+        const [password, expiryStr] = decoded.split(':')
+        const adminPassword = process.env.ADMIN_PASSWORD
+
+        if (password !== adminPassword || Date.now() > parseInt(expiryStr)) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+
+        const { id } = await request.json()
+        if (!id) {
+            return NextResponse.json({ error: 'Feedback ID is required' }, { status: 400 })
+        }
+
+        const { error } = await supabase
+            .from('feedback')
+            .delete()
+            .eq('id', id)
+
+        if (error) {
+            console.error('Supabase delete error:', error)
+            return NextResponse.json({ error: 'Failed to delete feedback' }, { status: 500 })
+        }
+
+        return NextResponse.json({ message: 'Feedback deleted successfully' }, { status: 200 })
+    } catch (err) {
+        console.error('API error:', err)
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    }
+}
+
 export async function GET() {
     try {
         const { data, error } = await supabase
