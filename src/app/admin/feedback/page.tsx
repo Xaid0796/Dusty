@@ -118,7 +118,7 @@ export default function AdminFeedbackPage() {
             } else {
                 setFeedbackList(json.data || [])
                 // Auto-expand all date groups
-                const dates = new Set(
+                const dates = new Set<string>(
                     (json.data || []).map((item: FeedbackRecord) =>
                         new Date(item.created_at).toISOString().split('T')[0]
                     )
