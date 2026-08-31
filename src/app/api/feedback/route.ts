@@ -4,7 +4,7 @@ import { supabase } from '@/utils/supabase'
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json()
-        const { message, rating, name, category } = body
+        const { message, rating, email, category } = body
 
         if (!message || !rating) {
             return NextResponse.json(
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
             .insert({
                 message,
                 rating,
-                name: name || 'Anonymous',
+                email: email || '',
                 category: category || 'general',
                 status: 'new',
             })

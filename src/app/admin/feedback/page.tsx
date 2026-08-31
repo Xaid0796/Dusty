@@ -26,6 +26,7 @@ interface FeedbackRecord {
     category: string | null
     user_id: string | null
     name: string
+    email: string
     created_at: string
     status: string
 }
@@ -174,7 +175,7 @@ export default function AdminFeedbackPage() {
             list = list.filter(
                 (item) =>
                     item.message.toLowerCase().includes(q) ||
-                    (item.name || '').toLowerCase().includes(q)
+                    (item.email || '').toLowerCase().includes(q)
             )
         }
         if (ratingFilter !== null) {
@@ -771,7 +772,7 @@ export default function AdminFeedbackPage() {
                                                         }}
                                                     >
                                                         <User size={13} />
-                                                        {item.name || 'Anonymous'}
+                                                        {item.email || 'Anonymous'}
                                                     </span>
                                                     {item.category && (
                                                         <span

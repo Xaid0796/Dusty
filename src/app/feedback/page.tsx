@@ -12,6 +12,7 @@ interface FeedbackRecord {
     category: string | null
     user_id: string | null
     name: string
+    email: string
     created_at: string
     status: string
 }
@@ -57,7 +58,7 @@ export default function FeedbackPage() {
     const [rating, setRating] = useState(0)
     const [hoverRating, setHoverRating] = useState(0)
     const [message, setMessage] = useState('')
-    const [name, setName] = useState('')
+    const [email, setEmail] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isSubmitted, setIsSubmitted] = useState(false)
     const [error, setError] = useState('')
@@ -106,7 +107,7 @@ export default function FeedbackPage() {
                 body: JSON.stringify({
                     message: message.trim(),
                     rating,
-                    name: name.trim() || 'Anonymous',
+                    email: email.trim() || '',
                     category: 'general',
                 }),
             })
@@ -131,7 +132,7 @@ export default function FeedbackPage() {
     const resetForm = () => {
         setRating(0)
         setMessage('')
-        setName('')
+        setEmail('')
         setError('')
         setIsSubmitted(false)
     }
@@ -175,8 +176,8 @@ export default function FeedbackPage() {
                                                 key={star}
                                                 type="button"
                                                 className={`${styles.starButton} ${star <= displayRating
-                                                        ? styles.starFilled
-                                                        : styles.starEmpty
+                                                    ? styles.starFilled
+                                                    : styles.starEmpty
                                                     }`}
                                                 onClick={() => setRating(star)}
                                                 onMouseEnter={() => setHoverRating(star)}
@@ -222,19 +223,19 @@ export default function FeedbackPage() {
                                     </div>
                                 </div>
 
-                                {/* Name */}
+                                {/* Email */}
                                 <div className={styles.formGroup}>
                                     <label className={styles.formLabel}>
-                                        Name
+                                        Email
                                         <span className={styles.optionalLabel}>(optional)</span>
                                     </label>
                                     <input
-                                        type="text"
+                                        type="email"
                                         className={styles.formInput}
-                                        placeholder="Anonymous"
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                        maxLength={100}
+                                        placeholder="you@example.com"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        maxLength={200}
                                     />
                                 </div>
 
@@ -282,7 +283,7 @@ export default function FeedbackPage() {
                                                     &ldquo;{item.message}&rdquo;
                                                 </p>
                                                 <div className={styles.feedbackMeta}>
-                                                    <span>{item.name || 'Anonymous'}</span>
+                                                    <span>{item.email || 'Anonymous'}</span>
                                                     <span>·</span>
                                                     <span>{formatTime(item.created_at)}</span>
                                                 </div>

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { Layers, Lock, Eye, EyeOff } from 'lucide-react'
+import { Layers, Lock, Eye, EyeOff, LogOut } from 'lucide-react'
 
 export default function AdminGuard({ children }: { children: React.ReactNode }) {
     const router = useRouter()
@@ -27,6 +27,17 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
             }
         } catch {
             setIsAuthenticated(false)
+        }
+    }
+
+    const handleLogout = async () => {
+        try {
+            await fetch('/api/admin/auth/logout', { method: 'POST' })
+            setIsAuthenticated(false)
+            setPassword('')
+            router.refresh()
+        } catch {
+            // ignore
         }
     }
 
@@ -245,6 +256,47 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
         )
     }
 
-    // Authenticated — render children
-    return <>{children}</>
+    // Authenticated — render children with logout button
+    return (
+        <>
+            {/* Floating Logout Button */}
+            <button
+                onClick={handleLogout}
+                title="Logout"
+                style={{
+                    position: 'fixed',
+                    top: '20px',
+                    right: '20px',
+                    zIndex: 9999,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    border: '1px solid #fecaca',
+                    background: '#fef2f2',
+                    color: '#dc2626',
+                    fontWeight: 700,
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                }}
+                onMouseOver={(e) => {
+                    e.currentTarget.style.background = '#dc2626'
+                    e.currentTarget.style.color = '#ffffff'
+                    e.currentTarget.style.borderColor = '#dc2626'
+                }}
+                onMouseOut={(e) => {
+                    e.currentTarget.style.background = '#fef2f2'
+                    e.currentTarget.style.color = '#dc2626'
+                    e.currentTarget.style.borderColor = '#fecaca'
+                }}
+            >
+                <LogOut size={15} />
+                Logout
+            </button>
+            {children}
+        </>
+    )
 }
