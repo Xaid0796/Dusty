@@ -12,66 +12,94 @@ import styles from '../editor.module.css';
 interface CanvasStageProps {
   pageRef: React.RefObject<HTMLDivElement | null>;
   showGrid?: boolean;
-  showRulers?: boolean;
   previewMode?: boolean;
 }
 
 interface LassoState {
   startX: number; startY: number; currentX: number; currentY: number; active: boolean;
+  /** Page slot element the lasso was initiated on (multi-page aware). */
+  pageEl?: HTMLElement | null;
+  /** ID of the page slot element for easy rendering-side matching. */
+  pageId?: string;
 }
 
-const RULER_SIZE = 20; // px width/height of rulers
-
-// ── Ruler component ──────────────────────────────────────────
-const RulerH: React.FC<{ widthMm: number; zoom: number }> = ({ widthMm, zoom }) => {
-  const widthPx = mmToPx(widthMm) * (zoom / 100);
-  const tickEvery = zoom > 120 ? 5 : zoom > 80 ? 10 : 20; // mm between ticks
-  const ticks: React.ReactNode[] = [];
-  for (let mm = 0; mm <= widthMm; mm += tickEvery) {
-    const x = mmToPx(mm) * (zoom / 100);
-    ticks.push(
-      <line key={mm} x1={x} y1={RULER_SIZE - 6} x2={x} y2={RULER_SIZE} stroke="rgba(148,163,184,0.6)" strokeWidth={1} />,
-      <text key={`t${mm}`} x={x + 2} y={RULER_SIZE - 8} fontSize={7} fill="rgba(100,116,139,0.9)" fontFamily="Inter,sans-serif">{mm}</text>
-    );
-  }
-  return (
-    <svg width={widthPx + 20} height={RULER_SIZE} style={{ display: 'block', background: '#f1f5f9', borderBottom: '1px solid #e2e8f0', userSelect: 'none', flexShrink: 0 }}>
-      {ticks}
-    </svg>
-  );
-};
-
-const RulerV: React.FC<{ heightMm: number; zoom: number }> = ({ heightMm, zoom }) => {
-  const heightPx = mmToPx(heightMm) * (zoom / 100);
-  const tickEvery = zoom > 120 ? 5 : zoom > 80 ? 10 : 20;
-  const ticks: React.ReactNode[] = [];
-  for (let mm = 0; mm <= heightMm; mm += tickEvery) {
-    const y = mmToPx(mm) * (zoom / 100);
-    ticks.push(
-      <line key={mm} x1={RULER_SIZE - 6} y1={y} x2={RULER_SIZE} y2={y} stroke="rgba(148,163,184,0.6)" strokeWidth={1} />,
-      <text key={`t${mm}`} x={1} y={y + 4} fontSize={7} fill="rgba(100,116,139,0.9)" fontFamily="Inter,sans-serif" transform={`rotate(-90, 7, ${y})`}>{mm}</text>
-    );
-  }
-  return (
-    <svg width={RULER_SIZE} height={heightPx + 20} style={{ display: 'block', background: '#f1f5f9', borderRight: '1px solid #e2e8f0', userSelect: 'none', flexShrink: 0 }}>
-      {ticks}
-    </svg>
-  );
-};
-
 export const CanvasStage: React.FC<CanvasStageProps> = ({
-  pageRef, showGrid = false, showRulers = false, previewMode = false,
+  pageRef, showGrid = false, previewMode = false,
 }) => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const {
     document: doc, selectedId, selectedIds, isTextEditing, croppingId,
     selectElement, setSelectedIds, setTextEditing, updateElement, deleteSelected,
-    zoom, saveHistory, activeTool, setActiveTool, snapToGrid,
+    zoom, saveHistory, activeTool, setActiveTool, snapToGrid, pageCount,
   } = useCanvasStore();
 
   const selectedIdsRef = useRef(selectedIds);
   const drawingIdRef = useRef<string | null>(null);
+  const pointersRef = useRef<Map<number, PointerEvent>>(new Map());
+  const [isResizing, setIsResizing] = useState(false);
+
+  useEffect(() => {
+    const handleResizeStart = () => setIsResizing(true);
+    const handleResizeEnd = () => setIsResizing(false);
+    window.addEventListener('canvas-resizing-start', handleResizeStart);
+    window.addEventListener('canvas-resizing-end', handleResizeEnd);
+    return () => {
+      window.removeEventListener('canvas-resizing-start', handleResizeStart);
+      window.removeEventListener('canvas-resizing-end', handleResizeEnd);
+    };
+  }, []);
+
+  useEffect(() => {
+    const onPointerDown = (e: PointerEvent) => {
+      pointersRef.current.set(e.pointerId, e);
+    };
+    const onPointerUpOrCancel = (e: PointerEvent) => {
+      pointersRef.current.delete(e.pointerId);
+    };
+    window.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('pointerup', onPointerUpOrCancel);
+    window.addEventListener('pointercancel', onPointerUpOrCancel);
+    return () => {
+      window.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('pointerup', onPointerUpOrCancel);
+      window.removeEventListener('pointercancel', onPointerUpOrCancel);
+    };
+  }, []);
   const [lasso, setLasso] = useState<LassoState | null>(null);
   const [smartGuides, setSmartGuides] = useState<GuideLineData[]>([]);
+  const [longPressedId, setLongPressedId] = useState<string | null>(null);
+
+  const canvasRef = useRef<HTMLDivElement | null>(null);
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    // Setup canvasRef if needed
+    if (!canvasRef.current) canvasRef.current = document.getElementById('canvas-a4-page') as HTMLDivElement;
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    // Exclusively handle single-pointer panning by translating canvas based on delta (e.clientX, e.clientY)
+    // Only allow panning if not actively dragging/moving an element, not during marquee (lasso), not during text editing, and not during resizing
+    if (e.buttons === 1 && !longPressedId && !lasso && !isTextEditing && !isResizing) {
+      const pane = document.querySelector(`.${styles.canvasPane}`) as HTMLDivElement;
+      if (pane) {
+        pane.scrollLeft -= e.movementX;
+        pane.scrollTop -= e.movementY;
+      }
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+  };
 
   useEffect(() => { selectedIdsRef.current = selectedIds; }, [selectedIds]);
 
@@ -124,20 +152,30 @@ export const CanvasStage: React.FC<CanvasStageProps> = ({
 
   if (!doc) return null;
 
-  const pagePointFromEvent = (e: PointerEvent | React.PointerEvent<HTMLDivElement>) => {
-    const page = pageRef.current;
+  const pagePointFromEvent = (e: PointerEvent | React.PointerEvent<HTMLDivElement>, pageEl?: HTMLElement | null) => {
+    const page = pageEl || pageRef.current;
     if (!page) return { x: 0, y: 0 };
     const rect = page.getBoundingClientRect();
     const z = zoom / 100;
     return { x: pxToMm((e.clientX - rect.left) / z), y: pxToMm((e.clientY - rect.top) / z) };
   };
 
-  const pagePointPxFromEvent = (e: PointerEvent | React.PointerEvent<HTMLDivElement>) => {
-    const page = pageRef.current;
+  const pagePointPxFromEvent = (e: PointerEvent | React.PointerEvent<HTMLDivElement>, pageEl?: HTMLElement | null) => {
+    const page = pageEl || pageRef.current;
     if (!page) return { x: 0, y: 0 };
     const rect = page.getBoundingClientRect();
     const z = zoom / 100;
     return { x: (e.clientX - rect.left) / z, y: (e.clientY - rect.top) / z };
+  };
+
+  // Resolve the page slot element that sits under a client point (for page-aware marquee math).
+  const pageElementFromClient = (clientX: number, clientY: number): HTMLElement | null => {
+    const slots = Array.from(document.querySelectorAll<HTMLElement>('[id^="canvas-a4-page"]'));
+    for (const slot of slots) {
+      const r = slot.getBoundingClientRect();
+      if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom) return slot;
+    }
+    return pageRef.current;
   };
 
   const handleTextBlur = (id: string, text: string, finalHeightMm?: number) => {
@@ -154,10 +192,11 @@ export const CanvasStage: React.FC<CanvasStageProps> = ({
     setTextEditing(false);
   };
 
-  // Drawing tool
+  // Drawing tool (page-aware for multi-page)
   const createDrawingAt = (e: React.PointerEvent<HTMLDivElement>) => {
     const target = e.currentTarget;
-    const p = pagePointFromEvent(e);
+    const pageEl = pageElementFromClient(e.clientX, e.clientY);
+    const p = pagePointFromEvent(e, pageEl);
     const id = `drawing-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const drawing: DrawingElement = {
       id, type: 'drawing', label: 'Drawing',
@@ -173,7 +212,7 @@ export const CanvasStage: React.FC<CanvasStageProps> = ({
 
     const updateDrawing = (ev: PointerEvent) => {
       if (ev.pointerId !== e.pointerId) return;
-      const point = pagePointFromEvent(ev);
+      const point = pagePointFromEvent(ev, pageEl);
       const current = useCanvasStore.getState().document?.elements.find((item) => item.id === id);
       if (!current || current.type !== 'drawing') return;
 
@@ -209,36 +248,148 @@ export const CanvasStage: React.FC<CanvasStageProps> = ({
     target.addEventListener('pointercancel', finish);
   };
 
-  // Lasso selection
+  // Lasso selection (on mobile/touch devices, selection requires a double-tap and drag gesture)
+  const lastTapTimeRef = useRef<number>(0);
+  const lastTapPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
   const startLasso = (e: React.PointerEvent<HTMLDivElement>) => {
     const target = e.currentTarget;
-    const { x, y } = pagePointPxFromEvent(e);
+    const isTouchOrMobile = isMobile || e.pointerType === 'touch';
+    const isSelectTool = activeTool === 'select';
+
+    const now = Date.now();
+    const dt = now - lastTapTimeRef.current;
+    const dist = Math.hypot(e.clientX - lastTapPosRef.current.x, e.clientY - lastTapPosRef.current.y);
+    const isDoubleTap = dt < 400 && dist < 30;
+
+    lastTapTimeRef.current = now;
+    lastTapPosRef.current = { x: e.clientX, y: e.clientY };
+
+    if (isTouchOrMobile && isSelectTool && !isDoubleTap) {
+      selectElement(null);
+      return; // Prevent single tap/click from starting lasso on mobile/touch devices, but clear selection
+    }
+
+    // Multi-page aware: resolve the page slot the pointer started on so marquee
+    // coordinates are computed relative to that page (not always page 1).
+    const pageEl = pageElementFromClient(e.clientX, e.clientY);
+    const lassoPageId = pageEl?.id || 'canvas-a4-page';
+
+    const { x, y } = pagePointPxFromEvent(e, pageEl);
     const start = { x, y };
-    target.setPointerCapture(e.pointerId);
-    selectElement(null);
-    let current = { x, y };
-    let active = false;
+    const pointerId = e.pointerId;
+    let lassoInitiated = !isTouchOrMobile || !isSelectTool || isDoubleTap;
+
+    if (lassoInitiated) {
+      try { target.setPointerCapture(pointerId); } catch { }
+      selectElement(null);
+    }
+
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startTime = Date.now();
+    let exceeded = false;
+    let timer: any = null;
+
+    // ── Auto-scroll during marquee (when pointer nears viewport edge) ──
+    const pane = document.querySelector(`.${styles.canvasPane}`) as HTMLDivElement | null;
+    const lastClient = { x: startX, y: startY };
+    let autoScrollRAF: number | null = null;
+    const EDGE = 60;       // px proximity to edge to start auto-scrolling
+    const MAX_SPEED = 20;  // px per frame at the very edge
+
+    const stopAutoScroll = () => {
+      if (autoScrollRAF !== null) {
+        cancelAnimationFrame(autoScrollRAF);
+        autoScrollRAF = null;
+      }
+    };
+
+    const autoScrollTick = () => {
+      if (!lassoInitiated || !pane) return;
+      const rect = pane.getBoundingClientRect();
+      let vx = 0;
+      let vy = 0;
+      if (lastClient.y > rect.bottom - EDGE) vy = MAX_SPEED * Math.min(1, (lastClient.y - (rect.bottom - EDGE)) / EDGE);
+      else if (lastClient.y < rect.top + EDGE) vy = -MAX_SPEED * Math.min(1, (rect.top + EDGE - lastClient.y) / EDGE);
+      if (lastClient.x > rect.right - EDGE) vx = MAX_SPEED * Math.min(1, (lastClient.x - (rect.right - EDGE)) / EDGE);
+      else if (lastClient.x < rect.left + EDGE) vx = -MAX_SPEED * Math.min(1, (rect.left + EDGE - lastClient.x) / EDGE);
+      if (vx !== 0 || vy !== 0) {
+        pane.scrollLeft += vx;
+        pane.scrollTop += vy;
+        // Keep the lasso's moving edge synced with the (now scrolled) pointer position
+        const pt = pagePointPxFromEvent({ clientX: lastClient.x, clientY: lastClient.y } as any, pageEl);
+        setLasso({ startX: start.x, startY: start.y, currentX: pt.x, currentY: pt.y, active: true, pageEl, pageId: lassoPageId });
+      }
+      autoScrollRAF = requestAnimationFrame(autoScrollTick);
+    };
+
+    const startAutoScroll = () => {
+      if (autoScrollRAF === null) autoScrollRAF = requestAnimationFrame(autoScrollTick);
+    };
+
+    const initiateLasso = () => {
+      if (lassoInitiated) return;
+      lassoInitiated = true;
+      if (timer) { clearTimeout(timer); timer = null; }
+      try { target.setPointerCapture(pointerId); } catch { }
+      selectElement(null);
+    };
+
+    if (!lassoInitiated) {
+      timer = setTimeout(() => {
+        if (!exceeded && !lassoInitiated) initiateLasso();
+      }, 150);
+    }
 
     const onMove = (ev: PointerEvent) => {
-      if (ev.pointerId !== e.pointerId) return;
-      const pt = pagePointPxFromEvent(ev);
-      current = pt; active = true;
-      setLasso({ startX: start.x, startY: start.y, currentX: pt.x, currentY: pt.y, active: true });
+      if (ev.pointerId !== pointerId) return;
+      const dx = Math.abs(ev.clientX - startX);
+      const dy = Math.abs(ev.clientY - startY);
+
+      if (!lassoInitiated) {
+        if (dx > 10 || dy > 10) {
+          exceeded = true;
+          if (timer) { clearTimeout(timer); timer = null; }
+          target.removeEventListener('pointermove', onMove);
+          target.removeEventListener('pointerup', onUp);
+          target.removeEventListener('pointercancel', onUp);
+          return;
+        }
+        if (Date.now() - startTime >= 150) initiateLasso();
+        else return;
+      }
+
+      lastClient.x = ev.clientX;
+      lastClient.y = ev.clientY;
+      const pt = pagePointPxFromEvent(ev, pageEl);
+      setLasso({ startX: start.x, startY: start.y, currentX: pt.x, currentY: pt.y, active: true, pageEl, pageId: lassoPageId });
+      startAutoScroll();
     };
+
     const onUp = (ev: PointerEvent) => {
-      if (ev.pointerId !== e.pointerId) return;
-      try { target.releasePointerCapture(e.pointerId); } catch { }
+      if (ev.pointerId !== pointerId) return;
+      stopAutoScroll();
+      if (timer) { clearTimeout(timer); timer = null; }
+      try { target.releasePointerCapture(pointerId); } catch { }
       target.removeEventListener('pointermove', onMove);
       target.removeEventListener('pointerup', onUp);
       target.removeEventListener('pointercancel', onUp);
-      if (active) {
-        const minX = pxToMm(Math.min(start.x, current.x));
-        const maxX = pxToMm(Math.max(start.x, current.x));
-        const minY = pxToMm(Math.min(start.y, current.y));
-        const maxY = pxToMm(Math.max(start.y, current.y));
+
+      if (lassoInitiated) {
+        const pt = pagePointPxFromEvent(ev, pageEl);
+        const minX = pxToMm(Math.min(start.x, pt.x));
+        const maxX = pxToMm(Math.max(start.x, pt.x));
+        const minY = pxToMm(Math.min(start.y, pt.y));
+        const maxY = pxToMm(Math.max(start.y, pt.y));
         const state = useCanvasStore.getState();
-        const selected = (state.document?.elements || []).filter((el) => el.visible && !el.locked && el.x < maxX && el.x + el.width > minX && el.y < maxY && el.y + el.height > minY).map((el) => el.id);
+        // Page-aware: add the page slot's vertical offset (in mm) to the marquee
+        // bounds so page-2+ element coordinates (absolute doc y) are matched.
+        const pageTopMm = pageEl ? pxToMm(pageEl.getBoundingClientRect().top - (pageRef.current?.getBoundingClientRect().top ?? 0)) : 0;
+        const selected = (state.document?.elements || []).filter((el) => el.visible && !el.locked && el.x < maxX && el.x + el.width > minX && el.y < maxY + pageTopMm && el.y + el.height > minY + pageTopMm).map((el) => el.id);
         if (selected.length > 0) setSelectedIds(selected);
+      } else if (!exceeded) {
+        selectElement(null);
       }
       setLasso(null);
     };
@@ -250,13 +401,19 @@ export const CanvasStage: React.FC<CanvasStageProps> = ({
   const handleEmptyPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (previewMode) return;
     if (activeTool === 'draw') { e.preventDefault(); createDrawingAt(e); return; }
-    if (activeTool === 'select' && e.button === 0) { startLasso(e); return; }
+    if (activeTool === 'select' && e.button === 0) {
+      if (isMobile || e.pointerType === 'touch') {
+        e.preventDefault();
+      }
+      startLasso(e);
+      return;
+    }
     selectElement(null);
   };
 
   // Element drag with smart guides
   const handleElementPointerDown = (e: React.PointerEvent<HTMLDivElement>, el: CanvasElement) => {
-    if (previewMode || activeTool === 'draw') return;
+    if (previewMode || activeTool === 'draw' || pointersRef.current.size >= 2) return;
     if (isTextEditing && selectedId === el.id) {
       e.stopPropagation();
       return;
@@ -264,65 +421,123 @@ export const CanvasStage: React.FC<CanvasStageProps> = ({
     if (e.button === 2 || el.locked || croppingId === el.id) return;
     e.stopPropagation();
 
-    const additive = e.ctrlKey || e.metaKey || e.shiftKey;
-    if (additive) { useCanvasStore.getState().toggleSelection(el.id); return; }
-    if (!selectedIdsRef.current.includes(el.id)) selectElement(el.id);
-
-    const ids = selectedIdsRef.current.includes(el.id) ? [...selectedIdsRef.current] : [el.id];
-    const positions = new Map(doc.elements.filter((item) => ids.includes(item.id)).map((item) => [item.id, { x: item.x, y: item.y }]));
     const target = e.currentTarget;
-    target.setPointerCapture(e.pointerId);
     const pointerId = e.pointerId;
     const startX = e.clientX;
     const startY = e.clientY;
+    const startTime = Date.now();
+    let selectionInitiated = false;
+    let exceeded = false;
+    let timer: any = null;
+
+    let dragData: {
+      ids: string[];
+      positions: Map<string, { x: number; y: number }>;
+      historySaved: boolean;
+      moved: boolean;
+    } | null = null;
+
     const z = zoom / 100;
-    let historySaved = false;
-    let moved = false;
 
-    const move = (ev: PointerEvent) => {
-      if (ev.pointerId !== pointerId) return;
-      const dx = pxToMm((ev.clientX - startX) / z);
-      const dy = pxToMm((ev.clientY - startY) / z);
-      if (Math.abs(dx) < 0.3 && Math.abs(dy) < 0.3) return;
-      moved = true;
-      if (!historySaved) { saveHistory(); historySaved = true; }
+    const initiateSelection = (ev: PointerEvent | React.PointerEvent) => {
+      if (selectionInitiated || pointersRef.current.size >= 2) return;
+      selectionInitiated = true;
+      if (timer) { clearTimeout(timer); timer = null; }
 
-      const state = useCanvasStore.getState();
-      const primaryEl = state.document?.elements.find((item) => item.id === ids[0]);
-      const others = (state.document?.elements || []).filter((item) => !ids.includes(item.id) && item.visible && !item.locked);
-      let snappedDx = dx;
-      let snappedDy = dy;
+      setLongPressedId(el.id);
 
-      // Smart guides for single-element drag
-      if (primaryEl && ids.length === 1 && !snapToGrid) {
-        const start = positions.get(ids[0]);
-        if (start) {
-          const tentative = { x: start.x + dx, y: start.y + dy, width: primaryEl.width, height: primaryEl.height };
-          const { guides, snapX, snapY } = computeSmartGuides(tentative, others, doc.page.width, doc.page.height, 2.5);
-          setSmartGuides(guides);
-          snappedDx = snapX - start.x;
-          snappedDy = snapY - start.y;
-        }
+      const additive = ev.ctrlKey || ev.metaKey || ev.shiftKey;
+      if (additive) {
+        useCanvasStore.getState().toggleSelection(el.id);
       } else {
-        setSmartGuides([]);
+        if (!selectedIdsRef.current.includes(el.id)) selectElement(el.id);
       }
 
-      ids.forEach((id) => {
-        const start = positions.get(id);
-        const current = state.document?.elements.find((item) => item.id === id);
-        if (!start || !current || current.locked) return;
-        const snap = (value: number) => snapToGrid ? Math.round(value / 2) * 2 : value;
-        state.updateElement(id, { x: snap(start.x + snappedDx), y: snap(start.y + snappedDy) }, true);
-      });
+      const ids = selectedIdsRef.current.includes(el.id) ? [...selectedIdsRef.current] : [el.id];
+      const positions = new Map(doc.elements.filter((item) => ids.includes(item.id)).map((item) => [item.id, { x: item.x, y: item.y }]));
+
+      dragData = { ids, positions, historySaved: false, moved: false };
+      try { target.setPointerCapture(pointerId); } catch { }
+    };
+
+    // If mouse, trigger immediately. If touch, use 500ms delay.
+    if (e.pointerType === 'mouse') {
+      initiateSelection(e);
+    } else {
+      timer = setTimeout(() => {
+        if (!exceeded && !selectionInitiated && pointersRef.current.size < 2 && e.pointerType === 'touch') initiateSelection(e);
+      }, 500); // 500ms = 0.5 seconds
+    }
+
+    const move = (ev: PointerEvent) => {
+      if (ev.pointerId !== pointerId || pointersRef.current.size >= 2) return;
+      const dx_px = Math.abs(ev.clientX - startX);
+      const dy_px = Math.abs(ev.clientY - startY);
+
+      if (!selectionInitiated) {
+        if (dx_px > 10 || dy_px > 10) {
+          exceeded = true;
+          if (timer) { clearTimeout(timer); timer = null; }
+          setLongPressedId(null);
+          target.removeEventListener('pointermove', move);
+          target.removeEventListener('pointerup', up);
+          target.removeEventListener('pointercancel', up);
+          return;
+        }
+        // Only initiate if long press timer was reached
+        return;
+      }
+
+      if (selectionInitiated && dragData) {
+        const dx = pxToMm((ev.clientX - startX) / z);
+        const dy = pxToMm((ev.clientY - startY) / z);
+        if (Math.abs(dx) < 0.3 && Math.abs(dy) < 0.3) return;
+        dragData.moved = true;
+        if (!dragData.historySaved) { saveHistory(); dragData.historySaved = true; }
+
+        const state = useCanvasStore.getState();
+        const primaryEl = state.document?.elements.find((item) => item.id === dragData!.ids[0]);
+        const others = (state.document?.elements || []).filter((item) => !dragData!.ids.includes(item.id) && item.visible && !item.locked);
+        let snappedDx = dx;
+        let snappedDy = dy;
+
+        if (primaryEl && dragData.ids.length === 1 && !snapToGrid) {
+          const start = dragData.positions.get(dragData.ids[0]);
+          if (start) {
+            const tentative = { x: start.x + dx, y: start.y + dy, width: primaryEl.width, height: primaryEl.height };
+            const { guides, snapX, snapY } = computeSmartGuides(tentative, others, doc.page.width, doc.page.height, 2.5);
+            setSmartGuides(guides);
+            snappedDx = snapX - start.x;
+            snappedDy = snapY - start.y;
+          }
+        } else {
+          setSmartGuides([]);
+        }
+
+        dragData.ids.forEach((id) => {
+          const start = dragData!.positions.get(id);
+          const current = state.document?.elements.find((item) => item.id === id);
+          if (!start || !current || current.locked) return;
+          const snap = (value: number) => snapToGrid ? Math.round(value / 2) * 2 : value;
+          state.updateElement(id, { x: snap(start.x + snappedDx), y: snap(start.y + snappedDy) }, true);
+        });
+      }
     };
 
     const up = (ev: PointerEvent) => {
       if (ev.pointerId !== pointerId) return;
+      if (timer) { clearTimeout(timer); timer = null; }
+      setLongPressedId(null);
       try { target.releasePointerCapture(pointerId); } catch { }
       setSmartGuides([]);
       target.removeEventListener('pointermove', move);
       target.removeEventListener('pointerup', up);
       target.removeEventListener('pointercancel', up);
+
+      if (!selectionInitiated && !exceeded && pointersRef.current.size < 2) {
+        // Allow selection ONLY if it was a long press, otherwise do nothing (scrolling is handled natively)
+        return;
+      }
     };
     target.addEventListener('pointermove', move);
     target.addEventListener('pointerup', up);
@@ -337,12 +552,18 @@ export const CanvasStage: React.FC<CanvasStageProps> = ({
       selectElement(el.id); saveHistory(); setTextEditing(true);
     } else if (el.type === 'image') {
       useCanvasStore.getState().setCroppingId(el.id);
+    } else if (el.type === 'frame' && (el as any).src) {
+      useCanvasStore.getState().setCroppingId(el.id);
     }
   };
 
+  const pageGapPx = 24; // spacing between stacked page slots (px, in unscaled canvas space)
+  const effectivePageCount = Math.max(1, pageCount || doc.pageCount || 1);
+
   const canvasHeight = useMemo(() => {
-    return mmToPx(doc.page.height || 297);
-  }, [doc.page.height]);
+    const pagePx = mmToPx(doc.page.height || 297);
+    return pagePx * effectivePageCount + pageGapPx * (effectivePageCount - 1);
+  }, [doc.page.height, effectivePageCount]);
 
   const zoomStyle: React.CSSProperties = {
     transform: `scale(${zoom / 100})`,
@@ -355,91 +576,150 @@ export const CanvasStage: React.FC<CanvasStageProps> = ({
   // primaryEl is the first selected element — used for context toolbar.
   // We set it for ANY selection size so the toolbar renders for both single & multi-select.
   const primaryEl = selectedIds.length > 0 ? doc.elements.find((el) => el.id === selectedIds[0]) || null : null;
-  const lassoStyle: React.CSSProperties | null = lasso ? { left: `${Math.min(lasso.startX, lasso.currentX)}px`, top: `${Math.min(lasso.startY, lasso.currentY)}px`, width: `${Math.abs(lasso.currentX - lasso.startX)}px`, height: `${Math.abs(lasso.currentY - lasso.startY)}px` } : null;
-
-  const rulerOffset = showRulers ? RULER_SIZE : 0;
+  // The lasso is rendered at the container level (above the master elements overlay)
+  // so the selection rectangle is never hidden behind full-page element backgrounds.
+  // lasso.startX/startY are relative to the page slot, so we offset by the slot's top.
+  const lassoPageTopPx = (() => {
+    if (!lasso) return 0;
+    const id = lasso.pageId || 'canvas-a4-page';
+    let pageIdx = 0;
+    if (id !== 'canvas-a4-page') {
+      const m = /canvas-a4-page-(\d+)/.exec(id);
+      pageIdx = m ? parseInt(m[1], 10) - 1 : 0;
+    }
+    return pageIdx * (mmToPx(doc.page.height) + pageGapPx);
+  })();
+  const lassoStyle: React.CSSProperties | null = lasso ? { left: `${Math.min(lasso.startX, lasso.currentX)}px`, top: `${lassoPageTopPx + Math.min(lasso.startY, lasso.currentY)}px`, width: `${Math.abs(lasso.currentX - lasso.startX)}px`, height: `${Math.abs(lasso.currentY - lasso.startY)}px` } : null;
 
   return (
-    <div className={styles.canvasOuter} style={{ position: 'relative' }}>
-      {/* Rulers */}
-      {showRulers && (
-        <div style={{ position: 'absolute', top: 0, left: 0, zIndex: 50, display: 'flex', flexDirection: 'column', pointerEvents: 'none' }}>
-          {/* Corner square */}
-          <div style={{ width: RULER_SIZE, height: RULER_SIZE, background: '#e2e8f0', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #cbd5e1', flexShrink: 0 }} />
-          <RulerV heightMm={doc.page.height} zoom={zoom} />
-        </div>
-      )}
-      {showRulers && (
-        <div style={{ position: 'absolute', top: 0, left: RULER_SIZE, zIndex: 50, pointerEvents: 'none' }}>
-          <RulerH widthMm={doc.page.width} zoom={zoom} />
-        </div>
-      )}
-
+    <div
+      className={styles.canvasOuter}
+      style={{ position: 'relative' }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+    >
       {/* Canvas content */}
-      <div style={{ marginTop: rulerOffset, marginLeft: rulerOffset }}>
+      <div style={{ marginTop: 0, marginLeft: 0 }}>
         <div style={zoomStyle}>
-          {/* A4 Page */}
-          <div
-            ref={pageRef}
-            id="canvas-a4-page"
-            className={styles.canvasA4Page}
-            style={{
-              width: `${mmToPx(doc.page.width)}px`,
-              height: `${canvasHeight}px`,
-              backgroundColor: doc.page.background,
-              position: 'absolute', top: 0, left: 0,
-              overflow: 'hidden',
-              cursor: previewMode ? 'default' : activeTool === 'draw' ? 'crosshair' : 'default',
-            }}
-            onPointerDown={handleEmptyPointerDown}
-          >
-            {showGrid && !previewMode && <div className={styles.gridOverlay} data-grid-overlay />}
-            {Array.from({ length: Math.max(0, Math.floor(canvasHeight / mmToPx(297)) - 1) }).map((_, i) => (
-              <div
-                key={i}
-                className={previewMode ? styles.previewPageGap : styles.pageGuideLine}
-                style={{ top: `${(i + 1) * mmToPx(297)}px` }}
-                data-page-guide
-              />
-            ))}
+          {/* Stacked A4 page slots (multi-page background layout) */}
+          {Array.from({ length: effectivePageCount }).map((_, pageIndex) => {
+            const pageTopMm = pageIndex * (doc.page.height + pxToMm(pageGapPx));
+            const pagePxTop = mmToPx(pageTopMm);
+            const pagePxHeight = mmToPx(doc.page.height);
+            const isFirstPage = pageIndex === 0;
+            const isLastPage = pageIndex === effectivePageCount - 1;
+            return (
+              <React.Fragment key={pageIndex}>
+                <div
+                  ref={isFirstPage ? pageRef : undefined}
+                  id={isFirstPage ? 'canvas-a4-page' : `canvas-a4-page-${pageIndex + 1}`}
+                  className={styles.canvasA4Page}
+                  style={{
+                    width: `${mmToPx(doc.page.width)}px`,
+                    height: `${pagePxHeight}px`,
+                    backgroundColor: doc.page.background,
+                    position: 'absolute',
+                    top: `${pagePxTop}px`,
+                    left: 0,
+                    overflow: 'hidden',
+                    cursor: previewMode ? 'default' : activeTool === 'draw' ? 'crosshair' : 'default',
+                    touchAction: (isMobile && activeTool === 'select') ? 'none' : 'auto',
+                    zIndex: 1,
+                  }}
+                  onPointerDown={handleEmptyPointerDown}
+                >
+                  {showGrid && !previewMode && <div className={styles.gridOverlay} data-grid-overlay />}
 
-            {sortedElements.map((el) => (
-              <div
-                key={el.id}
-                style={{
-                  position: 'absolute',
-                  left: `${mmToPx(el.x)}px`, top: `${mmToPx(el.y)}px`,
-                  width: `${mmToPx(el.width)}px`, height: `${mmToPx(el.height)}px`,
-                  transform: `rotate(${el.rotation}deg)`,
-                  zIndex: el.zIndex,
-                  // In preview mode (and PDF export which clones the DOM), ALL elements render
-                  // regardless of the visible flag. The visible flag only hides elements
-                  // from the workspace canvas during editing.
-                  display: (!previewMode && !el.visible) ? 'none' : 'block',
-                  boxSizing: 'border-box',
-                  cursor: previewMode ? 'default' : el.locked ? 'default' : 'move',
-                }}
-                onPointerDown={(e) => handleElementPointerDown(e, el)}
-                onClick={(e) => e.stopPropagation()}
-                onDoubleClick={(e) => handleDoubleClick(e, el)}
-              >
-                <ElementRenderer
-                  element={el}
-                  isEditing={selectedId === el.id && isTextEditing}
-                  onTextBlur={handleTextBlur}
-                  onTableBlur={handleTableBlur}
-                />
-              </div>
-            ))}
+                  {/* Page number badge (desktop, editing mode) */}
+                  {!previewMode && !isMobile && (
+                    <div className={styles.pageBadge}>Page {pageIndex + 1}</div>
+                  )}
+                </div>
 
-            {/* Smart guides */}
-            {!previewMode && (
-              <SmartGuides guides={smartGuides} pageWidthMm={doc.page.width} pageHeightMm={doc.page.height} />
-            )}
+                {/* Page break indicator between slots */}
+                {!isLastPage && (
+                  <div
+                    className={previewMode ? styles.previewPageGap : styles.pageBreakIndicator}
+                    style={{ top: `${pagePxTop + pagePxHeight + pageGapPx / 2}px`, zIndex: 50 }}
+                    data-page-break
+                  >
+                    <span className={styles.pageBreakLabel}>Page {pageIndex + 1} ends · Page {pageIndex + 2} begins</span>
+                  </div>
+                )}
+              </React.Fragment>
+            );
+          })}
 
-            {/* Lasso */}
-            {lassoStyle && <div className={styles.lassoBox} style={lassoStyle} />}
+          {/* Master Elements Overlay for seamless cross-page dragging (like Microsoft Word) */}
+          {/* Each element is clipped to its A4 page band so content never bleeds into the gap or adjacent pages. */}
+          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 100 }}>
+            {sortedElements.map((el) => {
+              const isLongPressed = longPressedId === el.id;
+              // Determine which A4 page band the element's center falls in, then clip to that page's vertical bounds.
+              const pageBandMm = doc.page.height + pxToMm(pageGapPx);
+              const elCenterMm = el.y + el.height / 2;
+              const pageIdx = Math.min(effectivePageCount - 1, Math.max(0, Math.floor(elCenterMm / pageBandMm)));
+              const pageTopMm = pageIdx * pageBandMm;
+              const pageBottomMm = pageTopMm + doc.page.height;
+              const clipTopMm = Math.max(0, pageTopMm - el.y);
+              const clipBottomMm = Math.max(0, (el.y + el.height) - pageBottomMm);
+              const needsClip = clipTopMm > 0 || clipBottomMm > 0;
+              return (
+                <div
+                  key={el.id}
+                  style={{
+                    position: 'absolute',
+                    left: `${mmToPx(el.x)}px`,
+                    top: `${mmToPx(el.y)}px`,
+                    width: `${mmToPx(el.width)}px`,
+                    height: `${mmToPx(el.height)}px`,
+                    transform: `rotate(${el.rotation}deg)${isLongPressed ? ' scale(1.03)' : ''}`,
+                    transition: isLongPressed ? 'transform 0.15s ease' : 'none',
+                    zIndex: el.zIndex,
+                    display: (!previewMode && !el.visible) ? 'none' : 'block',
+                    boxSizing: 'border-box',
+                    cursor: previewMode ? 'default' : el.locked ? 'default' : 'move',
+                    boxShadow: isLongPressed ? '0 0 12px rgba(59, 130, 246, 0.6)' : 'none',
+                    borderRadius: isLongPressed ? '4px' : '0px',
+                    // Locked elements are non-interactive on the canvas: they must not
+                    // swallow pointer events (e.g. a full-page background rect), otherwise
+                    // marquee selection and click-to-deselect on "empty" space break.
+                    // Unlock happens via the Layers panel (or admin builder), so the
+                    // element remains visible but lets events pass through to the page.
+                    pointerEvents: el.locked ? 'none' : 'auto',
+                    // Clip to page band so elements don't visually bleed between pages
+                    clipPath: needsClip ? `inset(${mmToPx(clipTopMm)}px 0 ${mmToPx(clipBottomMm)}px 0)` : undefined,
+                  }}
+                  onPointerDown={(e) => handleElementPointerDown(e, el)}
+                  onClick={(e) => e.stopPropagation()}
+                  onDoubleClick={(e) => handleDoubleClick(e, el)}
+                >
+                  <ElementRenderer
+                    element={el}
+                    isEditing={selectedId === el.id && isTextEditing}
+                    onTextBlur={handleTextBlur}
+                    onTableBlur={handleTableBlur}
+                  />
+                </div>
+              );
+            })}
           </div>
+          {/* Smart guides (first page layer) */}
+          {!previewMode && (
+            <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 150 }}>
+              <SmartGuides guides={smartGuides} pageWidthMm={doc.page.width} pageHeightMm={doc.page.height} />
+            </div>
+          )}
+
+          {/* Marquee/lasso rectangle — rendered at container level (above the master
+    elements overlay) so it is never hidden behind full-page element backgrounds
+    such as the cover-letter page-bg rects. */}
+          {!previewMode && lassoStyle && (
+            <div className={styles.lassoBox} style={lassoStyle} />
+          )}
+
 
           {/* Selection + context (outside page, in scaled container) */}
           {!previewMode && selectedIds.map((id) => {
@@ -452,6 +732,31 @@ export const CanvasStage: React.FC<CanvasStageProps> = ({
             <ContextToolbar element={primaryEl} zoom={zoom} />
           )}
         </div>
+      </div>
+
+      {/* Mobile-only bottom-center floating toolbar for landscape orientation with incremental zoom */}
+      <div className={styles.landscapeZoomBar}>
+        <button
+          className={styles.landscapeZoomBtn}
+          onClick={() => {
+            const newZoom = Math.max(20, zoom - 10);
+            useCanvasStore.getState().setZoom(newZoom);
+          }}
+          title="Zoom Out"
+        >
+          -
+        </button>
+        <span className={styles.landscapeZoomText}>{zoom}%</span>
+        <button
+          className={styles.landscapeZoomBtn}
+          onClick={() => {
+            const newZoom = Math.min(500, zoom + 10);
+            useCanvasStore.getState().setZoom(newZoom);
+          }}
+          title="Zoom In"
+        >
+          +
+        </button>
       </div>
     </div>
   );

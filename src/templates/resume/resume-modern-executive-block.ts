@@ -880,5 +880,5 @@ export const resumeModernExecutiveBlockTemplate: CanvasDocument = {
       "opacity": 1
     }
   ],
-  "isPremium": true
+  "isPremium": false
 };

@@ -46,12 +46,20 @@
   align-items: flex-start;
   gap: 20px;
   transition: all 0.3s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
 }
 
 .card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
-  border-color: #cbd5e1;
+  border-color: #10b981;
+}
+
+.card:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
 }
 
 .iconWrapper {
@@ -89,10 +97,4 @@
   font-size: 0.9rem;
   color: var(--text-secondary);
   line-height: 1.5;
-}
-
-.btn {
-  width: 100%;
-  text-align: center;
-  margin-top: 10px;
 }

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Header } from '@/components/shared/Header';
 import { Footer } from '@/components/shared/Footer';
 import { getAllTemplates } from '@/templates/index';
@@ -13,6 +14,8 @@ export default function TemplatesPage() {
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'resume' | 'cv' | 'biodata' | 'cover-letter'>('all');
   const [priceFilter, setPriceFilter] = useState<'all' | 'free' | 'paid'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showQuickModal, setShowQuickModal] = useState(false);
+  const router = useRouter();
   const templates = getAllTemplates();
 
   useEffect(() => {
@@ -198,21 +201,150 @@ export default function TemplatesPage() {
                 <Sparkles size={18} color="#fbbf24" />
                 <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#fbbf24', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Recommended Quick tool</span>
               </div>
-              <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, color: '#fff' }}>Classic Resume Generator</h2>
+              <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, color: '#fff' }}>Quick Document Generator</h2>
               <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)', lineHeight: 1.5 }}>
-                No canvas adjustments. Fill in your fields, enable/disable segments, and export standard resumes instantly.
+                No canvas adjustments. Fill in your fields and export polished resumes or biodatas instantly.
               </p>
             </div>
-            <Link href="/generator" target="_blank" rel="noopener noreferrer" style={{
+            <button onClick={() => setShowQuickModal(true)} style={{
               display: 'inline-flex', alignItems: 'center', gap: '7px',
               padding: '11px 22px', borderRadius: '8px', background: '#fff',
-              color: '#1e3a8a', fontWeight: 700, fontSize: '0.88rem', textDecoration: 'none',
-              whiteSpace: 'nowrap', flexShrink: 0,
+              color: '#1e3a8a', fontWeight: 700, fontSize: '0.88rem', border: 'none',
+              cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
               transition: 'opacity 0.15s'
             }}>
-              Create Quick Resume <ArrowRight size={15} />
-            </Link>
+              Quick Start <ArrowRight size={15} />
+            </button>
           </div>
+
+          {/* Quick Start Modal */}
+          {showQuickModal && (
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(15, 23, 42, 0.5)',
+              backdropFilter: 'blur(6px)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px'
+            }}>
+              <div style={{
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '16px',
+                padding: '32px',
+                maxWidth: '480px',
+                width: '100%',
+                color: '#0f172a',
+                position: 'relative',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)'
+              }}>
+                <button
+                  onClick={() => setShowQuickModal(false)}
+                  style={{
+                    position: 'absolute',
+                    top: '20px',
+                    right: '20px',
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#64748b',
+                    cursor: 'pointer',
+                    padding: '4px',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  ✕
+                </button>
+
+                <h2 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '10px', color: '#0f172a' }}>
+                  What would you like to create?
+                </h2>
+                <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '24px', lineHeight: '1.5' }}>
+                  Choose the document type you want to build. You can switch templates anytime.
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <button
+                    onClick={() => router.push('/generator')}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '16px',
+                      padding: '16px 20px',
+                      background: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '12px',
+                      color: '#0f172a',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <div style={{
+                      width: '44px',
+                      height: '44px',
+                      borderRadius: '10px',
+                      background: '#2563eb',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#fff',
+                      flexShrink: 0
+                    }}>
+                      📄
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: '700', fontSize: '1.1rem', marginBottom: '2px', color: '#0f172a' }}>Resume</div>
+                      <div style={{ color: '#64748b', fontSize: '0.85rem' }}>Professional CV & job application resume</div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => router.push('/biodata-generator')}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '16px',
+                      padding: '16px 20px',
+                      background: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '12px',
+                      color: '#0f172a',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <div style={{
+                      width: '44px',
+                      height: '44px',
+                      borderRadius: '10px',
+                      background: '#9333ea',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#fff',
+                      flexShrink: 0
+                    }}>
+                      👤
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: '700', fontSize: '1.1rem', marginBottom: '2px', color: '#0f172a' }}>Biodata</div>
+                      <div style={{ color: '#64748b', fontSize: '0.85rem' }}>Traditional & modern marriage or personal biodata</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Unified Template Card Grid */}
           <div className={styles.grid}>

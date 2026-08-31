@@ -1,11 +1,17 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Header } from '@/components/shared/Header';
 import { Footer } from '@/components/shared/Footer';
-import { Zap, Paintbrush, Download, FileText, ArrowRight } from 'lucide-react';
+import { Zap, Paintbrush, Download, FileText, ArrowRight, User, FileCheck, X } from 'lucide-react';
 import styles from './page.module.css';
 
 export default function Home() {
+  const [showModal, setShowModal] = useState(false);
+  const router = useRouter();
+
   return (
     <>
       <Header />
@@ -22,9 +28,20 @@ export default function Home() {
               Choose a design, edit directly in your browser, upload your photo, customize colors, and download a professional PDF immediately. Completely free and offline-first.
             </p>
             <div className={styles.heroActions}>
-              <Link href="/generator" target="_blank" rel="noopener noreferrer" className="btn btn-primary">
-                Create Your Resume <ArrowRight size={16} />
-              </Link>
+              <button
+                onClick={() => router.push('/generator')}
+                className="btn btn-primary"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+              >
+                Create your resume <ArrowRight size={16} />
+              </button>
+              <button
+                onClick={() => router.push('/biodata-generator')}
+                className="btn btn-secondary"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer', background: '#9d174d', color: '#fff', border: 'none' }}
+              >
+                Create Biodata <ArrowRight size={16} />
+              </button>
               <Link href="/templates" className="btn btn-secondary btn-secondary-dark">
                 Browse Templates
               </Link>

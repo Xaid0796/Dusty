@@ -150,6 +150,8 @@ export function getEffectiveColors(style: GeneratorStyle) {
 
 export interface GeneratorDocument {
   id: string;
+  /** User-editable name/title for this resume (shown in the mobile top bar) */
+  name?: string;
   contact: GeneratorContact;
   style: GeneratorStyle;
   /** ORDER of this array = render order in preview AND PDF */

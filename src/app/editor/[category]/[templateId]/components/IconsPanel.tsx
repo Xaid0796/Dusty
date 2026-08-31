@@ -95,6 +95,8 @@ export const IconsPanel: React.FC<IconsPanelProps> = ({ onClose }) => {
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
+      overflowY: 'auto',
+      WebkitOverflowScrolling: 'touch',
     }}>
       {/* Header */}
       <div style={{ padding: '14px 16px 12px', borderBottom: '1px solid var(--border-panel)', flexShrink: 0 }}>
@@ -270,7 +272,7 @@ export const IconsPanel: React.FC<IconsPanelProps> = ({ onClose }) => {
         />
       )}
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '10px 12px' }}>
+      <div style={{ padding: '10px 12px' }}>
         {filteredIcons.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-panel-muted)', fontSize: 12 }}>
             No icons match "{query}"

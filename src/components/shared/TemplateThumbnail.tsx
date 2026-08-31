@@ -31,7 +31,9 @@ export const TemplateThumbnail: React.FC<ThumbnailProps> = ({ template }) => {
 
   const TemplateComponent = template.Component;
   const canvasDoc = sampleTemplates[template.id];
-  const thumbnailSrc = template.thumbnail || canvasDoc?.thumbnail;
+  // Prefer the canvas document thumbnail (the source the Admin Builder updates
+  // when a user uploads a new thumbnail). Fall back to the metadata registry path.
+  const thumbnailSrc = canvasDoc?.thumbnail || template.thumbnail;
 
   if (thumbnailSrc) {
     return (
@@ -60,6 +62,11 @@ export const TemplateThumbnail: React.FC<ThumbnailProps> = ({ template }) => {
             objectPosition: 'top',
           }}
         />
+        {canvasDoc && (
+          <div style={{ position: 'absolute', bottom: 8, right: 8, fontSize: '10px', fontWeight: 700, color: '#ffffff', background: '#22c55e', padding: '2px 8px', borderRadius: '4px', zIndex: 10, boxShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
+            {canvasDoc.pageCount || 1} {canvasDoc.pageCount === 1 ? 'PAGE' : 'PAGES'}
+          </div>
+        )}
       </div>
     );
   }
@@ -130,6 +137,11 @@ export const TemplateThumbnail: React.FC<ThumbnailProps> = ({ template }) => {
           })
         ) : (
           <TemplateComponent data={template.defaultData} />
+        )}
+        {canvasDoc && (
+          <div style={{ position: 'absolute', bottom: 8, right: 8, fontSize: '10px', fontWeight: 600, color: '#64748b', background: 'rgba(255,255,255,0.85)', padding: '2px 6px', borderRadius: '4px', zIndex: 10, boxShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>
+            {canvasDoc.pageCount || 1} {canvasDoc.pageCount === 1 ? 'Page' : 'Pages'}
+          </div>
         )}
       </div>
     </div>

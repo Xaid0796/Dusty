@@ -293,8 +293,8 @@ export default function AdminDashboardPage() {
                                         <Trash2 size={15} />
                                     </button>
                                     <button
-                                        onClick={() => router.push(`/admin/templates?edit=${tpl.id}`)}
-                                        title="Edit Template"
+                                        onClick={() => window.open(`/admin/templates?edit=${tpl.id}`, '_blank', 'noopener,noreferrer')}
+                                        title="Edit Template — opens admin template editor in a new tab"
                                         style={{
                                             position: 'absolute',
                                             top: '12px',

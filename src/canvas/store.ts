@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { CanvasDocument, CanvasElement } from './types';
+import { CanvasDocument, CanvasElement, MAX_PAGE_COUNT } from './types';
 
 export type CanvasTool = 'select' | 'draw';
 export type Alignment = 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom';
@@ -16,13 +16,17 @@ interface CanvasState {
   zoom: number;
   activeTool: CanvasTool;
   snapToGrid: boolean;
+  showGrid: boolean;
   clipboard: CanvasElement[];
   styleClipboard: Record<string, unknown> | null;
+  /** Number of sequential vertical pages (desktop only). Defaults to 1. */
+  pageCount: number;
 
   loadDocument: (doc: CanvasDocument, skipHistory?: boolean) => void;
   setOriginalDocument: (doc: CanvasDocument | null) => void;
   setPageSize: (width: number, height: number) => void;
   setCroppingId: (id: string | null) => void;
+  setPageCount: (count: number) => void;
   updateElement: (id: string, updates: Partial<CanvasElement>, skipHistory?: boolean) => void;
   addElement: (element: CanvasElement) => void;
   deleteElement: (id: string) => void;
@@ -35,6 +39,7 @@ interface CanvasState {
   setZoom: (zoom: number) => void;
   setActiveTool: (tool: CanvasTool) => void;
   setSnapToGrid: (value: boolean) => void;
+  setShowGrid: (value: boolean) => void;
   copySelected: () => void;
   cutSelected: () => void;
   pasteClipboard: () => void;
@@ -151,8 +156,10 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
     zoom: 100,
     activeTool: 'select',
     snapToGrid: false,
+    showGrid: false,
     clipboard: [],
     styleClipboard: null,
+    pageCount: 1,
 
     loadDocument: (doc, _skipHistory = false) => {
       const cloned = clone(doc);
@@ -165,6 +172,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
         history: [],
         future: [],
         activeTool: 'select',
+        pageCount: cloned.pageCount && cloned.pageCount > 0 ? cloned.pageCount : 1,
       });
     },
 
@@ -177,6 +185,16 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       replaceDocument(next);
     },
     setCroppingId: (id) => set({ croppingId: id, selectedIds: id ? [id] : get().selectedIds, selectedId: id ?? get().selectedId }),
+
+    setPageCount: (count) => {
+      const clamped = Math.max(1, Math.min(MAX_PAGE_COUNT, Math.floor(count)));
+      const { document } = get();
+      if (document) {
+        saveToHistory(document);
+        replaceDocument({ ...document, pageCount: clamped });
+      }
+      set({ pageCount: clamped });
+    },
 
     saveHistory: () => saveToHistory(get().document),
 
@@ -264,6 +282,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
     setZoom: (zoom) => set({ zoom: Math.max(25, Math.min(200, zoom)) }),
     setActiveTool: (tool) => set({ activeTool: tool, croppingId: tool === 'draw' ? null : get().croppingId }),
     setSnapToGrid: (value) => set({ snapToGrid: value }),
+    setShowGrid: (value) => set({ showGrid: value }),
 
     copySelected: () => {
       const { document, selectedIds } = get();
@@ -431,6 +450,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
         selectedIds: preserveSelection ? selectedIds : [],
         isTextEditing: preserveSelection ? isTextEditing : false,
         croppingId: preserveSelection ? croppingId : null,
+        pageCount: previous.pageCount && previous.pageCount > 0 ? previous.pageCount : 1,
       });
       saveToLocalStorage(previous);
     },
@@ -453,6 +473,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
         selectedIds: preserveSelection ? selectedIds : [],
         isTextEditing: preserveSelection ? isTextEditing : false,
         croppingId: preserveSelection ? croppingId : null,
+        pageCount: next.pageCount && next.pageCount > 0 ? next.pageCount : 1,
       });
       saveToLocalStorage(next);
     },

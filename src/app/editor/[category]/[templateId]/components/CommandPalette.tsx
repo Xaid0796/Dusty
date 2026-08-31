@@ -1,7 +1,8 @@
 'use client';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Search, Undo2, Redo2, Copy, Clipboard, Trash2, Download, Save, Eye, Grid2X2, Ruler, Layers, AlignCenter, Type, ImagePlus, Shapes, Smile, RefreshCw } from 'lucide-react';
+import { Search, Undo2, Redo2, Copy, Clipboard, Trash2, Download, Save, Eye, Grid2X2, Layers, AlignCenter, Type, ImagePlus, Shapes, Smile, RefreshCw } from 'lucide-react';
 import { useCanvasStore } from '@/canvas/store';
+import { useIsMobileOrTouch } from '@/utils/device';
 
 interface Command {
   id: string;
@@ -19,17 +20,15 @@ interface CommandPaletteProps {
   onExportPDF: () => void;
   onSave: () => void;
   onToggleGrid: () => void;
-  onToggleRulers: () => void;
   onTogglePreview: () => void;
   onUploadImage: () => void;
-  onOpenShapes: () => void;
   onOpenElements: () => void;
   onReset: () => void;
 }
 
 export const CommandPalette: React.FC<CommandPaletteProps> = ({
-  onClose, onExportPDF, onSave, onToggleGrid, onToggleRulers,
-  onTogglePreview, onUploadImage, onOpenShapes, onOpenElements, onReset,
+  onClose, onExportPDF, onSave, onToggleGrid,
+  onTogglePreview, onUploadImage, onOpenElements, onReset,
 }) => {
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState(0);
@@ -47,6 +46,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 
   const hasSel = selectedIds.length > 0;
   const hasMulti = selectedIds.length > 1;
+  const isMobileOrTouch = useIsMobileOrTouch();
 
   const commands = useMemo<Command[]>(() => [
     // History
@@ -79,18 +79,17 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
     { id: 'zoom-150', label: 'Zoom 150%', icon: <Eye size={15} />, category: 'View', keywords: ['zoom', '150'], action: () => { setZoom(150); onClose(); } },
     // View toggles
     { id: 'toggle-grid', label: 'Toggle Grid', icon: <Grid2X2 size={15} />, category: 'View', keywords: ['grid', 'toggle'], action: () => { onToggleGrid(); onClose(); } },
-    { id: 'toggle-rulers', label: 'Toggle Rulers', icon: <Ruler size={15} />, category: 'View', keywords: ['rulers', 'toggle', 'measure'], action: () => { onToggleRulers(); onClose(); } },
     { id: 'toggle-preview', label: 'Toggle Preview Mode', icon: <Eye size={15} />, category: 'View', keywords: ['preview', 'clean', 'hide selection'], action: () => { onTogglePreview(); onClose(); } },
     // Add elements
     { id: 'add-text', label: 'Add Text', icon: <Type size={15} />, category: 'Add', shortcut: 'T', keywords: ['add', 'text', 'type'], action: () => { onClose(); document.querySelector<HTMLButtonElement>('[data-tooltip="Add Text (T)"]')?.click(); } },
     { id: 'add-image', label: 'Add Image', icon: <ImagePlus size={15} />, category: 'Add', keywords: ['add', 'image', 'photo'], action: () => { onUploadImage(); onClose(); } },
-    { id: 'open-shapes', label: 'Open Shapes Panel', icon: <Shapes size={15} />, category: 'Add', keywords: ['shapes', 'rect', 'circle', 'triangle'], action: () => { onOpenShapes(); onClose(); } },
+
     { id: 'open-elements', label: 'Open Icons & Elements', icon: <Smile size={15} />, category: 'Add', keywords: ['icons', 'elements', 'linkedin', 'github', 'emoji'], action: () => { onOpenElements(); onClose(); } },
     // File
     { id: 'save', label: 'Save Draft', icon: <Save size={15} />, category: 'File', shortcut: 'Ctrl+S', keywords: ['save', 'draft'], action: () => { onSave(); onClose(); } },
     { id: 'export', label: 'Export as PDF', icon: <Download size={15} />, category: 'File', keywords: ['export', 'pdf', 'download', 'print'], action: () => { onExportPDF(); onClose(); } },
     { id: 'reset', label: 'Reset to Template', icon: <RefreshCw size={15} />, category: 'File', keywords: ['reset', 'restore', 'original', 'template'], action: () => { onReset(); onClose(); } },
-  ], [undo, redo, hasSel, hasMulti, copySelected, pasteClipboard, duplicateSelected, deleteSelected, selectAll, bringToFront, sendToBack, bringForward, sendBackward, alignSelected, setZoom, onClose, onExportPDF, onSave, onToggleGrid, onToggleRulers, onTogglePreview, onUploadImage, onOpenShapes, onOpenElements, onReset]);
+  ], [undo, redo, hasSel, hasMulti, isMobileOrTouch, copySelected, pasteClipboard, duplicateSelected, deleteSelected, selectAll, bringToFront, sendToBack, bringForward, sendBackward, alignSelected, setZoom, onClose, onExportPDF, onSave, onToggleGrid, onTogglePreview, onUploadImage, onOpenElements, onReset]);
 
   const filtered = useMemo(() => {
     if (!query.trim()) return commands;

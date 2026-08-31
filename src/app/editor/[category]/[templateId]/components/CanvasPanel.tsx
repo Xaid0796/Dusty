@@ -1,10 +1,12 @@
 'use client';
 import React from 'react';
 import { useCanvasStore } from '@/canvas/store';
+import { useIsMobileOrTouch } from '@/utils/device';
 import { X, Maximize2 } from 'lucide-react';
 
 interface CanvasPanelProps {
     onClose: () => void;
+    onReset?: () => void;
 }
 
 const CANVAS_SIZES = [
@@ -20,10 +22,19 @@ const CANVAS_SIZES = [
     { label: 'B5', width: 176, height: 250 },
 ];
 
-export const CanvasPanel: React.FC<CanvasPanelProps> = ({ onClose }) => {
-    const { document: doc, setPageSize } = useCanvasStore();
+export const CanvasPanel: React.FC<CanvasPanelProps> = ({ onClose, onReset }) => {
+    const {
+        document: doc,
+        setPageSize,
+        showGrid,
+        setShowGrid,
+        snapToGrid,
+        setSnapToGrid,
+    } = useCanvasStore();
+
     const currentWidth = doc?.page.width || 210;
     const currentHeight = doc?.page.height || 297;
+    const isMobileOrTouch = useIsMobileOrTouch();
 
     return (
         <div style={{
@@ -43,7 +54,7 @@ export const CanvasPanel: React.FC<CanvasPanelProps> = ({ onClose }) => {
             }}>
                 <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-panel)', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6 }}>
                     <Maximize2 size={14} style={{ color: 'var(--primary-color)' }} />
-                    Canvas Size
+                    Canvas Settings
                 </span>
                 <button
                     onClick={onClose}
@@ -55,6 +66,19 @@ export const CanvasPanel: React.FC<CanvasPanelProps> = ({ onClose }) => {
 
             {/* Main panel scroll container */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                    color: 'var(--text-panel-muted)',
+                    marginBottom: '4px',
+                    borderBottom: '1px solid var(--border-panel)',
+                    paddingBottom: '4px'
+                }}>
+                    Page Sizes
+                </div>
+
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                     {CANVAS_SIZES.map((size) => {
                         const isSelected = Math.abs(size.width - currentWidth) < 1 && Math.abs(size.height - currentHeight) < 1;
@@ -84,6 +108,153 @@ export const CanvasPanel: React.FC<CanvasPanelProps> = ({ onClose }) => {
                         );
                     })}
                 </div>
+
+                {/* Canvas Options Header */}
+                <div style={{
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                    color: 'var(--text-panel-muted)',
+                    marginTop: '12px',
+                    marginBottom: '4px',
+                    borderBottom: '1px solid var(--border-panel)',
+                    paddingBottom: '4px'
+                }}>
+                    Canvas Options
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {/* Toggle Show Grid */}
+                    <button
+                        onClick={() => setShowGrid(!showGrid)}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '10px 14px',
+                            background: showGrid ? 'var(--bg-popover-active, rgba(99, 102, 241, 0.15))' : 'var(--bg-panel-input)',
+                            color: 'var(--text-panel)',
+                            border: showGrid ? '1px solid var(--primary-color)' : '1px solid var(--border-panel)',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            textAlign: 'left',
+                            transition: 'all 0.15s',
+                        }}
+                    >
+                        <span>Show Grid Overlay</span>
+                        <div style={{
+                            width: '28px',
+                            height: '16px',
+                            borderRadius: '8px',
+                            background: showGrid ? 'var(--primary-color)' : '#cbd5e1',
+                            position: 'relative',
+                            transition: 'background-color 0.2s',
+                        }}>
+                            <div style={{
+                                width: '12px',
+                                height: '12px',
+                                borderRadius: '50%',
+                                background: '#ffffff',
+                                position: 'absolute',
+                                top: '2px',
+                                left: showGrid ? '14px' : '2px',
+                                transition: 'left 0.2s',
+                            }} />
+                        </div>
+                    </button>
+
+                    {/* Toggle Snap to Grid */}
+                    <button
+                        onClick={() => setSnapToGrid(!snapToGrid)}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '10px 14px',
+                            background: snapToGrid ? 'var(--bg-popover-active, rgba(99, 102, 241, 0.15))' : 'var(--bg-panel-input)',
+                            color: 'var(--text-panel)',
+                            border: snapToGrid ? '1px solid var(--primary-color)' : '1px solid var(--border-panel)',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            textAlign: 'left',
+                            transition: 'all 0.15s',
+                        }}
+                    >
+                        <span>Snap Elements to Grid</span>
+                        <div style={{
+                            width: '28px',
+                            height: '16px',
+                            borderRadius: '8px',
+                            background: snapToGrid ? 'var(--primary-color)' : '#cbd5e1',
+                            position: 'relative',
+                            transition: 'background-color 0.2s',
+                        }}>
+                            <div style={{
+                                width: '12px',
+                                height: '12px',
+                                borderRadius: '50%',
+                                background: '#ffffff',
+                                position: 'absolute',
+                                top: '2px',
+                                left: snapToGrid ? '14px' : '2px',
+                                transition: 'left 0.2s',
+                            }} />
+                        </div>
+                    </button>
+
+                </div>
+
+                {/* Reset Template Option */}
+                {onReset && (
+                    <>
+                        <div style={{
+                            fontSize: '10px',
+                            fontWeight: 700,
+                            letterSpacing: '0.08em',
+                            textTransform: 'uppercase',
+                            color: 'var(--text-panel-muted)',
+                            marginTop: '16px',
+                            marginBottom: '4px',
+                            borderBottom: '1px solid var(--border-panel)',
+                            paddingBottom: '4px'
+                        }}>
+                            Danger Zone
+                        </div>
+                        <button
+                            onClick={onReset}
+                            style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '6px',
+                                padding: '12px 14px',
+                                background: 'rgba(239, 68, 68, 0.1)',
+                                border: '1px solid rgba(239, 68, 68, 0.3)',
+                                borderRadius: '8px',
+                                color: '#ef4444',
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                transition: 'all 0.15s',
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.background = 'rgba(239, 68, 68, 0.18)';
+                                e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                                e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                            }}
+                        >
+                            Reset Template to Default
+                        </button>
+                    </>
+                )}
             </div>
         </div>
     );

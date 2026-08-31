@@ -324,7 +324,12 @@ export interface CanvasDocument {
   name: string;
   page: CanvasPage;
   elements: CanvasElement[];
+  /** Number of sequential vertical page slots rendered in the editor/export (desktop only). Defaults to 1. */
+  pageCount?: number;
   isPremium?: boolean;
   thumbnail?: string;
   description?: string;
 }
+
+/** Maximum number of pages a user can add via the page-count control. */
+export const MAX_PAGE_COUNT = 4;

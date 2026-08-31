@@ -12,6 +12,119 @@
  * 8. Downloads a valid PDF Blob and cleans up memory
  */
 
+/**
+ * Multi-page export: rasterizes each page slot independently and assembles
+ * them into a single PDF with one page per slot. This guarantees clean page
+ * boundaries (each stacked page becomes exactly one PDF page) even though the
+ * editor renders them as one continuous vertical strip.
+ */
+export const generateMultiPagePDF = async (
+  pageElements: HTMLElement[],
+  filename: string
+): Promise<void> => {
+  if (typeof document === 'undefined') return;
+  if (pageElements.length === 0) return;
+  if (pageElements.length === 1) {
+    await generatePDF(pageElements[0], filename);
+    return;
+  }
+
+  await document.fonts?.ready;
+
+  const { jsPDF } = await import('jspdf');
+  const html2canvasModule = await import('html2canvas');
+  const html2canvas = html2canvasModule.default;
+
+  const safeFilename = filename.endsWith('.pdf') ? filename : `${filename}.pdf`;
+
+  const clones: HTMLElement[] = [];
+  let widthMm = 210;
+  let heightMm = 297;
+
+  try {
+    // Clone every page slot off-screen, stripping editor-only overlays.
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'fixed';
+    wrapper.style.top = '-9999px';
+    wrapper.style.left = '-9999px';
+    wrapper.style.background = '#ffffff';
+    document.body.appendChild(wrapper);
+
+    pageElements.forEach((source) => {
+      const clone = source.cloneNode(true) as HTMLElement;
+      clone.querySelectorAll(
+        '[data-grid-overlay], [data-page-guide], [data-page-break], [class*="pageBadge"], [class*="selectionBox"], [class*="contextToolbar"]'
+      ).forEach((el) => el.remove());
+
+      // Force display:block on children hidden by the visible flag.
+      Array.from(clone.children).forEach((child) => {
+        const el = child as HTMLElement;
+        if (el.style && el.style.display === 'none') {
+          el.style.display = 'block';
+        }
+      });
+
+      const wPx = source.offsetWidth || source.clientWidth || 794;
+      const hPx = source.offsetHeight || source.clientHeight || 1123;
+
+      clone.style.setProperty('width', `${wPx}px`, 'important');
+      clone.style.setProperty('min-width', `${wPx}px`, 'important');
+      clone.style.setProperty('max-width', `${wPx}px`, 'important');
+      clone.style.setProperty('height', `${hPx}px`, 'important');
+      clone.style.setProperty('min-height', `${hPx}px`, 'important');
+      clone.style.setProperty('max-height', `${hPx}px`, 'important');
+      clone.style.position = 'relative';
+      clone.style.display = 'block';
+      clone.style.boxShadow = 'none';
+      clone.style.margin = '0';
+      clone.style.overflow = 'hidden';
+      clone.style.transform = 'none';
+      clone.style.border = 'none';
+
+      wrapper.appendChild(clone);
+      clones.push(clone);
+
+      widthMm = (wPx * 25.4) / 96;
+      heightMm = (hPx * 25.4) / 96;
+    });
+
+    // Render each clone to canvas at 2x scale.
+    const canvases = await Promise.all(
+      clones.map((clone) =>
+        html2canvas(clone, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+          width: clone.offsetWidth || 794,
+          height: clone.offsetHeight || 1123,
+          windowWidth: clone.offsetWidth || 794,
+          windowHeight: clone.offsetHeight || 1123,
+        })
+      )
+    );
+
+    const pdf = new jsPDF({
+      orientation: widthMm > heightMm ? 'landscape' : 'portrait',
+      unit: 'mm',
+      format: [widthMm, heightMm],
+      compress: true,
+    });
+
+    canvases.forEach((canvas, index) => {
+      if (index > 0) pdf.addPage([widthMm, heightMm], widthMm > heightMm ? 'landscape' : 'portrait');
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.98), 'JPEG', 0, 0, widthMm, heightMm, undefined, 'FAST');
+    });
+
+    pdf.save(safeFilename);
+  } finally {
+    const wrapper = document.body.querySelector('div[style*="-9999px"]');
+    if (wrapper && wrapper.parentNode === document.body) {
+      document.body.removeChild(wrapper);
+    }
+  }
+};
+
 export const generatePDF = async (
   sourceElement: HTMLElement,
   filename: string

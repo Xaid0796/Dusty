@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { useCanvasStore } from '@/canvas/store';
 import { sampleTemplates } from '@/templates/registry';
 import { CanvasStage } from '@/app/editor/[category]/[templateId]/components/CanvasStage';
@@ -9,11 +10,27 @@ import { LeftToolbar } from '@/app/editor/[category]/[templateId]/components/Lef
 import { PropertiesPanel } from '@/app/editor/[category]/[templateId]/components/PropertiesPanel';
 import { CommandPalette } from '@/app/editor/[category]/[templateId]/components/CommandPalette';
 import { ImageCropModal } from '@/app/editor/[category]/[templateId]/components/ImageCropModal';
+import { Toolbar } from '@/app/editor/[category]/[templateId]/components/Toolbar';
 import { CanvasDocument } from '@/canvas/types';
 import styles from '@/app/editor/[category]/[templateId]/editor.module.css';
 import { ArrowLeft, Download, Upload, Send, Save, RefreshCw, Check, Loader2, FileCode, Layers } from 'lucide-react';
 
-export default function AdminTemplateBuilderPage() {
+// Biodata-specific enhanced canvas is code-split so it is only loaded when a
+// Biodata template is being edited — keeps the default admin bundle smaller.
+const AdminBiodataCanvas = dynamic(
+    () => import('@/components/admin/BiodataCanvas').then((m) => m.AdminBiodataCanvas),
+    {
+        ssr: false,
+        loading: () => (
+            <div className={styles.loadingScreen}>
+                <div className={styles.loadingSpinner} />
+                <p>Loading Biodata Canvas…</p>
+            </div>
+        ),
+    }
+);
+
+function AdminTemplateBuilderInner() {
     const router = useRouter();
     const {
         document: doc,
@@ -25,14 +42,27 @@ export default function AdminTemplateBuilderPage() {
         setSnapToGrid,
     } = useCanvasStore();
 
+    const searchParams = useSearchParams();
+    const editId = searchParams?.get('edit') || null;
+
     const [isClient, setIsClient] = useState(false);
+    // Tracks which template (edit id) the currently-loaded document belongs to.
+    // Guards the metadata-sync effect so it can never stamp one template's
+    // content with another template's metadata when navigating between edits.
+    const loadedEditIdRef = useRef<string | null>(null);
+    // Set on the same commit where a new template is loaded. The metadata-sync
+    // effect skips that commit so it can't overwrite the fresh document with a
+    // stale closure value (the previous template's content).
+    const isJustLoadedRef = useRef(false);
     const [theme, setTheme] = useState<'light' | 'dark'>('light');
     const [showGrid, setShowGrid] = useState(true);
-    const [showRulers, setShowRulers] = useState(true);
     const [previewMode, setPreviewMode] = useState(false);
     const [showCommandPalette, setShowCommandPalette] = useState(false);
     const [isPublishing, setIsPublishing] = useState(false);
     const [publishMessage, setPublishMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+    // State consumed by the shared canvas editor Toolbar (upper panel)
+    const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved');
+    const [isDirty, setIsDirty] = useState(false);
 
     // Metadata Fields
     const [filename, setFilename] = useState('my-new-template.ts');
@@ -87,13 +117,97 @@ export default function AdminTemplateBuilderPage() {
         reader.readAsDataURL(file);
     };
 
+    // ── Normal sidebar raster image import (never prompts for transparency) ────────────────
+    const handleSidebarImageImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const dataUrl = event.target?.result as string;
+            const img = new Image();
+            img.onload = () => {
+                const natW = img.naturalWidth || 100;
+                const natH = img.naturalHeight || 100;
+                const aspect = natW / natH;
+
+                let width = 60;
+                let height = 60 / aspect;
+                if (aspect < 1) {
+                    height = 60;
+                    width = 60 * aspect;
+                }
+
+                if (doc) {
+                    const maxZ = doc.elements.reduce((max, el) => Math.max(max, el.zIndex), 0);
+                    const x = Math.max(8, doc.page.width / 2 - width / 2);
+                    const y = Math.max(8, doc.page.height / 2 - height / 2);
+                    useCanvasStore.getState().addElement({
+                        id: `image-${Date.now()}`, type: 'image', label: file.name ? file.name.replace(/\.[^/.]+$/, '') : 'Image',
+                        x, y, width, height, rotation: 0, zIndex: maxZ + 1, visible: true, locked: false,
+                        src: dataUrl, objectFit: 'contain', objectPosition: '50% 50%',
+                        cropX: 50, cropY: 50, zoom: 1, borderRadius: 0, opacity: 1,
+                    });
+                }
+            };
+            img.src = dataUrl;
+
+            if (e.target) e.target.value = '';
+        };
+        reader.readAsDataURL(file);
+    };
+
+    // ── Normal sidebar SVG vector image import ────
+    const handleSVGImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (!file.name.toLowerCase().endsWith('.svg') && file.type !== 'image/svg+xml') {
+            alert('Please select a valid SVG file.');
+            if (e.target) e.target.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const text = event.target?.result as string;
+
+            if (!text.trim().toLowerCase().startsWith('<svg') && !text.includes('<svg')) {
+                alert('Invalid SVG file content.');
+                if (e.target) e.target.value = '';
+                return;
+            }
+
+            const dataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(text)}`;
+
+            if (doc) {
+                const maxZ = doc.elements.reduce((max, el) => Math.max(max, el.zIndex), 0);
+                const size = { width: 60, height: 60 };
+                const x = Math.max(8, doc.page.width / 2 - size.width / 2);
+                const y = Math.max(8, doc.page.height / 2 - size.height / 2);
+
+                useCanvasStore.getState().addElement({
+                    id: `svg-${Date.now()}`,
+                    type: 'image',
+                    label: 'Vector Graphic',
+                    x, y, ...size, rotation: 0, zIndex: maxZ + 1, visible: true, locked: false,
+                    src: dataUrl, objectFit: 'contain', objectPosition: '50% 50%',
+                    cropX: 50, cropY: 50, zoom: 1, borderRadius: 0, opacity: 1,
+                });
+            }
+            if (e.target) e.target.value = '';
+        };
+        reader.readAsText(file);
+    };
+
+    // Loads the template identified by `editId` (reactive to URL changes so
+    // SPA-navigation between templates re-loads instead of reusing stale state).
     useEffect(() => {
         setIsClient(true);
-        const params = new URLSearchParams(window.location.search);
-        const editId = params.get('edit');
         if (editId) {
             const existingTemplate = sampleTemplates[editId];
             if (existingTemplate) {
+                loadedEditIdRef.current = editId;
+                isJustLoadedRef.current = true;
                 setTemplateId(existingTemplate.id);
                 setDisplayName(existingTemplate.name);
                 setCategory((existingTemplate.category || 'resume') as any);
@@ -106,7 +220,11 @@ export default function AdminTemplateBuilderPage() {
             }
         }
 
-        // Initialize with a blank canvas or default template
+        // No template id, or unknown id: initialize with a blank canvas or
+        // default template. The blank doc is intentionally NOT associated with
+        // any edit id so the metadata-sync effect below can apply local edits.
+        loadedEditIdRef.current = editId;
+        isJustLoadedRef.current = true;
         const defaultDoc: CanvasDocument = {
             id: templateId,
             name: displayName,
@@ -148,23 +266,39 @@ export default function AdminTemplateBuilderPage() {
             ],
         };
         loadDocument(defaultDoc, true);
-    }, []);
+    }, [editId]);
 
-    // Update document metadata when local metadata state changes
+    // Update document metadata when local metadata state changes. Guarded by
+    // loadedEditIdRef so it only patches the metadata of the template that was
+    // actually loaded — never stamping one template's content with another's.
+    // It also skips the commit where a new template was just loaded (isJustLoaded)
+    // and reads the LATEST document from the store rather than a stale closure,
+    // so it can never overwrite a freshly-loaded template with old content.
     useEffect(() => {
-        if (doc) {
-            useCanvasStore.setState({
-                document: {
-                    ...doc,
-                    id: templateId,
-                    name: displayName,
-                    category: category,
-                    isPremium: isPremium,
-                    thumbnail: thumbnail || undefined,
-                },
-            });
+        if (isJustLoadedRef.current) {
+            isJustLoadedRef.current = false;
+            return;
         }
-    }, [templateId, displayName, category, isPremium, thumbnail]);
+        if (loadedEditIdRef.current !== editId) return;
+        const latestDoc = useCanvasStore.getState().document;
+        if (!latestDoc) return;
+        useCanvasStore.setState({
+            document: {
+                ...latestDoc,
+                id: templateId,
+                name: displayName,
+                category: category,
+                isPremium: isPremium,
+                thumbnail: thumbnail || undefined,
+            },
+        });
+    }, [templateId, displayName, category, isPremium, thumbnail, editId]);
+
+    // Mark the document dirty whenever the canvas document changes so the
+    // editor Toolbar's Reset button reflects unsaved edits.
+    useEffect(() => {
+        setIsDirty(true);
+    }, [doc]);
 
     // Handle TS / JSON Template Import
     const handleImportTS = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -237,10 +371,11 @@ export const ${exportName}: CanvasDocument = ${JSON.stringify(
     };
 
     // Publish to Website via Admin API
-    const handlePublish = async () => {
+    const handlePublish = async (overwriteConfirmation: boolean = false) => {
         if (!doc) return;
         setIsPublishing(true);
         setPublishMessage(null);
+        setSaveStatus('saving');
 
         try {
             const payload = {
@@ -250,13 +385,21 @@ export const ${exportName}: CanvasDocument = ${JSON.stringify(
                 category,
                 displayName,
                 isPremium,
+                // Always send the latest thumbnail explicitly. The canvas document
+                // (doc) may not yet reflect a freshly uploaded thumbnail due to
+                // React state-batching, so we pass the `thumbnail` state directly
+                // instead of relying on doc.thumbnail being patched by an effect.
+                thumbnail: thumbnail || undefined,
                 document: {
                     ...doc,
                     id: templateId,
                     name: displayName,
                     category: category,
                     isPremium: isPremium,
+                    thumbnail: thumbnail || undefined,
                 },
+                // Set only when the user has approved overwriting an existing file.
+                overwriteConfirmation,
             };
 
             const res = await fetch('/api/admin/templates', {
@@ -266,16 +409,51 @@ export const ${exportName}: CanvasDocument = ${JSON.stringify(
             });
 
             const data = await res.json();
+
+            // 409 = template already exists under a different filename. Ask the
+            // user to confirm an overwrite, then resend with overwriteConfirmation.
+            if (res.status === 409 && !overwriteConfirmation) {
+                const existingFile = (data && data.existingFile) || 'an existing file';
+                const confirmMsg =
+                    `This template already exists under a different name ("${existingFile}"). ` +
+                    `Do you want to overwrite it?`;
+                const userConfirmed = window.confirm(confirmMsg);
+                if (userConfirmed) {
+                    // Recursive retry with the flag set — it will resolve the
+                    // overwrite server-side without requiring manual intervention.
+                    return await handlePublish(true);
+                }
+                throw new Error(data.error || 'Publish cancelled — existing template preserved.');
+            }
+
             if (!res.ok) {
                 throw new Error(data.error || 'Failed to publish template.');
             }
 
             setPublishMessage({ type: 'success', text: data.message });
+            setSaveStatus('saved');
         } catch (err: any) {
             setPublishMessage({ type: 'error', text: err.message });
+            setSaveStatus('unsaved');
         } finally {
             setIsPublishing(false);
         }
+    };
+
+    // Reset the canvas to a blank default document (Toolbar "Reset" action)
+    const handleEditorReset = () => {
+        const blankDoc: CanvasDocument = {
+            id: templateId,
+            name: displayName,
+            category: category,
+            isPremium: isPremium,
+            page: { id: 'page-1', width: 210, height: 297, background: '#ffffff' },
+            elements: [],
+        };
+        loadDocument(blankDoc, true);
+        setIsDirty(false);
+        setSaveStatus('saved');
+        useCanvasStore.setState({ history: [], future: [] });
     };
 
     if (!isClient || !doc) {
@@ -289,12 +467,17 @@ export const ${exportName}: CanvasDocument = ${JSON.stringify(
 
     const selectedElement = doc.elements.find((el) => el.id === selectedId) || null;
 
+    // Choose the editor layout: Biodata templates get the enhanced Biodata
+    // canvas (photo frames, ornaments, section titles); everything else keeps
+    // the full-featured generic builder.
+    const isBiodataMode = category === 'biodata';
+
     return (
         <div className={styles.workspace} data-theme={theme} style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
             {/* Hidden file inputs */}
             <input ref={tsImportInputRef} type="file" accept=".ts,.js,.json" style={{ display: 'none' }} onChange={handleImportTS} />
-            <input ref={sidebarImageInputRef} type="file" accept="image/png, image/jpeg, image/webp" style={{ display: 'none' }} />
-            <input ref={svgInputRef} type="file" accept="image/svg+xml" style={{ display: 'none' }} />
+            <input ref={sidebarImageInputRef} type="file" accept="image/png, image/jpeg, image/webp" style={{ display: 'none' }} onChange={handleSidebarImageImport} />
+            <input ref={svgInputRef} type="file" accept="image/svg+xml" style={{ display: 'none' }} onChange={handleSVGImport} />
             <input ref={fileInputRef} type="file" accept="image/png, image/jpeg, image/webp" style={{ display: 'none' }} onChange={handlePhotoReplace} />
             <input ref={thumbnailFileInputRef} type="file" accept="image/png, image/jpeg, image/webp" style={{ display: 'none' }} onChange={handleThumbnailSelect} />
 
@@ -414,7 +597,7 @@ export const ${exportName}: CanvasDocument = ${JSON.stringify(
 
                     <button
                         className={styles.saveBtn}
-                        onClick={handlePublish}
+                        onClick={() => handlePublish()}
                         disabled={isPublishing}
                         title="Publish Template to Website"
                         style={{ background: '#10b981', color: '#fff', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 'bold' }}
@@ -424,6 +607,20 @@ export const ${exportName}: CanvasDocument = ${JSON.stringify(
                     </button>
                 </div>
             </header>
+
+            {/* SHARED CANVAS EDITOR TOOLBAR (upper panel: undo/redo, layers, snap/grid, zoom, page count) */}
+            <Toolbar
+                documentName={displayName}
+                onNameChange={setDisplayName}
+                saveStatus={saveStatus}
+                onSave={handlePublish}
+                onExportPDF={handlePublish}
+                onBack={() => router.push('/admin/templates')}
+                isDirty={isDirty}
+                onReset={handleEditorReset}
+                previewMode={previewMode}
+                onTogglePreview={() => setPreviewMode((v) => !v)}
+            />
 
             {/* PUBLISH STATUS BANNER */}
             {publishMessage && (
@@ -445,42 +642,49 @@ export const ${exportName}: CanvasDocument = ${JSON.stringify(
                 </div>
             )}
 
-            {/* EDITOR BODY */}
-            <div className={styles.editorBody} style={{ flex: 1, overflow: 'hidden' }}>
-                <LeftToolbar
-                    onUploadRasterImage={() => sidebarImageInputRef.current?.click()}
-                    onUploadSVG={() => svgInputRef.current?.click()}
-                    snapToGrid={snapToGrid}
-                    onToggleSnap={() => setSnapToGrid(!snapToGrid)}
-                    showGrid={showGrid}
-                    onToggleGrid={() => setShowGrid((v) => !v)}
-                    showRulers={showRulers}
-                    onToggleRulers={() => setShowRulers((v) => !v)}
-                    previewMode={previewMode}
-                    onTogglePreview={() => setPreviewMode((v) => !v)}
-                />
+            {/* EDITOR BODY — enhanced Biodata canvas OR generic builder */}
+            {isBiodataMode ? (
+                <div className={styles.editorBody} style={{ flex: 1, overflow: 'hidden' }}>
+                    <AdminBiodataCanvas
+                        pageRef={pageRef}
+                        showGrid={showGrid}
+                        previewMode={previewMode}
+                        onToggleGrid={() => setShowGrid((v) => !v)}
+                        onToggleSnap={() => setSnapToGrid(!snapToGrid)}
+                    />
+                </div>
+            ) : (
+                <div className={styles.editorBody} style={{ flex: 1, overflow: 'hidden' }}>
+                    <LeftToolbar
+                        onUploadRasterImage={() => sidebarImageInputRef.current?.click()}
+                        onUploadSVG={() => svgInputRef.current?.click()}
+                        showGrid={showGrid}
+                        snapToGrid={snapToGrid}
+                        onToggleGrid={() => setShowGrid((v) => !v)}
+                        onToggleSnap={() => setSnapToGrid(!snapToGrid)}
+                    />
 
-                <main className={styles.canvasPane}>
-                    <div className={styles.canvasScroll}>
-                        <CanvasStage
-                            pageRef={pageRef}
-                            showGrid={showGrid}
-                            showRulers={showRulers}
-                            previewMode={previewMode}
-                        />
-                    </div>
-                </main>
+                    <main className={styles.canvasPane}>
+                        <div className={styles.canvasScroll}>
+                            <CanvasStage
+                                pageRef={pageRef}
+                                showGrid={showGrid}
+                                previewMode={previewMode}
+                            />
+                        </div>
+                    </main>
 
-                <aside className={styles.propertiesPane}>
-                    <div className={styles.propertiesPaneInner}>
-                        <PropertiesPanel
-                            element={selectedElement}
-                            onUploadClick={() => fileInputRef.current?.click()}
-                            previewMode={previewMode}
-                        />
-                    </div>
-                </aside>
-            </div>
+                    <aside className={styles.propertiesPane}>
+                        <div className={styles.propertiesPaneInner}>
+                            <PropertiesPanel
+                                element={selectedElement}
+                                onUploadClick={() => fileInputRef.current?.click()}
+                                previewMode={previewMode}
+                            />
+                        </div>
+                    </aside>
+                </div>
+            )}
 
             {/* ── TRANSPARENT IMAGE QUESTION MODAL ── */}
             {showTransPrompt && (
@@ -601,5 +805,20 @@ export const ${exportName}: CanvasDocument = ${JSON.stringify(
 
             <ImageCropModal />
         </div>
+    );
+}
+
+export default function AdminTemplateBuilderPage() {
+    return (
+        <Suspense
+            fallback={
+                <div className={styles.loadingScreen}>
+                    <div className={styles.loadingSpinner} />
+                    <p>Loading Admin Canvas…</p>
+                </div>
+            }
+        >
+            <AdminTemplateBuilderInner />
+        </Suspense>
     );
 }

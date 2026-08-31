@@ -39,7 +39,7 @@ export const SelectionBox: React.FC<SelectionBoxProps> = ({ element, zoom }) => 
   const pxH = mmToPx(element.height);
 
   const handleCancelCrop = () => {
-    if (element.type !== 'image') return;
+    if (element.type !== 'image' && element.type !== 'frame') return;
     updateElement(element.id, {
       cropX: initialCropRef.current.x,
       cropY: initialCropRef.current.y,
@@ -55,6 +55,9 @@ export const SelectionBox: React.FC<SelectionBoxProps> = ({ element, zoom }) => 
     e.stopPropagation();
     e.preventDefault();
     if (element.locked || isTextEditing || isCropping) return;
+
+    // Dispatch a custom event or flag to let CanvasStage know resizing is active
+    window.dispatchEvent(new CustomEvent('canvas-resizing-start'));
 
     const target = e.currentTarget;
     target.setPointerCapture(e.pointerId);
@@ -165,6 +168,7 @@ export const SelectionBox: React.FC<SelectionBoxProps> = ({ element, zoom }) => 
       target.removeEventListener('pointermove', move);
       target.removeEventListener('pointerup', up);
       target.removeEventListener('pointercancel', up);
+      window.dispatchEvent(new CustomEvent('canvas-resizing-end'));
     };
     target.addEventListener('pointermove', move);
     target.addEventListener('pointerup', up);
@@ -217,8 +221,8 @@ export const SelectionBox: React.FC<SelectionBoxProps> = ({ element, zoom }) => 
   const outlineCls = isCropping
     ? styles.selectionOutlineCrop
     : isLocked
-    ? styles.selectionOutlineLocked
-    : styles.selectionOutline;
+      ? styles.selectionOutlineLocked
+      : styles.selectionOutline;
 
   const boxStyle: React.CSSProperties = {
     position: 'absolute',
@@ -234,14 +238,14 @@ export const SelectionBox: React.FC<SelectionBoxProps> = ({ element, zoom }) => 
 
   // Resize handles config
   const handles: { key: Handle; style: React.CSSProperties; cursor: string }[] = [
-    { key: 'tl', style: { left: 0,         top: 0          }, cursor: 'nwse-resize' },
-    { key: 'tc', style: { left: '50%',      top: 0          }, cursor: 'ns-resize'   },
-    { key: 'tr', style: { left: '100%',     top: 0          }, cursor: 'nesw-resize' },
-    { key: 'ml', style: { left: 0,          top: '50%'      }, cursor: 'ew-resize'   },
-    { key: 'mr', style: { left: '100%',     top: '50%'      }, cursor: 'ew-resize'   },
-    { key: 'bl', style: { left: 0,          top: '100%'     }, cursor: 'nesw-resize' },
-    { key: 'bc', style: { left: '50%',      top: '100%'     }, cursor: 'ns-resize'   },
-    { key: 'br', style: { left: '100%',     top: '100%'     }, cursor: 'nwse-resize' },
+    { key: 'tl', style: { left: 0, top: 0 }, cursor: 'nwse-resize' },
+    { key: 'tc', style: { left: '50%', top: 0 }, cursor: 'ns-resize' },
+    { key: 'tr', style: { left: '100%', top: 0 }, cursor: 'nesw-resize' },
+    { key: 'ml', style: { left: 0, top: '50%' }, cursor: 'ew-resize' },
+    { key: 'mr', style: { left: '100%', top: '50%' }, cursor: 'ew-resize' },
+    { key: 'bl', style: { left: 0, top: '100%' }, cursor: 'nesw-resize' },
+    { key: 'bc', style: { left: '50%', top: '100%' }, cursor: 'ns-resize' },
+    { key: 'br', style: { left: '100%', top: '100%' }, cursor: 'nwse-resize' },
   ];
 
   // Images: only show br handle; Proportional frames: only show corner handles (tl, tr, bl, br)
@@ -258,19 +262,17 @@ export const SelectionBox: React.FC<SelectionBoxProps> = ({ element, zoom }) => 
       {/* Selection outline */}
       <div className={outlineCls} />
 
-      {/* Crop button */}
-      {element.type === 'image' && !isCropping && !isLocked && (
+      {/* Crop button for frames (only) — shown below the frame image */}
+      {element.type === 'frame' && (element as any).src && !isCropping && !isLocked && (
         <button
           className={styles.cropBtn}
-          style={{ position: 'absolute', top: -38, right: 0 }}
+          style={{ position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', marginTop: 6 }}
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => { e.stopPropagation(); setCroppingId(element.id); }}
         >
           ✂ Crop
         </button>
       )}
-
-      {/* Crop Done / Cancel handled entirely by CropEditor */}
 
       {/* Multi-selection badge */}
       {isMulti && (

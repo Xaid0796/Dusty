@@ -1,15 +1,15 @@
 import { CanvasDocument } from '@/canvas/types';
 import { resumeTemplates } from './resume';
-import { biodataTemplates } from './biodata';
 import { cvTemplates } from './cv';
 import { coverLetterTemplates } from './cover-letter';
+import { biodataTemplates } from './biodata';
 
 // Canonical registry mapping template ID to CanvasDocument
 export const templateRegistry: Record<string, CanvasDocument> = {
   ...resumeTemplates,
-  ...biodataTemplates,
   ...cvTemplates,
   ...coverLetterTemplates,
+  ...biodataTemplates,
 };
 
 // Enforce template ID and key mapping consistency

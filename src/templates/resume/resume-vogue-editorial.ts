@@ -4,7 +4,7 @@ export const resumeVogueEditorialTemplate: CanvasDocument = {
   "id": "resume-vogue-editorial",
   "category": "resume",
   "name": "Vogue Editorial",
-  "isPremium": true,
+  "isPremium": false,
   "page": {
     "id": "page-1",
     "width": 210,

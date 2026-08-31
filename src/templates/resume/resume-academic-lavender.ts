@@ -4,7 +4,7 @@ export const resumeAcademicLavenderTemplate: CanvasDocument = {
   "id": "resume-academic-lavender",
   "category": "resume",
   "name": "Academic Lavender",
-  "isPremium": true,
+  "isPremium": false,
   "page": {
     "id": "page-1",
     "width": 210,

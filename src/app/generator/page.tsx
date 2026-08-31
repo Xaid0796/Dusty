@@ -47,6 +47,321 @@ const SECTION_ICONS: Record<string, string> = {
   interests: '✨', volunteer: '🤝', publications: '📚', custom: '📝',
 };
 
+// ─── Display names for generator template ids ────────────────────────────────
+const TEMPLATE_DISPLAY_NAMES: Record<string, string> = {
+  classic: 'Classic Professional',
+  modern: 'Modern Minimalist',
+  sidebar: 'Executive Sidebar',
+  greta: 'Greta Student Minimalist',
+  william: 'William Executive Designer',
+};
+
+// ─── Valid generator template ids ───────────────────────────────────────────
+const VALID_TEMPLATE_IDS = ['classic', 'modern', 'sidebar', 'greta', 'william'];
+
+// ─── Prebuilt document for the Greta template ────────────────────────────────
+const GRETA_TEMPLATE_DOC: GeneratorDocument = {
+  id: 'generator-document',
+  name: 'Greta Student Minimalist',
+  contact: {
+    fullName: 'ELENA ROOTS',
+    title: 'Business Administration Graduate',
+    email: 'elena.roots@reallygreatsite.com',
+    phone: '+1 (555) 382-9102',
+    location: '742 Evergreen Terrace, Springfield',
+    website: 'elenaroots.dev',
+    linkedin: 'linkedin.com/in/elena-roots',
+    photoUrl: '/resume-photo-4.jpeg',
+  },
+  style: {
+    templateId: 'greta',
+    primaryColor: '#f2e6dc',
+    secondaryColor: '#111111',
+    fontFamily: 'Calibri',
+    fontSizeName: 26,
+    fontSizeHeading: 11.5,
+    fontSizeBody: 10,
+    lineHeight: 1.4,
+    sectionSpacing: 16,
+  },
+  sections: [
+    {
+      id: 'sec-summary',
+      kind: 'summary',
+      title: 'Profile',
+      isDeletable: false,
+      isReorderable: true,
+      content: 'Dedicated Business Administration student and aspiring professional. Possesses a strong work ethic, exceptional organizational skills, and a proactive mindset toward corporate leadership and operational efficiency.',
+    },
+    {
+      id: 'sec-education',
+      kind: 'education',
+      title: 'Education',
+      isDeletable: false,
+      isReorderable: true,
+      educationItems: [
+        {
+          id: 'edu-1',
+          institution: 'BORCELLE UNIVERSITY',
+          degree: 'B.S. in Business Administration',
+          field: 'Management & Marketing',
+          startDate: '2020',
+          endDate: '2024',
+          grade: '3.9 GPA · Magna Cum Laude',
+        },
+        {
+          id: 'edu-2',
+          institution: 'BORCELLE SCHOOL',
+          degree: 'High School Diploma with Honors',
+          startDate: '2015',
+          endDate: '2019',
+          grade: 'Valedictorian',
+        },
+      ],
+    },
+    {
+      id: 'sec-languages',
+      kind: 'languages',
+      title: 'Language',
+      isDeletable: true,
+      isReorderable: true,
+      genericItems: [
+        { id: 'lang-1', title: 'Native English.' },
+        { id: 'lang-2', title: 'Advanced Spanish.' },
+        { id: 'lang-3', title: 'Conversational French.' },
+      ],
+    },
+    {
+      id: 'sec-skills',
+      kind: 'skills',
+      title: 'Computer Skills',
+      isDeletable: true,
+      isReorderable: true,
+      skillItems: [
+        { id: 'sk-1', name: 'Text processor (Word / Docs).' },
+        { id: 'sk-2', name: 'Spreadsheets (Advanced Excel & Formulas).' },
+        { id: 'sk-3', name: 'Slide presentations (PowerPoint / Canva).' },
+        { id: 'sk-4', name: 'Database management & CRM software.' },
+      ],
+    },
+    {
+      id: 'sec-volunteer',
+      kind: 'volunteer',
+      title: 'Volunteer Experience',
+      isDeletable: true,
+      isReorderable: true,
+      experienceItems: [
+        {
+          id: 'vol-1',
+          position: 'INGOUDE COMPANY',
+          company: 'Community Outreach',
+          startDate: '2024',
+          endDate: 'present',
+          current: true,
+          description: 'Participation in collections to distribute educational supplies and books in low-income schools.',
+        },
+        {
+          id: 'vol-2',
+          position: 'STUDENT MENTOR',
+          company: 'Campus Youth Initiative',
+          startDate: '2022',
+          endDate: '2023',
+          current: false,
+          description: 'Guided incoming freshman students on academic planning and campus resource navigation.',
+        },
+      ],
+    },
+    {
+      id: 'sec-certifications',
+      kind: 'certifications',
+      title: 'Certifications',
+      isDeletable: true,
+      isReorderable: true,
+      genericItems: [
+        {
+          id: 'cert-1',
+          title: 'Digital Marketing Fundamentals',
+          subtitle: 'Google Career Certificates',
+          dateRange: '2023',
+          description: 'Mastery of SEO, social media strategy, and e-commerce analytics.',
+        },
+        {
+          id: 'cert-2',
+          title: 'Project Management Associate (CAPM)',
+          subtitle: 'Project Management Institute',
+          dateRange: '2024',
+          description: 'Comprehensive training in agile methodologies, risk management, and scheduling.',
+        },
+      ],
+    },
+    {
+      id: 'sec-awards',
+      kind: 'awards',
+      title: 'Awards & Honors',
+      isDeletable: true,
+      isReorderable: true,
+      genericItems: [
+        {
+          id: 'aw-1',
+          title: 'Dean’s List Excellence Award',
+          subtitle: 'Borcelle University',
+          dateRange: '2021 – 2024',
+          description: 'Awarded consecutively for maintaining top academic standing across 8 semesters.',
+        },
+      ],
+    },
+  ],
+};
+
+// ─── Prebuilt document for the William template ──────────────────────────────
+const WILLIAM_TEMPLATE_DOC: GeneratorDocument = {
+  id: 'generator-document',
+  name: 'William Executive Designer',
+  contact: {
+    fullName: 'WILLIAM ALEXANDER',
+    title: 'Managing Chairman',
+    email: 'youremail@here',
+    phone: '+123 456 7890',
+    location: 'Your Location Here 00',
+    website: 'your website here',
+    photoUrl: '/resume-photo-5.jpeg',
+  },
+  style: {
+    templateId: 'william',
+    primaryColor: '#f8f9fa',
+    secondaryColor: '#0f172a',
+    fontFamily: 'Calibri',
+    fontSizeName: 26,
+    fontSizeHeading: 11.5,
+    fontSizeBody: 10,
+    lineHeight: 1.4,
+    sectionSpacing: 16,
+  },
+  sections: [
+    {
+      id: 'sec-summary',
+      kind: 'summary',
+      title: 'Personal Profile',
+      isDeletable: false,
+      isReorderable: true,
+      content: 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.',
+    },
+    {
+      id: 'sec-experience',
+      kind: 'experience',
+      title: 'Work Experience',
+      isDeletable: false,
+      isReorderable: true,
+      experienceItems: [
+        {
+          id: 'exp-1',
+          position: 'Senior Graphic Designer',
+          company: 'Name of Company',
+          startDate: '2028',
+          endDate: 'Present',
+          current: true,
+          description: 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem.\n\n• Lorem ipsum dolor sit amet, consectetuer adipiscing elit\n• Lorem ipsum dolor sit amet, consectetuer adipiscing elit',
+        },
+        {
+          id: 'exp-2',
+          position: 'Senior Graphic Designer',
+          company: 'Name of Company',
+          startDate: '2026',
+          endDate: '2027',
+          current: false,
+          description: 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.\n\n• Lorem ipsum dolor sit amet, consectetuer adipiscing elit',
+        },
+        {
+          id: 'exp-3',
+          position: 'Senior Graphic Designer',
+          company: 'Name of Company',
+          startDate: '2024',
+          endDate: '2026',
+          current: false,
+          description: 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.',
+        },
+      ],
+    },
+    {
+      id: 'sec-education',
+      kind: 'education',
+      title: 'Education',
+      isDeletable: false,
+      isReorderable: true,
+      educationItems: [
+        {
+          id: 'edu-1',
+          institution: 'University Name - Canada',
+          degree: 'Degree Title',
+          startDate: '2024',
+          endDate: '2029',
+        },
+        {
+          id: 'edu-2',
+          institution: 'University Name - London',
+          degree: 'Degree Title',
+          startDate: '2024',
+          endDate: '2029',
+        },
+      ],
+    },
+    {
+      id: 'sec-skills',
+      kind: 'skills',
+      title: 'Skills',
+      isDeletable: true,
+      isReorderable: true,
+      skillItems: [
+        { id: 'sk-1', name: 'Digital Marketing' },
+        { id: 'sk-2', name: 'Web Development' },
+        { id: 'sk-3', name: 'Data Analysis' },
+        { id: 'sk-4', name: 'Project Management' },
+        { id: 'sk-5', name: 'Graphic Design' },
+        { id: 'sk-6', name: 'Content Creation' },
+        { id: 'sk-7', name: 'Programming' },
+      ],
+    },
+    {
+      id: 'sec-reference',
+      kind: 'custom',
+      title: 'Reference',
+      isDeletable: true,
+      isReorderable: true,
+      content: 'Robert Maverick\nCompany\nP: (+123) 456 7890\nE: youremail@here',
+    },
+  ],
+};
+
+// ─── Apply a generator template by id to the store ──────────────────────────
+function applyTemplate(id: string) {
+  const store = useGeneratorStore.getState();
+  switch (id) {
+    case 'classic':
+      store.updateStyle({ templateId: 'classic' });
+      store.updateContact({ photoUrl: '/resume-photo-1.jpeg' });
+      store.updateName('Classic Professional');
+      break;
+    case 'modern':
+      store.updateStyle({ templateId: 'modern' });
+      store.updateContact({ photoUrl: '/resume-photo-2.jpeg' });
+      store.updateName('Modern Minimalist');
+      break;
+    case 'sidebar':
+      store.updateStyle({ templateId: 'sidebar', primaryColor: '#004d1a' });
+      store.updateContact({ photoUrl: '/resume-photo-3.jpeg' });
+      store.updateName('Executive Sidebar');
+      break;
+    case 'greta':
+      store.setDocument(GRETA_TEMPLATE_DOC, true);
+      break;
+    case 'william':
+      store.setDocument(WILLIAM_TEMPLATE_DOC, true);
+      break;
+    default:
+      break;
+  }
+}
+
 // ─── Generator Page ──────────────────────────────────────────────────────────
 export default function GeneratorPage() {
   const [isClient, setIsClient] = useState(false);
@@ -109,6 +424,7 @@ export default function GeneratorPage() {
   const {
     document: doc,
     setDocument,
+    updateName,
     history,
     future,
     undo,
@@ -124,16 +440,25 @@ export default function GeneratorPage() {
 
   // ── Initialize store + check for existing draft ───────────────────────────
   useEffect(() => {
+    console.log("DEBUG: isClient", isClient);
     if (!isClient) return;
 
+    // Check for template query param
+    const params = new URLSearchParams(window.location.search);
+    const templateId = params.get('template');
+    console.log("DEBUG: templateId", templateId);
+    if (templateId && VALID_TEMPLATE_IDS.includes(templateId as any)) {
+      applyTemplate(templateId);
+      setIsPickingTemplate(false);
+      return;
+    }
+
     const defaultDoc = createDefaultDocument();
+    console.log("DEBUG: defaultDoc", defaultDoc);
     setDocument(defaultDoc, true); // always start with default visually
 
     try {
-      if (!sessionStorage.getItem('dusty_session_started')) {
-        sessionStorage.setItem('dusty_session_started', 'true');
-        localStorage.removeItem(STORAGE_KEY);
-      }
+      localStorage.removeItem(STORAGE_KEY);
       const rawDraft = localStorage.getItem(STORAGE_KEY);
       if (rawDraft) {
         const parsed = JSON.parse(rawDraft) as GeneratorDocument;
@@ -183,6 +508,7 @@ export default function GeneratorPage() {
     const currentTemplateId = pendingDraft?.style?.templateId || doc?.style?.templateId || 'classic';
     const newDoc = createDefaultDocument();
     newDoc.style.templateId = currentTemplateId;
+    newDoc.name = TEMPLATE_DISPLAY_NAMES[currentTemplateId] ?? 'My Resume';
     setDocument(newDoc, true);
     setIsPickingTemplate(false);
     setShowDraftModal(false);
@@ -195,6 +521,7 @@ export default function GeneratorPage() {
     const currentTemplateId = doc?.style?.templateId || 'classic';
     const newDoc = createDefaultDocument();
     newDoc.style.templateId = currentTemplateId;
+    newDoc.name = TEMPLATE_DISPLAY_NAMES[currentTemplateId] ?? 'My Resume';
     setDocument(newDoc, false);
     setShowResetModal(false);
   };
@@ -395,9 +722,7 @@ export default function GeneratorPage() {
             {/* Classic Template Card */}
             <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', transition: 'all 0.2s', cursor: 'pointer' }}
               onClick={() => {
-                useGeneratorStore.getState().updateStyle({ templateId: 'classic' });
-                useGeneratorStore.getState().updateContact({ photoUrl: '/resume-photo-1.jpeg' });
-                setIsPickingTemplate(false);
+                window.open('/generator?template=classic', '_blank');
               }}
             >
               <div>
@@ -415,9 +740,7 @@ export default function GeneratorPage() {
             {/* Modern Template Card */}
             <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', transition: 'all 0.2s', cursor: 'pointer' }}
               onClick={() => {
-                useGeneratorStore.getState().updateStyle({ templateId: 'modern' });
-                useGeneratorStore.getState().updateContact({ photoUrl: '/resume-photo-2.jpeg' });
-                setIsPickingTemplate(false);
+                window.open('/generator?template=modern', '_blank');
               }}
             >
               <div>
@@ -435,9 +758,7 @@ export default function GeneratorPage() {
             {/* Executive Sidebar Template Card */}
             <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', transition: 'all 0.2s', cursor: 'pointer' }}
               onClick={() => {
-                useGeneratorStore.getState().updateStyle({ templateId: 'sidebar', primaryColor: '#004d1a' });
-                useGeneratorStore.getState().updateContact({ photoUrl: '/resume-photo-3.jpeg' });
-                setIsPickingTemplate(false);
+                window.open('/generator?template=sidebar', '_blank');
               }}
             >
               <div>
@@ -455,158 +776,7 @@ export default function GeneratorPage() {
             {/* Greta Student Minimalist Sidebar Template Card */}
             <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', transition: 'all 0.2s', cursor: 'pointer' }}
               onClick={() => {
-                useGeneratorStore.getState().setDocument({
-                  id: 'generator-document',
-                  contact: {
-                    fullName: 'ELENA ROOTS',
-                    title: 'Business Administration Graduate',
-                    email: 'elena.roots@reallygreatsite.com',
-                    phone: '+1 (555) 382-9102',
-                    location: '742 Evergreen Terrace, Springfield',
-                    website: 'elenaroots.dev',
-                    linkedin: 'linkedin.com/in/elena-roots',
-                    photoUrl: '/resume-photo-4.jpeg',
-                  },
-                  style: {
-                    templateId: 'greta',
-                    primaryColor: '#f2e6dc',
-                    secondaryColor: '#111111',
-                    fontFamily: 'Calibri',
-                    fontSizeName: 26,
-                    fontSizeHeading: 11.5,
-                    fontSizeBody: 10,
-                    lineHeight: 1.4,
-                    sectionSpacing: 16,
-                  },
-                  sections: [
-                    {
-                      id: 'sec-summary',
-                      kind: 'summary',
-                      title: 'Profile',
-                      isDeletable: false,
-                      isReorderable: true,
-                      content: 'Dedicated Business Administration student and aspiring professional. Possesses a strong work ethic, exceptional organizational skills, and a proactive mindset toward corporate leadership and operational efficiency.',
-                    },
-                    {
-                      id: 'sec-education',
-                      kind: 'education',
-                      title: 'Education',
-                      isDeletable: false,
-                      isReorderable: true,
-                      educationItems: [
-                        {
-                          id: 'edu-1',
-                          institution: 'BORCELLE UNIVERSITY',
-                          degree: 'B.S. in Business Administration',
-                          field: 'Management & Marketing',
-                          startDate: '2020',
-                          endDate: '2024',
-                          grade: '3.9 GPA · Magna Cum Laude',
-                        },
-                        {
-                          id: 'edu-2',
-                          institution: 'BORCELLE SCHOOL',
-                          degree: 'High School Diploma with Honors',
-                          startDate: '2015',
-                          endDate: '2019',
-                          grade: 'Valedictorian',
-                        },
-                      ],
-                    },
-                    {
-                      id: 'sec-languages',
-                      kind: 'languages',
-                      title: 'Language',
-                      isDeletable: true,
-                      isReorderable: true,
-                      genericItems: [
-                        { id: 'lang-1', title: 'Native English.' },
-                        { id: 'lang-2', title: 'Advanced Spanish.' },
-                        { id: 'lang-3', title: 'Conversational French.' },
-                      ],
-                    },
-                    {
-                      id: 'sec-skills',
-                      kind: 'skills',
-                      title: 'Computer Skills',
-                      isDeletable: true,
-                      isReorderable: true,
-                      skillItems: [
-                        { id: 'sk-1', name: 'Text processor (Word / Docs).' },
-                        { id: 'sk-2', name: 'Spreadsheets (Advanced Excel & Formulas).' },
-                        { id: 'sk-3', name: 'Slide presentations (PowerPoint / Canva).' },
-                        { id: 'sk-4', name: 'Database management & CRM software.' },
-                      ],
-                    },
-                    {
-                      id: 'sec-volunteer',
-                      kind: 'volunteer',
-                      title: 'Volunteer Experience',
-                      isDeletable: true,
-                      isReorderable: true,
-                      experienceItems: [
-                        {
-                          id: 'vol-1',
-                          position: 'INGOUDE COMPANY',
-                          company: 'Community Outreach',
-                          startDate: '2024',
-                          endDate: 'present',
-                          current: true,
-                          description: 'Participation in collections to distribute educational supplies and books in low-income schools.',
-                        },
-                        {
-                          id: 'vol-2',
-                          position: 'STUDENT MENTOR',
-                          company: 'Campus Youth Initiative',
-                          startDate: '2022',
-                          endDate: '2023',
-                          current: false,
-                          description: 'Guided incoming freshman students on academic planning and campus resource navigation.',
-                        },
-                      ],
-                    },
-                    {
-                      id: 'sec-certifications',
-                      kind: 'certifications',
-                      title: 'Certifications',
-                      isDeletable: true,
-                      isReorderable: true,
-                      genericItems: [
-                        {
-                          id: 'cert-1',
-                          title: 'Digital Marketing Fundamentals',
-                          subtitle: 'Google Career Certificates',
-                          dateRange: '2023',
-                          description: 'Mastery of SEO, social media strategy, and e-commerce analytics.',
-                        },
-                        {
-                          id: 'cert-2',
-                          title: 'Project Management Associate (CAPM)',
-                          subtitle: 'Project Management Institute',
-                          dateRange: '2024',
-                          description: 'Comprehensive training in agile methodologies, risk management, and scheduling.',
-                        },
-                      ],
-                    },
-                    {
-                      id: 'sec-awards',
-                      kind: 'awards',
-                      title: 'Awards & Honors',
-                      isDeletable: true,
-                      isReorderable: true,
-                      genericItems: [
-                        {
-                          id: 'aw-1',
-                          title: 'Dean’s List Excellence Award',
-                          subtitle: 'Borcelle University',
-                          dateRange: '2021 – 2024',
-                          description: 'Awarded consecutively for maintaining top academic standing across 8 semesters.',
-                        },
-                      ],
-                    },
-                  ],
-                });
-                setIsPickingTemplate(false);
+                window.open('/generator?template=greta', '_blank');
               }}
             >
               <div>
@@ -624,123 +794,7 @@ export default function GeneratorPage() {
             {/* William Executive Designer Template Card */}
             <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', transition: 'all 0.2s', cursor: 'pointer' }}
               onClick={() => {
-                useGeneratorStore.getState().setDocument({
-                  id: 'generator-document',
-                  contact: {
-                    fullName: 'WILLIAM ALEXANDER',
-                    title: 'Managing Chairman',
-                    email: 'youremail@here',
-                    phone: '+123 456 7890',
-                    location: 'Your Location Here 00',
-                    website: 'your website here',
-                    photoUrl: '/resume-photo-5.jpeg',
-                  },
-                  style: {
-                    templateId: 'william',
-                    primaryColor: '#f8f9fa',
-                    secondaryColor: '#0f172a',
-                    fontFamily: 'Calibri',
-                    fontSizeName: 26,
-                    fontSizeHeading: 11.5,
-                    fontSizeBody: 10,
-                    lineHeight: 1.4,
-                    sectionSpacing: 16,
-                  },
-                  sections: [
-                    {
-                      id: 'sec-summary',
-                      kind: 'summary',
-                      title: 'Personal Profile',
-                      isDeletable: false,
-                      isReorderable: true,
-                      content: 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.',
-                    },
-                    {
-                      id: 'sec-experience',
-                      kind: 'experience',
-                      title: 'Work Experience',
-                      isDeletable: false,
-                      isReorderable: true,
-                      experienceItems: [
-                        {
-                          id: 'exp-1',
-                          position: 'Senior Graphic Designer',
-                          company: 'Name of Company',
-                          startDate: '2028',
-                          endDate: 'Present',
-                          current: true,
-                          description: 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem.\n\n• Lorem ipsum dolor sit amet, consectetuer adipiscing elit\n• Lorem ipsum dolor sit amet, consectetuer adipiscing elit',
-                        },
-                        {
-                          id: 'exp-2',
-                          position: 'Senior Graphic Designer',
-                          company: 'Name of Company',
-                          startDate: '2026',
-                          endDate: '2027',
-                          current: false,
-                          description: 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.\n\n• Lorem ipsum dolor sit amet, consectetuer adipiscing elit',
-                        },
-                        {
-                          id: 'exp-3',
-                          position: 'Senior Graphic Designer',
-                          company: 'Name of Company',
-                          startDate: '2024',
-                          endDate: '2026',
-                          current: false,
-                          description: 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.',
-                        },
-                      ],
-                    },
-                    {
-                      id: 'sec-education',
-                      kind: 'education',
-                      title: 'Education',
-                      isDeletable: false,
-                      isReorderable: true,
-                      educationItems: [
-                        {
-                          id: 'edu-1',
-                          institution: 'University Name - Canada',
-                          degree: 'Degree Title',
-                          startDate: '2024',
-                          endDate: '2029',
-                        },
-                        {
-                          id: 'edu-2',
-                          institution: 'University Name - London',
-                          degree: 'Degree Title',
-                          startDate: '2024',
-                          endDate: '2029',
-                        },
-                      ],
-                    },
-                    {
-                      id: 'sec-skills',
-                      kind: 'skills',
-                      title: 'Skills',
-                      isDeletable: true,
-                      isReorderable: true,
-                      skillItems: [
-                        { id: 'sk-1', name: 'Digital Marketing' },
-                        { id: 'sk-2', name: 'Web Development' },
-                        { id: 'sk-3', name: 'Data Analysis' },
-                        { id: 'sk-4', name: 'Project Management' },
-                        { id: 'sk-5', name: 'Graphic Design' },
-                        { id: 'sk-6', name: 'Content Creation' },
-                        { id: 'sk-7', name: 'Programming' },
-                      ],
-                    },
-                    {
-                      id: 'sec-reference',
-                      kind: 'custom',
-                      title: 'Reference',
-                      isDeletable: true,
-                      isReorderable: true,
-                      content: 'Robert Maverick\nCompany\nP: (+123) 456 7890\nE: youremail@here',
-                    },
-                  ],
-                });
-                setIsPickingTemplate(false);
+                window.open('/generator?template=william', '_blank');
               }}
             >
               <div>
@@ -782,11 +836,19 @@ export default function GeneratorPage() {
 
       {/* ── Top Toolbar ─────────────────────────────────────────────────────── */}
       <header className={styles.toolbar}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div>
+        {/* Top-left: mobile-only editable resume name, desktop brand title */}
+        <div className={styles.toolbarBrandWrap}>
+          <div className={styles.toolbarBrandDesktop}>
             <span className={styles.toolbarTitle}>Resume Generator</span>
             <span className={styles.toolbarSub}>Professional single-format resume</span>
           </div>
+          <input
+            className={styles.resumeNameInput}
+            value={doc.name ?? ''}
+            onChange={(e) => updateName(e.target.value)}
+            placeholder="Untitled Resume"
+            aria-label="Resume name"
+          />
         </div>
 
         <div className={styles.toolbarActions}>
@@ -796,20 +858,20 @@ export default function GeneratorPage() {
           </div>
 
 
-          <button className={styles.iconBtn} onClick={toggleTheme} title="Toggle Theme">
+          <button className={`${styles.iconBtn} ${styles.editOnly}`} onClick={toggleTheme} title="Toggle Theme">
             {theme === 'light' ? <Moon size={15} /> : <Sun size={15} />}
-            {theme === 'light' ? 'Dark' : 'Light'}
+            <span className={styles.themeLabel}>{theme === 'light' ? 'Dark' : 'Light'}</span>
           </button>
-          <button className={styles.iconBtn} onClick={undo} disabled={!history.length} title="Undo">
-            <Undo2 size={15} /> Undo
+          <button className={`${styles.iconBtnIconOnly} ${styles.editOnly}`} onClick={undo} disabled={!history.length} title="Undo" aria-label="Undo">
+            <Undo2 size={16} />
           </button>
-          <button className={styles.iconBtn} onClick={redo} disabled={!future.length} title="Redo">
-            <Redo2 size={15} /> Redo
+          <button className={`${styles.iconBtnIconOnly} ${styles.editOnly}`} onClick={redo} disabled={!future.length} title="Redo" aria-label="Redo">
+            <Redo2 size={16} />
           </button>
-          <button className={styles.iconBtn} onClick={() => setShowResetModal(true)} title="Reset">
+          <button className={`${styles.iconBtn} ${styles.editOnly}`} onClick={() => setShowResetModal(true)} title="Reset">
             <RotateCcw size={15} /> Reset
           </button>
-          <button className={styles.downloadBtn} onClick={handleDownloadPDF} disabled={isExporting}>
+          <button className={`${styles.downloadBtn} ${styles.previewOnly}`} onClick={handleDownloadPDF} disabled={isExporting}>
             <Download size={15} />
             {isExporting ? 'Generating…' : 'Download PDF'}
           </button>
@@ -929,13 +991,13 @@ export default function GeneratorPage() {
           className={`${styles.mobileTabBtn} ${activeMobileTab === 'edit' ? styles.mobileTabBtnActive : ''}`}
           onClick={() => setActiveMobileTab('edit')}
         >
-          ✏️ Edit
+          Edit
         </button>
         <button
           className={`${styles.mobileTabBtn} ${activeMobileTab === 'preview' ? styles.mobileTabBtnActive : ''}`}
           onClick={() => setActiveMobileTab('preview')}
         >
-          👁 Preview
+          Preview
         </button>
       </nav>
 

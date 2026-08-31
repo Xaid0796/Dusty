@@ -4,7 +4,7 @@ export const resumeEmeraldLuxuryTemplate: CanvasDocument = {
   "id": "resume-emerald-luxury",
   "category": "resume",
   "name": "Emerald Luxury",
-  "isPremium": true,
+  "isPremium": false,
   "page": {
     "id": "page-1",
     "width": 210,

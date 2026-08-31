@@ -163,6 +163,7 @@ interface GeneratorState {
   future: GeneratorDocument[];
 
   setDocument: (doc: GeneratorDocument, skipHistory?: boolean) => void;
+  updateName: (name: string) => void;
   updateContact: (contact: Partial<GeneratorContact>) => void;
   updateStyle: (style: Partial<GeneratorStyle>) => void;
   updateSectionContent: (sectionId: string, content: string) => void;
@@ -198,7 +199,7 @@ export const useGeneratorStore = create<GeneratorState>((set, get) => {
   };
 
   return {
-    document: null,
+    document: createDefaultDocument(),
     history: [],
     future: [],
 
@@ -209,6 +210,9 @@ export const useGeneratorStore = create<GeneratorState>((set, get) => {
       set({ document: newDoc });
       scheduleSave(newDoc);
     },
+
+    updateName: (name) =>
+      commit((doc) => ({ ...doc, name: name })),
 
     updateContact: (contact) =>
       commit((doc) => ({ ...doc, contact: { ...doc.contact, ...contact } })),

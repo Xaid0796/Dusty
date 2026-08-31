@@ -98,7 +98,7 @@ export const ContextToolbar: React.FC<ContextToolbarProps> = ({ element, zoom })
 
   // Position the toolbar horizontally centered over the element bounding box
   const toolbarLeft = pxX + pxW / 2;
-  const toolbarTop = pxY - 48;
+  const toolbarTop = pxY - 60;
 
   const isSingle = selectedElements.length === 1;
   const isText = isSingle && element.type === 'text';

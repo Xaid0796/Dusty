@@ -3,10 +3,74 @@ import fs from 'fs';
 import path from 'path';
 import { templateRegistry } from '@/templates/registry';
 
+// This route uses Node.js filesystem APIs (fs) to read/write template files on
+// the server. Declaring the Node.js runtime is REQUIRED for serverless
+// deployments (e.g. Vercel) — without it the route fails at runtime because the
+// Edge runtime does not provide fs/path.
+export const runtime = 'nodejs';
+
+// Restrict template IDs / filenames to safe URL+file friendly characters to
+// prevent path traversal and arbitrary file writes.
+const SAFE_ID = /^[a-z0-9][a-z0-9-]*$/;
+const SAFE_NAME = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
+const SAFE_FILENAME = /^[a-z0-9][a-z0-9-]*\.ts$/;
+const CATEGORIES = new Set(['resume', 'biodata', 'cv', 'cover-letter']);
+
+/** Parse a template JSON object from a TypeScript file without using eval(). */
+const parseTemplateJson = (content: string): Record<string, unknown> | null => {
+    // Match the JSON object after `=`:  export const name: CanvasDocument = { ... };
+    const jsonMatch = content.match(/=\s*({[\s\S]*?});?\s*$/);
+    if (!jsonMatch) return null;
+    try {
+        const parsed = JSON.parse(jsonMatch[1]);
+        return parsed;
+    } catch {
+        // Fallback: if the template data contains a trailing comma we can't parse,
+        // try to strip trailing commas before the closing brace.
+        try {
+            const cleaned = jsonMatch[1].replace(/,\s*([}\]])/g, '$1');
+            return JSON.parse(cleaned);
+        } catch {
+            return null;
+        }
+    }
+};
+
 const isTemplateFile = (content: string, templateId: string): boolean => {
     const idPattern = new RegExp(`"id"\\s*:\\s*["']${templateId}["']`);
     const idPatternSingle = new RegExp(`'id'\\s*:\\s*["']${templateId}["']`);
     return idPattern.test(content) || idPatternSingle.test(content);
+};
+
+/** Convert a kebab-case / snake_case slug to a camelCase identifier (e.g. "my-template" -> "myTemplate"). */
+const toCamelCase = (value: string): string =>
+    value.replace(/-+([a-z0-9])/g, (_, c: string) => c.toUpperCase()).replace(/-+/g, '');
+
+/**
+ * Resolve the ACTUAL named export of a template file. Template files created by
+ * this API export `<camelCaseId>Template` (or the bare camelCase id). This keeps
+ * the global `src/templates/index.ts` import in sync regardless of which naming
+ * convention a file uses, so the "edit template from admin" flow never produces
+ * `ts(2724)` "has no exported member" errors again.
+ */
+const resolveTemplateExport = (fileContent: string, templateId: string): string | null => {
+    const constMatch = fileContent.match(/export\s+const\s+(\w+)\s*:/);
+    if (constMatch) return constMatch[1];
+
+    // Fallback: derive the conventional export name from the template id.
+    const camel = toCamelCase(templateId.replace(/^resume-/, ''));
+    return `${camel}Template`;
+};
+
+/** Resolve a template file path safely (no path traversal) and return absolute path. */
+const safeResolve = (category: string, filename: string): string | null => {
+    if (!CATEGORIES.has(category)) return null;
+    if (!SAFE_FILENAME.test(filename)) return null;
+    const dir = path.join(process.cwd(), 'src', 'templates', category);
+    const full = path.join(dir, filename);
+    // Ensure the resolved path stays inside the category directory.
+    if (!full.startsWith(dir + path.sep)) return null;
+    return full;
 };
 
 export async function GET(request: Request) {
@@ -17,6 +81,9 @@ export async function GET(request: Request) {
     if (!id) {
         return NextResponse.json({ error: 'Missing template id' }, { status: 400 });
     }
+    if (!SAFE_ID.test(id) || !CATEGORIES.has(category)) {
+        return NextResponse.json({ error: 'Invalid template id or category.' }, { status: 400 });
+    }
 
     try {
         const categoryDir = path.join(process.cwd(), 'src', 'templates', category);
@@ -24,12 +91,12 @@ export async function GET(request: Request) {
             const files = fs.readdirSync(categoryDir);
             for (const f of files) {
                 if (f === 'index.ts') continue;
+                if (!/\.ts$/.test(f)) continue;
                 const filePath = path.join(categoryDir, f);
                 const content = fs.readFileSync(filePath, 'utf8');
                 if (isTemplateFile(content, id) || f === `resume-${id}.ts` || f === `${id}.ts`) {
-                    const jsonMatch = content.match(/=\s*({[\s\S]*});?\s*$/);
-                    if (jsonMatch) {
-                        const parsed = Function(`return ${jsonMatch[1]}`)();
+                    const parsed = parseTemplateJson(content);
+                    if (parsed) {
                         return NextResponse.json(parsed);
                     }
                 }
@@ -44,7 +111,12 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { filename, exportName, templateId, category, displayName, document } = body;
+        const { filename, exportName, templateId, category, displayName, isPremium, document, thumbnail } = body;
+        // Prefer an explicitly provided thumbnail (admin page sends both the
+        // top-level `thumbnail` and `document.thumbnail`); fall back to the
+        // document's embedded value so we never drop an uploaded image.
+        const resolvedThumbnail = thumbnail || (document && document.thumbnail) || undefined;
+        document.thumbnail = resolvedThumbnail;
 
         // Validation
         if (!filename || !exportName || !templateId || !category || !displayName || !document) {
@@ -54,40 +126,82 @@ export async function POST(request: Request) {
             );
         }
 
-        // Smart Update / Overwrite if template already exists
-        const categories = ['resume', 'biodata', 'cv', 'cover-letter'];
-        for (const cat of categories) {
+        // ── Input sanitization (prevents path traversal & arbitrary writes) ──
+        if (!CATEGORIES.has(category)) {
+            return NextResponse.json({ error: `Invalid category "${category}".` }, { status: 400 });
+        }
+        if (!SAFE_ID.test(templateId)) {
+            return NextResponse.json(
+                { error: 'templateId may only contain lowercase letters, numbers, and hyphens.' },
+                { status: 400 }
+            );
+        }
+        if (!SAFE_NAME.test(exportName)) {
+            return NextResponse.json(
+                { error: 'exportName must be a valid TypeScript identifier.' },
+                { status: 400 }
+            );
+        }
+        const cleanFilename = filename.endsWith('.ts') ? filename : `${filename}.ts`;
+        const baseName = cleanFilename.replace(/\.ts$/, '');
+        if (!SAFE_FILENAME.test(cleanFilename) || !SAFE_ID.test(baseName)) {
+            return NextResponse.json(
+                { error: 'filename must be a safe lowercase slug ending in .ts (e.g. my-template.ts).' },
+                { status: 400 }
+            );
+        }
+
+        // Basic shape validation of the incoming CanvasDocument payload.
+        if (!document.page || typeof document.page.width !== 'number' || typeof document.page.height !== 'number' || !Array.isArray(document.elements)) {
+            return NextResponse.json(
+                { error: 'document must be a valid CanvasDocument (page.width, page.height, and elements[] are required).' },
+                { status: 400 }
+            );
+        }
+
+        // ── Resolve an existing template file for this templateId (if any) ──
+        // IMPORTANT: We do NOT blindly delete-and-recreate. That "disappears" the
+        // original design whenever the admin canvas isn't an exact copy of the
+        // saved template (stale GET, partial metadata-sync, blank canvas for a
+        // template missing from the registry, etc.) and can also break the
+        // category index when the export name differs. Instead we load the current
+        // file so we can PRESERVE its real page/elements design and only patch
+        // safe metadata (name, category, isPremium, thumbnail) below.
+        let existingFilePath: string | null = null;
+        let existingCategory: string | null = null;
+        let existingExportName: string | null = null;
+        let existingContent: string | null = null;
+        for (const cat of CATEGORIES) {
             const catDir = path.join(process.cwd(), 'src', 'templates', cat);
             if (!fs.existsSync(catDir)) continue;
             const files = fs.readdirSync(catDir);
             for (const f of files) {
-                if (f === 'index.ts') continue;
+                if (f === 'index.ts' || !/\.ts$/.test(f)) continue;
                 const filePath = path.join(catDir, f);
                 const content = fs.readFileSync(filePath, 'utf8');
                 if (isTemplateFile(content, templateId) || f === `resume-${templateId}.ts` || f === `${templateId}.ts`) {
-                    const constMatch = content.match(/export\s+const\s+(\w+)\s*:/);
-                    const constName = constMatch ? constMatch[1] : null;
-                    try {
-                        fs.unlinkSync(filePath);
-                    } catch (e) { }
-
-                    const indexPath = path.join(catDir, 'index.ts');
-                    if (fs.existsSync(indexPath)) {
-                        let indexContent = fs.readFileSync(indexPath, 'utf8');
-                        if (constName) {
-                            const importRegex = new RegExp(`import\\s+\\{\\s*${constName}\\s*\\}\\s+from\\s+['\"].*?['\"];?\\s*\\n?`, 'g');
-                            indexContent = indexContent.replace(importRegex, '');
+                    if (f !== cleanFilename) {
+                        // The template exists but under a different filename.
+                        // Require explicit confirmation before we rename/move it.
+                        if (body.overwriteConfirmation !== true && body.overwriteConfirmation !== 'true') {
+                            return NextResponse.json({
+                                error: `Template "${templateId}" already exists as file "${f}". Set overwriteConfirmation=true to overwrite with "${cleanFilename}".`,
+                                existingFile: f,
+                            }, { status: 409 });
                         }
-                        const entryRegex = new RegExp(`['"]?${templateId}['"]?\\s*:\\s*\\w+,?\\s*\\n?`, 'g');
-                        indexContent = indexContent.replace(entryRegex, '');
-                        fs.writeFileSync(indexPath, indexContent, 'utf8');
+                    }
+                    // Prefer the file matching cleanFilename; fallback to first match.
+                    if (!existingFilePath || f === cleanFilename) {
+                        existingFilePath = filePath;
+                        existingCategory = cat;
+                        existingContent = content;
+                        const constMatch = content.match(/export\s+const\s+(\w+)\s*:/);
+                        existingExportName = constMatch ? constMatch[1] : null;
                     }
                 }
             }
         }
 
-        const cleanFilename = filename.endsWith('.ts') ? filename : `${filename}.ts`;
-        const baseName = cleanFilename.replace(/\.ts$/, '');
         const categoryDir = path.join(process.cwd(), 'src', 'templates', category);
 
         if (!fs.existsSync(categoryDir)) {
@@ -97,21 +211,107 @@ export async function POST(request: Request) {
             );
         }
 
-        // 1. Write template file
-        const filePath = path.join(categoryDir, cleanFilename);
-        const fileContent = `import { CanvasDocument } from '@/canvas/types';
+        // 0. Persist an uploaded thumbnail as a static file so the template keeps a
+        // stable, lightweight URL. A base64 data URL from the Admin Builder would
+        // otherwise bloat the .ts file and is not a usable <img> src across rebuilds.
+        let thumbnailRef: string | undefined;
+        if (typeof document.thumbnail === 'string' && document.thumbnail.startsWith('data:image')) {
+            try {
+                const thumbnailsDir = path.join(process.cwd(), 'public', 'thumbnails');
+                if (!fs.existsSync(thumbnailsDir)) fs.mkdirSync(thumbnailsDir, { recursive: true });
+                const extMatch = document.thumbnail.match(/^data:image\/(png|jpeg|webp);base64,/);
+                const ext = extMatch && extMatch[1] === 'jpeg' ? 'jpg' : extMatch && extMatch[1] === 'webp' ? 'webp' : 'png';
+                const base64 = document.thumbnail.replace(/^data:image\/\w+;base64,/, '');
+                // Remove any old thumbnail files for this template first
+                for (const tf of fs.readdirSync(thumbnailsDir)) {
+                    if (tf === `${templateId}.png` || tf === `${templateId}.jpg` || tf === `${templateId}.webp`) {
+                        try { fs.unlinkSync(path.join(thumbnailsDir, tf)); } catch (e) { }
+                    }
+                }
+                const thumbPath = path.join(thumbnailsDir, `${templateId}.${ext}`);
+                fs.writeFileSync(thumbPath, Buffer.from(base64, 'base64'));
+                // Cache-busting: a re-uploaded thumbnail reuses the same static path
+                // (e.g. /thumbnails/my-template.png), so browsers/hosting caches would
+                // keep serving the old image. Appending a fresh version query param
+                // guarantees the new thumbnail is always fetched after publish.
+                thumbnailRef = `/thumbnails/${templateId}.${ext}?v=${Date.now()}`;
+            } catch (e) {
+                console.error('Failed to persist thumbnail file:', e);
+            }
+        }
 
-export const ${exportName}: CanvasDocument = ${JSON.stringify(
-            {
+        // ── Design-preserving merge ──
+        // If an existing template file was found and the incoming canvas document
+        // is effectively empty (blank editor, thumbnail-only update, or a template
+        // the registry failed to load into the admin canvas), keep the EXISTING
+        // page/elements design and only apply the new metadata + thumbnail.
+        // This guarantees a push NEVER wipes out the saved layout.
+        const existingParsed = existingContent ? parseTemplateJson(existingContent) : null;
+        const existingElements = (existingParsed && Array.isArray((existingParsed as any).elements) ? (existingParsed as any).elements : []) as unknown[];
+        const incomingHasElements = Array.isArray(document.elements) && document.elements.length > 0;
+        const preserveDesign = existingElements.length > 0 && !incomingHasElements;
+
+        let finalDoc: Record<string, unknown>;
+        if (preserveDesign) {
+            finalDoc = {
+                ...(existingParsed as Record<string, unknown>),
+                id: templateId,
+                name: displayName,
+                category: category,
+                isPremium: typeof isPremium === 'boolean' ? isPremium : document.isPremium,
+                thumbnail: thumbnailRef || resolvedThumbnail || (existingParsed as any).thumbnail,
+            };
+        } else {
+            finalDoc = {
                 ...document,
                 id: templateId,
                 name: displayName,
                 category: category,
-            },
+                isPremium: typeof isPremium === 'boolean' ? isPremium : document.isPremium,
+                thumbnail: thumbnailRef || document.thumbnail,
+            };
+        }
+
+        // If the existing file lives in a DIFFERENT category or filename than the
+        // target (a confirmed move/rename), remove the old file + its index entry
+        // now that the new file will be written below.
+        if (existingFilePath && existingCategory && existingFilePath !== path.join(categoryDir, cleanFilename)) {
+            try {
+                fs.unlinkSync(existingFilePath);
+                const oldIndexPath = path.join(process.cwd(), 'src', 'templates', existingCategory, 'index.ts');
+                if (fs.existsSync(oldIndexPath)) {
+                    let oldIndexContent = fs.readFileSync(oldIndexPath, 'utf8');
+                    if (existingExportName && SAFE_NAME.test(existingExportName)) {
+                        const oldImportRegex = new RegExp(`import\\s+\\{\\s*${existingExportName}\\s*\\}\\s+from\\s+['\"].*?['\"];?\\s*\\n?`, 'g');
+                        oldIndexContent = oldIndexContent.replace(oldImportRegex, '');
+                        const oldAltImportRegex = new RegExp(`import\\s+.*?from\\s+['\"]\\.\\/${path.basename(existingFilePath).replace(/\.ts$/, '')}['\"].*?;?\\s*\\n?`, 'g');
+                        oldIndexContent = oldIndexContent.replace(oldAltImportRegex, '');
+                    }
+                    const oldEntryRegex = new RegExp(`['"]?${templateId}['"]?\\s*:\\s*\\w+,?\\s*\\n?`, 'g');
+                    oldIndexContent = oldIndexContent.replace(oldEntryRegex, '');
+                    fs.writeFileSync(oldIndexPath, oldIndexContent, 'utf8');
+                }
+            } catch (e) { }
+        }
+
+        // 1. Write template file
+        const filePath = path.join(categoryDir, cleanFilename);
+        // Compatibility alias: the global src/templates/index.ts historically imports
+        // the bare camelCase id (e.g. coverLetterBoldGeometric), while the category
+        // index.ts imports the `Template`-suffixed name (e.g. coverLetterBoldGeometricTemplate).
+        // Exporting BOTH keeps every importer valid after an admin edit/re-publish.
+        const compatAlias = toCamelCase(templateId.replace(/^resume-/, ''));
+        const aliasExportLine =
+            compatAlias && compatAlias !== exportName
+                ? `\nexport { ${exportName} as ${compatAlias} };\n`
+                : '';
+        const fileContent = `import { CanvasDocument } from '@/canvas/types';
+
+export const ${exportName}: CanvasDocument = ${JSON.stringify(
+            finalDoc,
             null,
             2
-        )};
-`;
+        )};${aliasExportLine}`;
 
         fs.writeFileSync(filePath, fileContent, 'utf8');
 
@@ -120,9 +320,14 @@ export const ${exportName}: CanvasDocument = ${JSON.stringify(
         if (fs.existsSync(indexPath)) {
             let indexContent = fs.readFileSync(indexPath, 'utf8');
 
+            // Remove any stale import pointing at this same file under a previous
+            // const name (e.g. after a re-publish that changed the export name).
+            const staleImportRegex = new RegExp(`import\\s+\\{[^}]*\\}\\s+from\\s+['\"]\\.\\/${baseName}['\"];?\\s*\\n?`, 'g');
+            indexContent = indexContent.replace(staleImportRegex, '');
+
             // Add import statement only if it doesn't already exist
             const importStatement = `import { ${exportName} } from './${baseName}';`;
-            if (!indexContent.includes(`from './${baseName}'`)) {
+            if (!indexContent.includes(`import { ${exportName} } from './${baseName}'`)) {
                 if (indexContent.includes("import { CanvasDocument } from '@/canvas/types';")) {
                     indexContent = indexContent.replace(
                         "import { CanvasDocument } from '@/canvas/types';",
@@ -173,6 +378,10 @@ export async function DELETE(request: Request) {
             return NextResponse.json({ error: 'Missing templateId or category.' }, { status: 400 });
         }
 
+        if (!CATEGORIES.has(category) || !SAFE_ID.test(templateId)) {
+            return NextResponse.json({ error: 'Invalid templateId or category.' }, { status: 400 });
+        }
+
         const categoryDir = path.join(process.cwd(), 'src', 'templates', category);
         let targetFilename = filename;
         let constName: string | null = null;
@@ -182,6 +391,7 @@ export async function DELETE(request: Request) {
                 const files = fs.readdirSync(categoryDir);
                 for (const f of files) {
                     if (f === 'index.ts') continue;
+                    if (!/\.ts$/.test(f)) continue;
                     const filePath = path.join(categoryDir, f);
                     try {
                         const content = fs.readFileSync(filePath, 'utf8');
@@ -193,7 +403,7 @@ export async function DELETE(request: Request) {
                 }
             }
 
-            if (targetFilename) {
+            if (targetFilename && SAFE_FILENAME.test(targetFilename)) {
                 const filePath = path.join(categoryDir, targetFilename);
                 if (fs.existsSync(filePath)) {
                     try {
@@ -210,7 +420,7 @@ export async function DELETE(request: Request) {
             if (fs.existsSync(indexPath)) {
                 try {
                     let indexContent = fs.readFileSync(indexPath, 'utf8');
-                    if (constName) {
+                    if (constName && SAFE_NAME.test(constName)) {
                         const importRegex = new RegExp(`import\\s+\\{\\s*${constName}\\s*\\}\\s+from\\s+['\"].*?['\"];?\\s*\\n?`, 'g');
                         indexContent = indexContent.replace(importRegex, '');
                     }
@@ -274,7 +484,7 @@ export async function DELETE(request: Request) {
         if (fs.existsSync(thumbnailsDir)) {
             const thumbFiles = fs.readdirSync(thumbnailsDir);
             for (const tf of thumbFiles) {
-                if (tf === `${templateId}.png` || tf === `resume-${templateId}.png` || (filename && tf === `${filename.replace(/\.ts$/, '')}.png`)) {
+                if (tf === `${templateId}.png` || tf === `resume-${templateId}.png` || (filename && SAFE_FILENAME.test(filename) && tf === `${filename.replace(/\.ts$/, '')}.png`)) {
                     try {
                         fs.unlinkSync(path.join(thumbnailsDir, tf));
                     } catch (e) { }

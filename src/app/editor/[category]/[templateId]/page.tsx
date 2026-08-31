@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useMemo } from 'react';
+import { Lottie } from 'lottie-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useCanvasStore } from '@/canvas/store';
 import { sampleTemplates } from '@/templates/registry';
@@ -11,7 +12,9 @@ import { CanvasStage } from './components/CanvasStage';
 import { PropertiesPanel } from './components/PropertiesPanel';
 import { CommandPalette } from './components/CommandPalette';
 import { ImageCropModal } from './components/ImageCropModal';
+import { Sun, Moon, Info } from 'lucide-react';
 import { CanvasDocument, CanvasElement } from '@/canvas/types';
+import { useIsMobileOrTouch } from '@/utils/device';
 import styles from './editor.module.css';
 
 const safeSetLocalStorage = (key: string, value: string) => {
@@ -40,17 +43,16 @@ export default function GenericCanvasEditorPage() {
     selectElement,
     snapToGrid,
     setSnapToGrid,
+    showGrid,
+    setShowGrid,
   } = useCanvasStore();
 
   const [isClient, setIsClient] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved');
   const [mobileTab, setMobileTab] = useState<'canvas' | 'properties' | 'tools'>('canvas');
-  const [showGrid, setShowGrid] = useState(false);
-  const [showRulers, setShowRulers] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
-  const [pendingShapePanel, setPendingShapePanel] = useState(false);
   const [pendingIconPanel, setPendingIconPanel] = useState(false);
 
   // Modal states
@@ -59,7 +61,74 @@ export default function GenericCanvasEditorPage() {
   const [pendingDraft, setPendingDraft] = useState<CanvasDocument | null>(null);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
+  const [showMobileInfoModal, setShowMobileInfoModal] = useState(false);
+  const [showDesktopInfoModal, setShowDesktopInfoModal] = useState(false);
   const isLeavingRef = useRef(false);
+
+  // ── Mobile / touch detection + one-time Info button attention blink ──
+  const isMobileOrTouch = useIsMobileOrTouch();
+  const [infoBlink, setInfoBlink] = useState(false);
+  const infoBlinkTriggeredRef = useRef(false);
+
+  // Blink the mobile Info button with a green glow 3x immediately upon
+  // entering the editor on a mobile / touch device. Fires exactly once.
+  useEffect(() => {
+    if (!isMobileOrTouch || infoBlinkTriggeredRef.current) return;
+    infoBlinkTriggeredRef.current = true;
+    setInfoBlink(true);
+    const timer = setTimeout(() => setInfoBlink(false), 3000);
+    return () => clearTimeout(timer);
+  }, [isMobileOrTouch]);
+
+  // ── Landscape orientation → 4-blink green glow on mobile / touch ──
+  const [isLandscape, setIsLandscape] = useState(false);
+  const [infoBlinkLandscape, setInfoBlinkLandscape] = useState(false);
+  const landscapeBlinkActiveRef = useRef(false);
+  const wasLandscapeRef = useRef(false);
+
+  // Listen to orientation changes (matchMedia + resize + orientationchange).
+  // The 4-blink glow fires exactly once per portrait→landscape transition and
+  // never restarts on intermediate resize events while the animation is running.
+  useEffect(() => {
+    if (!isMobileOrTouch) return;
+
+    const mql = window.matchMedia('(orientation: landscape)');
+    const apply = () => {
+      const landscape = mql.matches || window.innerWidth > window.innerHeight;
+      setIsLandscape(landscape);
+
+      // Trigger only on the portrait→landscape edge, not on every resize.
+      if (landscape && !wasLandscapeRef.current && !landscapeBlinkActiveRef.current) {
+        landscapeBlinkActiveRef.current = true;
+        setInfoBlinkLandscape(true);
+      }
+      wasLandscapeRef.current = landscape;
+    };
+
+    apply();
+    mql.addEventListener?.('change', apply);
+    window.addEventListener('resize', apply);
+    window.addEventListener('orientationchange', apply);
+    return () => {
+      mql.removeEventListener?.('change', apply);
+      window.removeEventListener('resize', apply);
+      window.removeEventListener('orientationchange', apply);
+    };
+  }, [isMobileOrTouch]);
+
+  // Clear the landscape blink *class* once the animation finishes, but keep the
+  // session guard (landscapeBlinkActiveRef) locked. This ensures ONLY the first
+  // portrait→landscape tilt of this editor session triggers the glow, and later
+  // tilts (even after this animation ends) do not re-trigger it. The guard is a
+  // fresh ref on every page mount, so entering a new template resets the
+  // one-time behavior automatically — no per-orientation-change replay.
+  useEffect(() => {
+    if (!infoBlinkLandscape) return;
+    const timer = setTimeout(() => {
+      setInfoBlinkLandscape(false);
+    }, 3400);
+    return () => clearTimeout(timer);
+  }, [infoBlinkLandscape]);
 
   // Transparent image box workflow states
   const [showTransPrompt, setShowTransPrompt] = useState(false);
@@ -85,6 +154,15 @@ export default function GenericCanvasEditorPage() {
     setTheme(next);
     safeSetLocalStorage('dusty_editor_theme', next);
   };
+
+  // Set default zoom to 45% strictly for mobile / touch devices
+  useEffect(() => {
+    if (!isClient) return;
+    const isMobileOrTouch = window.innerWidth <= 768 || window.matchMedia('(pointer: coarse)').matches;
+    if (isMobileOrTouch) {
+      useCanvasStore.getState().setZoom(45);
+    }
+  }, [isClient]);
 
   // ── Draft validation ────────────────────────────────────
   const isValidCanvasDocument = (data: any): data is CanvasDocument => {
@@ -227,6 +305,7 @@ export default function GenericCanvasEditorPage() {
   const isDirty = useMemo(() => {
     if (!doc || !originalDocument) return false;
     if (doc.name !== originalDocument.name) return true;
+    if ((doc.pageCount || 1) !== (originalDocument.pageCount || 1)) return true;
     if (doc.elements.length !== originalDocument.elements.length) return true;
 
     const getProps = (el: CanvasElement) => {
@@ -333,18 +412,33 @@ export default function GenericCanvasEditorPage() {
     const reader = new FileReader();
     reader.onload = (event) => {
       const dataUrl = event.target?.result as string;
-      if (doc) {
-        const maxZ = doc.elements.reduce((max, el) => Math.max(max, el.zIndex), 0);
-        const size = { width: 60, height: 60 };
-        const x = Math.max(8, doc.page.width / 2 - size.width / 2);
-        const y = Math.max(8, doc.page.height / 2 - size.height / 2);
-        useCanvasStore.getState().addElement({
-          id: `image-${Date.now()}`, type: 'image', label: 'Image',
-          x, y, ...size, rotation: 0, zIndex: maxZ + 1, visible: true, locked: false,
-          src: dataUrl, objectFit: 'cover', objectPosition: '50% 50%',
-          cropX: 50, cropY: 50, zoom: 1, borderRadius: 0, opacity: 1,
-        });
-      }
+      const img = new Image();
+      img.onload = () => {
+        const natW = img.naturalWidth || 100;
+        const natH = img.naturalHeight || 100;
+        const aspect = natW / natH;
+
+        let width = 60;
+        let height = 60 / aspect;
+        if (aspect < 1) {
+          height = 60;
+          width = 60 * aspect;
+        }
+
+        if (doc) {
+          const maxZ = doc.elements.reduce((max, el) => Math.max(max, el.zIndex), 0);
+          const x = Math.max(8, doc.page.width / 2 - width / 2);
+          const y = Math.max(8, doc.page.height / 2 - height / 2);
+          useCanvasStore.getState().addElement({
+            id: `image-${Date.now()}`, type: 'image', label: file.name ? file.name.replace(/\.[^/.]+$/, '') : 'Image',
+            x, y, width, height, rotation: 0, zIndex: maxZ + 1, visible: true, locked: false,
+            src: dataUrl, objectFit: 'contain', objectPosition: '50% 50%',
+            cropX: 50, cropY: 50, zoom: 1, borderRadius: 0, opacity: 1,
+          });
+        }
+      };
+      img.src = dataUrl;
+
       if (e.target) e.target.value = '';
     };
     reader.readAsDataURL(file);
@@ -577,25 +671,51 @@ export default function GenericCanvasEditorPage() {
         onBack={handleBack}
         isDirty={isDirty}
         onReset={() => setShowResetModal(true)}
-        theme={theme}
-        onToggleTheme={toggleTheme}
+        previewMode={previewMode}
+        onTogglePreview={() => setPreviewMode((v) => !v)}
       />
 
       {/* ── EDITOR BODY (left sidebar + canvas + right panel) ── */}
-      <div className={styles.editorBody}>
+      <div className={styles.editorBody} style={{ position: 'relative' }}>
+
+        {/* Floating Theme Toggle */}
+        <button
+          onClick={toggleTheme}
+          title={theme === 'light' ? 'Switch to Dark Theme' : 'Switch to Light Theme'}
+          className={styles.themeToggle}
+        >
+          {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+        </button>
+
+        {/* Floating Desktop Info Button */}
+        {!isMobileOrTouch && (
+          <button
+            onClick={() => setShowDesktopInfoModal(true)}
+            title="Editor Guide"
+            className={styles.desktopInfoBtn}
+          >
+            <Info size={16} />
+          </button>
+        )}
+
+        {/* Floating Mobile Info Button (Strictly for mobile / touch devices) */}
+        {isMobileOrTouch && (
+          <button
+            onClick={() => setShowMobileInfoModal(true)}
+            title="Mobile Editor Guide"
+            className={`${styles.mobileInfoBtn} ${infoBlink ? styles.mobileInfoBtnBlink : ''} ${infoBlinkLandscape ? styles.mobileInfoBtnBlinkLandscape : ''}`}
+          >
+            <Info size={16} />
+          </button>
+        )}
 
         {/* LEFT SIDEBAR - shown on desktop and mobile 'tools' tab */}
         <LeftToolbar
           onUploadRasterImage={() => sidebarImageInputRef.current?.click()}
           onUploadSVG={() => svgInputRef.current?.click()}
-          snapToGrid={snapToGrid}
-          onToggleSnap={() => setSnapToGrid(!snapToGrid)}
-          showGrid={showGrid}
-          onToggleGrid={() => setShowGrid((v) => !v)}
-          showRulers={showRulers}
-          onToggleRulers={() => setShowRulers((v) => !v)}
           previewMode={previewMode}
-          onTogglePreview={() => setPreviewMode((v) => !v)}
+          mobileVisible={mobileTab === 'tools'}
+          onReset={() => setShowResetModal(true)}
         />
 
         {/* CANVAS SCROLL AREA */}
@@ -604,7 +724,6 @@ export default function GenericCanvasEditorPage() {
             <CanvasStage
               pageRef={pageRef}
               showGrid={showGrid}
-              showRulers={showRulers}
               previewMode={previewMode}
             />
           </div>
@@ -617,6 +736,7 @@ export default function GenericCanvasEditorPage() {
               element={selectedElement}
               onUploadClick={() => fileInputRef.current?.click()}
               previewMode={previewMode}
+              theme={theme}
             />
           </div>
         </aside>
@@ -676,6 +796,64 @@ export default function GenericCanvasEditorPage() {
         </div>
       )}
 
+      {/* ── MOBILE EDITOR GUIDE MODAL ── */}
+      {showMobileInfoModal && (
+        <div className={styles.modalOverlay} style={{ zIndex: 999999 }}>
+          <div className={styles.modalContent} style={{ maxWidth: 420, width: '90vw', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}>
+            <h3 className={styles.modalHeader}>Mobile Editor Guide</h3>
+            <div className={styles.modalBody} style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 10, fontSize: 12, lineHeight: 1.4, overflowY: 'auto', paddingRight: 4, maxHeight: '60vh' }}>
+              <p style={{ margin: 0, fontWeight: 600 }}>Master your mobile editing experience with these 12 essential tips:</p>
+              <ol style={{ paddingLeft: 18, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <li><strong>Default Zoom:</strong> The canvas automatically opens at 45% default zoom, tailored for touchscreens.</li>
+                <li><strong>Zoom Controls:</strong> Use the floating zoom bar at the bottom center to adjust magnification between 20% and 500%.</li>
+                <li><strong>Panning & Navigation:</strong> Drag with a single finger on empty canvas workspace areas to pan smoothly.</li>
+                <li><strong>Bottom Tab Bar:</strong> Quickly switch between <em>Tools</em>, <em>Canvas</em>, and <em>Properties</em> using the bottom navigation menu.</li>
+                <li><strong>Element Selection:</strong> Tap directly on any text, shape, image, or icon on the canvas to select it.</li>
+                <li><strong>Dragging & Repositioning:</strong> Touch and drag selected elements to reposition them with precision across the layout.</li>
+                <li><strong>Text Editing:</strong> Double-tap any text element on the canvas to open inline editing and update text content.</li>
+                <li><strong>Properties Panel:</strong> Switch to the Properties tab to modify colors, fonts, sizing, padding, and alignment.</li>
+                <li><strong>Adding Elements:</strong> Use the Tools panel to browse, search, and insert icons, shapes, QR codes, or charts.</li>
+                <li><strong>Deselection of Elements:</strong> Tap on empty area of the canvas To deselect.</li>
+                <li><strong>Unified Scrolling:</strong> Side panels (such as Icons & Elements) scroll smoothly as a single unit including headers.</li>
+                <li><strong>Saving & Exporting:</strong> Use the top bar actions to save your progress or export your completed resume to PDF.</li>
+              </ol>
+            </div>
+            <div className={styles.modalFooter} style={{ marginTop: 16, flexShrink: 0 }}>
+              <button className={`${styles.modalBtn} ${styles.modalBtnPrimary}`} onClick={() => setShowMobileInfoModal(false)} style={{ width: '100%' }}>Got it</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── DESKTOP EDITOR GUIDE MODAL ── */}
+      {showDesktopInfoModal && (
+        <div className={styles.modalOverlay} style={{ zIndex: 999999 }}>
+          <div className={styles.modalContent} style={{ maxWidth: 480, width: '90vw', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}>
+            <h3 className={styles.modalHeader}>Editor Guide</h3>
+            <div className={styles.modalBody} style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 10, fontSize: 13, lineHeight: 1.5, overflowY: 'auto', paddingRight: 4, maxHeight: '60vh' }}>
+              <p style={{ margin: 0, fontWeight: 600 }}>Master your editing workflow with these essential tips:</p>
+              <ul style={{ paddingLeft: 20, margin: 0, display: 'flex', flexDirection: 'column', gap: 8, listStyleType: 'disc' }}>
+                <li>Canvas loads at 100% default scale, optimised for high-resolution visual layout editing.</li>
+                <li>Use the zoom slider or scroll wheel over the canvas to magnify or reduce view from 20% to 500%.</li>
+                <li>Click and drag with the left mouse button on any empty canvas workspace area to pan smoothly across the document.</li>
+                <li>Access the left toolbar to quickly browse, search, and insert shapes, icons, QR codes, or charts.</li>
+                <li>Click directly on any text, shape, image, or frame on the canvas to select and manipulate it.</li>
+                <li>Drag selection handles or edges of selected elements to resize and rotate with absolute precision.</li>
+                <li>Double-click any text element on the canvas to open inline editing and update content instantly.</li>
+                <li>Use the right-side properties panel to modify colors, typography, border styling, padding, and alignment.</li>
+                <li>Click outside any element onto the canvas background to deselect current selections.</li>
+                <li>Side panels feature smooth integrated scrolling across all category tools and element options.</li>
+                <li>Utilize the top bar actions to save progress, reset templates, or export completed documents to PDF.</li>
+                <li>Press keyboard delete or backspace shortcuts while an element is selected to remove it from the layout.</li>
+              </ul>
+            </div>
+            <div className={styles.modalFooter} style={{ marginTop: 16, flexShrink: 0 }}>
+              <button className={`${styles.modalBtn} ${styles.modalBtnPrimary}`} onClick={() => setShowDesktopInfoModal(false)} style={{ width: '100%' }}>Got it</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── TRANSPARENT IMAGE QUESTION MODAL ── */}
       {showTransPrompt && (
         <div className={styles.modalOverlay}>
@@ -699,7 +877,9 @@ export default function GenericCanvasEditorPage() {
                 className={`${styles.modalBtn} ${styles.modalBtnSecondary}`}
                 onClick={() => {
                   if (selectedImgElementId && pendingTransImgSrc) {
-                    updateElement(selectedImgElementId, { src: pendingTransImgSrc, backgroundColor: 'transparent' } as any);
+                    const freshId = selectedImgElementId;
+                    updateElement(freshId, { src: pendingTransImgSrc, originalSrc: pendingTransImgSrc, backgroundColor: 'transparent' } as any);
+                    useCanvasStore.getState().setCroppingId(freshId);
                   }
                   setShowTransPrompt(false);
                   setPendingTransImgSrc('');
@@ -767,7 +947,9 @@ export default function GenericCanvasEditorPage() {
                 className={`${styles.modalBtn} ${styles.modalBtnPrimary}`}
                 onClick={() => {
                   if (selectedImgElementId && pendingTransImgSrc) {
-                    updateElement(selectedImgElementId, { src: pendingTransImgSrc, backgroundColor: selectedTransColor } as any);
+                    const freshId = selectedImgElementId;
+                    updateElement(freshId, { src: pendingTransImgSrc, originalSrc: pendingTransImgSrc, backgroundColor: selectedTransColor } as any);
+                    useCanvasStore.getState().setCroppingId(freshId);
                   }
                   setShowColorSelect(false);
                   setPendingTransImgSrc('');
@@ -799,16 +981,28 @@ export default function GenericCanvasEditorPage() {
           onClose={() => setShowCommandPalette(false)}
           onExportPDF={handleExportPDF}
           onSave={handleSave}
-          onToggleGrid={() => setShowGrid((v) => !v)}
-          onToggleRulers={() => setShowRulers((v) => !v)}
+          onToggleGrid={() => setShowGrid(!showGrid)}
           onTogglePreview={() => setPreviewMode((v) => !v)}
           onUploadImage={() => sidebarImageInputRef.current?.click()}
-          onOpenShapes={() => setPendingShapePanel(true)}
           onOpenElements={() => setPendingIconPanel(true)}
           onReset={() => setShowResetModal(true)}
         />
       )}
       <ImageCropModal />
+
+      {/* Mobile Portrait Rotate Overlay */}
+      <div className={styles.portraitOverlay}>
+        <Lottie
+          src="/Rotate Your Phone.json"
+          loop={true}
+          autoplay={true}
+          className={styles.rotateVideo}
+        />
+        <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '8px' }}>Please Rotate Your Device</h2>
+        <p style={{ fontSize: '14px', color: '#94a3b8', maxWidth: '280px', lineHeight: 1.5 }}>
+          This editor is strictly optimized for mobile devices in landscape mode. Please rotate your phone to landscape to continue editing.
+        </p>
+      </div>
     </div>
   );
 }

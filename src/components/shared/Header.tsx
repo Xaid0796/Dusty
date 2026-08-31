@@ -27,25 +27,25 @@ export const Header: React.FC = () => {
         </Link>
 
         <nav className={styles.nav}>
-          <Link 
-            href="/" 
+          <Link
+            href="/"
             className={`${styles.navLink} ${isActive('/') ? styles.navLinkActive : ''}`}
           >
             Home
           </Link>
-          <Link 
-            href="/templates" 
+          <Link
+            href="/templates"
             className={`${styles.navLink} ${isActive('/templates') || isActive('/editor') ? styles.navLinkActive : ''}`}
           >
             Templates
           </Link>
-          <Link 
-            href="/pdf-tools" 
+          <Link
+            href="/pdf-tools"
             className={`${styles.navLink} ${isActive('/pdf-tools') ? styles.navLinkActive : ''}`}
           >
             PDF Tools
           </Link>
-          
+
           <Link href="/templates" className="btn btn-primary btn-sm ctaBtn">
             Build Now
           </Link>

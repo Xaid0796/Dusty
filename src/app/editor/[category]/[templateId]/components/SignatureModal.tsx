@@ -116,7 +116,7 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
   const handleSave = () => {
     if (activeTab === 'draw' && canvasRef.current) {
       const canvas = canvasRef.current;
-      
+
       // Trim empty space around signature
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
@@ -171,10 +171,10 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
         ctx.textBaseline = 'middle';
         ctx.fillStyle = selectedColor;
         ctx.font = `normal italic 72px "${selectedFont}", cursive`;
-        
+
         const measure = ctx.measureText(text);
         const textWidth = Math.ceil(measure.width);
-        
+
         // Resize canvas to text dimension with padding
         const pad = 24;
         tempCanvas.width = textWidth + pad * 2;
@@ -193,7 +193,7 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
 
   return (
     <div className={styles.modalOverlay} style={{ zIndex: 99999 }}>
-      <div className={styles.modalContent} style={{ maxWidth: 440, background: 'var(--bg-panel)', color: 'var(--text-panel)', border: '1px solid var(--border-panel)', padding: '20px' }}>
+      <div className={`${styles.modalContent} ${styles.signatureModalContent}`} style={{ maxWidth: 440, background: 'var(--bg-panel)', color: 'var(--text-panel)', border: '1px solid var(--border-panel)', padding: '20px' }}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -266,7 +266,7 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
                 onTouchStart={startDraw}
                 onTouchMove={draw}
                 onTouchEnd={stopDraw}
-                style={{ width: '100%', height: 160, display: 'block', cursor: 'crosshair', touchAction: 'none' }}
+                className={styles.signatureCanvas}
               />
               <button
                 onClick={clearCanvas}
@@ -298,7 +298,7 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
                 }}
                 maxLength={25}
               />
-              
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 150, overflowY: 'auto', border: '1px solid var(--border-panel)', borderRadius: 8, padding: 6, background: 'var(--bg-panel-input)' }}>
                 {SIGNATURE_FONTS.map((font) => (
                   <button

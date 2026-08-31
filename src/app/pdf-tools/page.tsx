@@ -22,7 +22,7 @@ export default function PdfToolsPage() {
 
           <div className={styles.grid}>
             {/* Merge Tool Card */}
-            <div className={styles.card}>
+            <Link href="/pdf-tools/merge" className={styles.card}>
               <div className={`${styles.iconWrapper} ${styles.mergeIcon}`}>
                 <Merge size={26} />
               </div>
@@ -32,13 +32,10 @@ export default function PdfToolsPage() {
                   Combine multiple PDF files into a single, cohesive document. Drag-and-drop to reorder pages before compiling.
                 </p>
               </div>
-              <Link href="/pdf-tools/merge" replace className="btn btn-secondary btn-sm">
-                Open Merge Tool
-              </Link>
-            </div>
+            </Link>
 
             {/* Split Tool Card */}
-            <div className={styles.card}>
+            <Link href="/pdf-tools/split" className={styles.card}>
               <div className={`${styles.iconWrapper} ${styles.splitIcon}`}>
                 <Scissors size={26} />
               </div>
@@ -48,10 +45,7 @@ export default function PdfToolsPage() {
                   Separate a single PDF file into multiple individual documents or extract specific pages.
                 </p>
               </div>
-              <Link href="/pdf-tools/split" replace className="btn btn-secondary btn-sm">
-                Open Split Tool
-              </Link>
-            </div>
+            </Link>
           </div>
 
         </div>

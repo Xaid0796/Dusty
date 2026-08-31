@@ -4,7 +4,7 @@ export const resumeMonacoLuxuryTemplate: CanvasDocument = {
   "id": "resume-monaco-luxury",
   "category": "resume",
   "name": "Monaco Luxury",
-  "isPremium": true,
+  "isPremium": false,
   "page": {
     "id": "page-1",
     "width": 210,

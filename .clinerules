@@ -18,20 +18,3 @@ When creating template nodes, enforce type literals explicitly:
 1. Check if the schema target metadata tracks `category: "resume"` or `category: "canvas"`.
 2. Write the strongly typed configuration export structure into the appropriate isolated target folder array.
 3. Dynamically insert the template reference key export entry into the local path directory `index.ts`. Do not impact existing array references.
-
-# Context: Canvas Portfolio Template Core Rules
-
-## Data Schema Rules
-- Every template array must strictly resolve to the `CanvasDocument` schema tree interface. 
-- Mandatory fields for all elements: id, x, y, width, height, rotation: 0, zIndex, visible: true, locked: false.
-- Ensure 'text' elements always have complete `style` blocks (padding, lineHeight, letterSpacing).
-
-## Automated Execution Pipeline
-- Check category: Since this is a portfolio, write the config file into the `/portfolio` folder.
-- Dynamically register and map its export reference inside the portfolio directory's `index.ts`.
-- NEVER modify or touch any core canvas engine calculations, event listeners, or rendering functions.
-
-## 🎨 Portfolio Layout Constraints
-1. Image Focus: Require at least 2 to 4 distinct container layout blocks using `FrameElement` nodes to act as mock visual image slots.
-2. Grid Alignment: Enforce strict multi-column math tracking (e.g., an exact 2x2 grid or horizontal rows) with fixed coordinate offsets to completely prevent element overlay or chaotic layout disorder.
-3. Typography Scale: Set main headlines and project names to a much larger, impactful scale, mapping `style.fontSize` cleanly between 24 and 36 with `fontWeight: "bold"`.

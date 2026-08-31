@@ -2,13 +2,13 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import {
   MousePointer2, PenTool, Type, ImagePlus, Shapes, Smile,
-  Maximize2, Layers, Grid2X2,
-  Ruler, Eye, Signature, Sparkles, Keyboard, BarChart3,
-  Frame, QrCode, List,
+  Maximize2,
+  Signature, Sparkles, Keyboard, BarChart3,
+  Frame, QrCode, List, Grid3x3, Magnet,
 } from 'lucide-react';
 import { useCanvasStore } from '@/canvas/store';
 import { CanvasElement } from '@/canvas/types';
-import { ShapesPanel } from './ShapesPanel';
+import { useIsMobileOrTouch } from '@/utils/device';
 import { ChartsPanel } from './ChartsPanel';
 import { FramesPanel } from './FramesPanel';
 import { QRCodesPanel } from './QRCodesPanel';
@@ -22,31 +22,37 @@ import styles from '../editor.module.css';
 interface LeftToolbarProps {
   onUploadRasterImage: () => void;
   onUploadSVG: () => void;
-  snapToGrid: boolean;
-  onToggleSnap: () => void;
-  showGrid: boolean;
-  onToggleGrid: () => void;
-  showRulers: boolean;
-  onToggleRulers: () => void;
-  previewMode: boolean;
-  onTogglePreview: () => void;
+  previewMode?: boolean;
+  mobileVisible?: boolean;
+  onReset?: () => void;
+  showGrid?: boolean;
+  snapToGrid?: boolean;
+  onToggleGrid?: () => void;
+  onToggleSnap?: () => void;
 }
 
-type SlidePanel = 'shapes' | 'charts' | 'frames' | 'qrcodes' | 'icons' | 'design' | 'canvas' | 'shortcuts' | null;
+type SlidePanel = 'charts' | 'frames' | 'qrcodes' | 'icons' | 'design' | 'canvas' | 'shortcuts' | null;
 
 const uid = (prefix: string) =>
   `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
 export const LeftToolbar: React.FC<LeftToolbarProps> = ({
-  onUploadRasterImage, onUploadSVG, snapToGrid, onToggleSnap,
-  showGrid, onToggleGrid, showRulers, onToggleRulers,
-  previewMode, onTogglePreview,
+  onUploadRasterImage, onUploadSVG,
+  previewMode = false,
+  mobileVisible = false,
+  onReset,
+  showGrid = false,
+  snapToGrid = false,
+  onToggleGrid,
+  onToggleSnap,
 }) => {
+  const isMobileOrTouch = useIsMobileOrTouch();
+
   const {
     document: doc,
     activeTool, setActiveTool,
     addElement,
-    selectedIds, bringToFront, sendToBack,
+    selectedIds,
   } = useCanvasStore();
 
   const [slidePanel, setSlidePanel] = useState<SlidePanel>(null);
@@ -117,13 +123,6 @@ export const LeftToolbar: React.FC<LeftToolbarProps> = ({
     if (scrollRef.current) scrollPosRef.current = scrollRef.current.scrollTop;
   };
 
-  // Close panels when preview mode activates
-  useEffect(() => {
-    if (previewMode) {
-      setSlidePanel(null);
-    }
-  }, [previewMode]);
-
   const center = (w: number, h: number) => ({
     x: Math.max(8, ((doc?.page.width || 210) / 2) - w / 2),
     y: Math.max(8, ((doc?.page.height || 297) / 2) - h / 2),
@@ -179,12 +178,13 @@ export const LeftToolbar: React.FC<LeftToolbarProps> = ({
     disabledInPreview?: boolean; // if true, also disable when previewMode=true
     tooltip: string;
     dimmed?: boolean;
+    mobileHidden?: boolean; // if true, hide this item on mobile viewports
     children: React.ReactNode;
-  }> = ({ onClick, active, disabled, disabledInPreview = false, tooltip, dimmed, children }) => {
+  }> = ({ onClick, active, disabled, disabledInPreview = false, tooltip, dimmed, mobileHidden = false, children }) => {
     const isDisabled = disabled || (disabledInPreview && previewMode);
     return (
       <button
-        className={`${styles.sidebarBtn} ${active ? styles.sidebarBtnActive : ''}`}
+        className={`${styles.sidebarBtn} ${active ? styles.sidebarBtnActive : ''} ${mobileHidden ? styles.mobileHidden : ''}`}
         onClick={isDisabled ? undefined : onClick}
         data-tooltip={tooltip}
         title={isDisabled && previewMode ? `${tooltip} — disabled in Preview` : tooltip}
@@ -201,7 +201,7 @@ export const LeftToolbar: React.FC<LeftToolbarProps> = ({
   };
 
   return (
-    <aside ref={leftSidebarRef} className={styles.leftSidebarContainer}>
+    <aside ref={leftSidebarRef} className={`${styles.leftSidebarContainer} ${mobileVisible ? styles.mobileVisible : ''}`}>
       <div className={styles.leftSidebar} ref={scrollRef} onScroll={handleScroll}>
         {/* ── Tools ─────────────────────────────────── */}
         <SidebarBtn
@@ -266,16 +266,7 @@ export const LeftToolbar: React.FC<LeftToolbarProps> = ({
           <span className={styles.sidebarBtnLabel}>Frames</span>
         </SidebarBtn>
 
-        {/* Shapes → slide-out panel */}
-        <SidebarBtn
-          onClick={() => togglePanel('shapes')}
-          active={slidePanel === 'shapes'}
-          disabledInPreview
-          tooltip="Shapes"
-        >
-          <Shapes size={19} />
-          <span className={styles.sidebarBtnLabel}>Shapes</span>
-        </SidebarBtn>
+
 
         {/* QR Codes → slide-out panel */}
         <SidebarBtn
@@ -311,75 +302,68 @@ export const LeftToolbar: React.FC<LeftToolbarProps> = ({
         </SidebarBtn>
 
         {/* Signature Tool */}
-        <SidebarBtn
-          onClick={() => setShowSignatureModal(true)}
-          disabledInPreview
-          tooltip="Add Signature"
-        >
-          <Signature size={19} />
-          <span className={styles.sidebarBtnLabel}>Signature</span>
-        </SidebarBtn>
+        {!isMobileOrTouch && (
+          <SidebarBtn
+            onClick={() => setShowSignatureModal(true)}
+            disabledInPreview
+            tooltip="Add Signature"
+          >
+            <Signature size={19} />
+            <span className={styles.sidebarBtnLabel}>Signature</span>
+          </SidebarBtn>
+        )}
 
         <div className={styles.leftSidebarDivider} />
 
         {/* ── Canvas Size ───────────────────────────── */}
-        <SidebarBtn
-          onClick={() => togglePanel('canvas')}
-          active={slidePanel === 'canvas'}
-          disabledInPreview
-          tooltip="Canvas Size"
-        >
-          <Maximize2 size={19} />
-          <span className={styles.sidebarBtnLabel}>Canvas</span>
-        </SidebarBtn>
+        {!isMobileOrTouch && (
+          <SidebarBtn
+            onClick={() => togglePanel('canvas')}
+            active={slidePanel === 'canvas'}
+            disabledInPreview
+            tooltip="Canvas Size"
+          >
+            <Maximize2 size={19} />
+            <span className={styles.sidebarBtnLabel}>Canvas</span>
+          </SidebarBtn>
+        )}
 
-        {/* Bring to Front / Send to Back */}
-        <SidebarBtn onClick={() => bringToFront()} dimmed={!hasSel} disabledInPreview tooltip="Bring to Front">
-          <Layers size={19} />
-          <span className={styles.sidebarBtnLabel}>Front</span>
-        </SidebarBtn>
-
-        <SidebarBtn onClick={() => sendToBack()} dimmed={!hasSel} disabledInPreview tooltip="Send to Back">
-          <Layers size={19} style={{ transform: 'scaleY(-1)' }} />
-          <span className={styles.sidebarBtnLabel}>Back</span>
-        </SidebarBtn>
+        {/* ── View Toggles: Grid, Snap (admin only) ─────────────── */}
+        {!isMobileOrTouch && (onToggleGrid || onToggleSnap) && (
+          <>
+            <div className={styles.leftSidebarDivider} />
+            <SidebarBtn
+              onClick={onToggleGrid}
+              active={showGrid}
+              tooltip={showGrid ? 'Hide Grid' : 'Show Grid'}
+            >
+              <Grid3x3 size={19} />
+              <span className={styles.sidebarBtnLabel}>Grid</span>
+            </SidebarBtn>
+            <SidebarBtn
+              onClick={onToggleSnap}
+              active={snapToGrid}
+              tooltip={snapToGrid ? 'Snap to Grid: ON' : 'Snap to Grid: OFF'}
+            >
+              <Magnet size={19} />
+              <span className={styles.sidebarBtnLabel}>Snap</span>
+            </SidebarBtn>
+          </>
+        )}
 
         <div className={styles.leftSidebarDivider} />
 
-        {/* ── View options ──────────────────────────── */}
-        <SidebarBtn onClick={onToggleSnap} active={snapToGrid} tooltip={snapToGrid ? 'Snap: ON' : 'Snap: OFF'}>
-          <Grid2X2 size={19} />
-          <span className={styles.sidebarBtnLabel}>Snap</span>
-        </SidebarBtn>
-
-        <SidebarBtn onClick={onToggleGrid} active={showGrid} tooltip={showGrid ? 'Grid: ON' : 'Grid: OFF'}>
-          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
-            <rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
-          </svg>
-          <span className={styles.sidebarBtnLabel}>Grid</span>
-        </SidebarBtn>
-
-        <SidebarBtn onClick={onToggleRulers} active={showRulers} tooltip="Rulers">
-          <Ruler size={19} />
-          <span className={styles.sidebarBtnLabel}>Rulers</span>
-        </SidebarBtn>
-
         {/* Keyboard Shortcuts panel */}
-        <SidebarBtn
-          onClick={() => togglePanel('shortcuts')}
-          active={slidePanel === 'shortcuts'}
-          tooltip="Keyboard Shortcuts"
-        >
-          <Keyboard size={19} />
-          <span className={styles.sidebarBtnLabel}>Shortcuts</span>
-        </SidebarBtn>
-
-        {/* Preview — always enabled so user can exit preview */}
-        <SidebarBtn onClick={onTogglePreview} active={previewMode} tooltip={previewMode ? 'Exit Preview' : 'Preview Mode'}>
-          <Eye size={19} />
-          <span className={styles.sidebarBtnLabel}>Preview</span>
-        </SidebarBtn>
+        {!isMobileOrTouch && (
+          <SidebarBtn
+            onClick={() => togglePanel('shortcuts')}
+            active={slidePanel === 'shortcuts'}
+            tooltip="Keyboard Shortcuts"
+          >
+            <Keyboard size={19} />
+            <span className={styles.sidebarBtnLabel}>Shortcuts</span>
+          </SidebarBtn>
+        )}
       </div>
 
       {/* ── Slide-out panels container with smooth transitions ── */}
@@ -389,13 +373,13 @@ export const LeftToolbar: React.FC<LeftToolbarProps> = ({
           '--panel-width': slidePanel === 'shortcuts' ? '300px' : '290px',
         } as React.CSSProperties}
       >
-        {renderedPanel === 'shapes' && <ShapesPanel onClose={() => setSlidePanel(null)} />}
+
         {renderedPanel === 'charts' && <ChartsPanel onClose={() => setSlidePanel(null)} />}
         {renderedPanel === 'frames' && <FramesPanel onClose={() => setSlidePanel(null)} />}
         {renderedPanel === 'qrcodes' && <QRCodesPanel onClose={() => setSlidePanel(null)} />}
         {renderedPanel === 'icons' && <IconsPanel onClose={() => setSlidePanel(null)} />}
         {renderedPanel === 'design' && <DesignPanel onClose={() => setSlidePanel(null)} />}
-        {renderedPanel === 'canvas' && <CanvasPanel onClose={() => setSlidePanel(null)} />}
+        {renderedPanel === 'canvas' && <CanvasPanel onClose={() => setSlidePanel(null)} onReset={onReset} />}
         {renderedPanel === 'shortcuts' && <ShortcutsPanel onClose={() => setSlidePanel(null)} />}
       </div>
 

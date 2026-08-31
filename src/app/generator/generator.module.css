@@ -119,6 +119,84 @@
   gap: 8px;
 }
 
+/* Top-left brand + mobile resume-name input wrapper */
+.toolbarBrandWrap {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.toolbarBrandDesktop {
+  min-width: 0;
+}
+
+/* Editable resume name — hidden on desktop, shown on mobile only */
+.resumeNameInput {
+  display: none;
+  width: 100%;
+  max-width: 220px;
+  min-width: 0;
+  height: 38px;
+  padding: 0 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--text-input);
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.resumeNameInput::placeholder {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.resumeNameInput:focus {
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+
+/* Theme button text label (hidden on mobile only) */
+.themeLabel {
+  display: inline;
+}
+
+/* Icon-only variant — compact, no text label (used for Undo/Redo on mobile) */
+.iconBtnIconOnly {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--border-btn);
+  border-radius: 7px;
+  background: var(--bg-btn);
+  cursor: pointer;
+  color: var(--text-btn);
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.iconBtnIconOnly:hover:not(:disabled) {
+  background: var(--bg-btn-hover);
+  border-color: var(--border-btn-hover);
+}
+
+.iconBtnIconOnly:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Tab-dependent visibility (mobile only). Visible by default on desktop. */
+.editOnly,
+.previewOnly {
+  display: inline-flex;
+}
+
 .saveStatus {
   font-size: 0.75rem;
   color: var(--text-muted);
@@ -150,10 +228,12 @@
   font-weight: 500;
   transition: background 0.15s, border-color 0.15s;
 }
+
 .iconBtn:hover:not(:disabled) {
   background: var(--bg-btn-hover);
   border-color: var(--border-btn-hover);
 }
+
 .iconBtn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
@@ -174,10 +254,12 @@
   font-family: inherit;
   transition: opacity 0.15s, transform 0.1s;
 }
+
 .downloadBtn:hover:not(:disabled) {
   opacity: 0.9;
   transform: translateY(-1px);
 }
+
 .downloadBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -190,7 +272,8 @@
   grid-template-columns: 420px 1fr;
   flex: 1;
   overflow: hidden;
-  min-height: 0; /* Allow the grid container to shrink and fit flex layout height */
+  min-height: 0;
+  /* Allow the grid container to shrink and fit flex layout height */
 }
 
 /* ─── Left Sidebar ────────────────────────────────────────── */
@@ -221,7 +304,8 @@
 .sidebarScroll {
   flex: 1;
   overflow-y: auto;
-  min-height: 0; /* Critical flexbox property to enable scrolling */
+  min-height: 0;
+  /* Critical flexbox property to enable scrolling */
   padding: 12px 14px 24px;
   display: flex;
   flex-direction: column;
@@ -297,6 +381,7 @@
   transition: background 0.15s, border-color 0.15s;
   width: 100%;
 }
+
 .addSectionBtn:hover {
   background: var(--bg-add-btn-hover);
   border-color: var(--border-add-btn-hover);
@@ -347,6 +432,7 @@
   font-family: inherit;
   transition: color 0.15s;
 }
+
 .mobileTabBtnActive {
   color: var(--text-primary);
   border-top: 2px solid var(--text-primary);
@@ -407,7 +493,10 @@
   font-family: inherit;
   transition: opacity 0.15s;
 }
-.btnPrimary:hover { opacity: 0.9; }
+
+.btnPrimary:hover {
+  opacity: 0.9;
+}
 
 .btnSecondary {
   padding: 9px 18px;
@@ -421,7 +510,10 @@
   font-family: inherit;
   transition: background 0.15s;
 }
-.btnSecondary:hover { background: var(--bg-btn-hover); }
+
+.btnSecondary:hover {
+  background: var(--bg-btn-hover);
+}
 
 .btnDanger {
   padding: 9px 18px;
@@ -435,7 +527,10 @@
   font-family: inherit;
   transition: opacity 0.15s;
 }
-.btnDanger:hover { opacity: 0.9; }
+
+.btnDanger:hover {
+  opacity: 0.9;
+}
 
 /* ─── Add Section modal list ──────────────────────────────── */
 .addSectionList {
@@ -461,6 +556,7 @@
   transition: background 0.15s, border-color 0.15s;
   text-align: left;
 }
+
 .addSectionOption:hover,
 .addSectionOptionSelected {
   background: var(--bg-btn-hover);
@@ -480,7 +576,10 @@
   background: #e2e8f0;
   flex-shrink: 0;
 }
-.cropViewport:active { cursor: grabbing; }
+
+.cropViewport:active {
+  cursor: grabbing;
+}
 
 /* ─── Error bar ───────────────────────────────────────────── */
 .errorBar {
@@ -492,6 +591,7 @@
   border-radius: 8px;
   text-align: center;
 }
+
 .successBar {
   background: #f0fdf4;
   border: 1px solid #bbf7d0;
@@ -532,7 +632,77 @@
     padding-bottom: 56px;
   }
 
-  .toolbarTitle { display: none; }
-  .toolbarSub { display: none; }
-  .saveStatus { display: none; }
+  .toolbarTitle {
+    display: none;
+  }
+
+  .toolbarSub {
+    display: none;
+  }
+
+  .saveStatus {
+    display: none;
+  }
+
+  /* Mobile-only header optimization */
+  .toolbar {
+    height: auto;
+    min-height: 56px;
+    padding: 8px 12px;
+    gap: 8px;
+    flex-wrap: nowrap;
+  }
+
+  .toolbarBrandDesktop {
+    display: none;
+  }
+
+  .toolbarBrandWrap {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-right: 4px;
+  }
+
+  .resumeNameInput {
+    display: block;
+  }
+
+  .toolbarActions {
+    flex: 0 0 auto;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  /* Ensure comfortable touch targets and prevent overflow on small screens */
+  .iconBtn {
+    padding: 7px 9px;
+  }
+
+  /* Theme button becomes icon-only on mobile (hide text label) */
+  .themeLabel {
+    display: none;
+  }
+
+  .iconBtnIconOnly {
+    width: 38px;
+    height: 38px;
+  }
+
+  /* Tab-dependent toolbar visibility on mobile */
+  .showEditor .previewOnly {
+    display: none;
+  }
+
+  .showPreview .editOnly {
+    display: none;
+  }
+
+  .downloadBtn {
+    padding: 7px 12px;
+    font-size: 0.78rem;
+    max-width: 132px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }

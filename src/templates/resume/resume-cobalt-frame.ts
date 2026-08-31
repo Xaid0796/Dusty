@@ -4,7 +4,7 @@ export const resumeCobaltFrameTemplate: CanvasDocument = {
   "id": "resume-cobalt-frame",
   "category": "resume",
   "name": "Cobalt Frame",
-  "isPremium": true,
+  "isPremium": false,
   "page": {
     "id": "page-1",
     "width": 210,

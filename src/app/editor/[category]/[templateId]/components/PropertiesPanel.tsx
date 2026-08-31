@@ -33,6 +33,7 @@ interface PropertiesPanelProps {
   element: CanvasElement | null;
   onUploadClick: () => void;
   previewMode?: boolean;
+  theme?: 'light' | 'dark';
 }
 
 const FONT_FAMILIES = [
@@ -182,7 +183,7 @@ const SliderField: React.FC<{
   </div>
 );
 
-export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({ element, onUploadClick, previewMode = false }) => {
+export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({ element, onUploadClick, previewMode = false, theme = 'light' }) => {
   const {
     updateElement,
     deleteElement,
@@ -224,7 +225,15 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({ element, onUpl
             alignItems: 'center', justifyContent: 'center',
             gap: 8, pointerEvents: 'none',
           }}>
-            <span style={{ fontSize: 22 }}>👁</span>
+            <img
+              src="/hide-layer.svg"
+              alt="Preview Mode"
+              style={{
+                width: 28,
+                height: 28,
+                filter: theme === 'dark' ? 'invert(1)' : 'none',
+              }}
+            />
             <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-panel-muted)', textAlign: 'center', letterSpacing: '0.05em' }}>PREVIEW MODE</span>
             <span style={{ fontSize: 10, color: 'var(--text-panel-muted)', textAlign: 'center' }}>Editing is disabled</span>
           </div>
@@ -502,7 +511,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({ element, onUpl
               <label className={styles.fieldLabel}>Object Fit</label>
               <select
                 className={styles.input}
-                value={(element as any).objectFit || 'cover'}
+                value={(element as any).objectFit || 'contain'}
                 onChange={(e) => update({ objectFit: e.target.value as any } as any)}
               >
                 <option value="cover">Cover</option>
@@ -1108,27 +1117,6 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({ element, onUpl
             </>
           );
         })()}
-
-        {/* ── LAYER ORDER ── */}
-        <Section title="Layer Order" defaultOpen={false}>
-          <div className={styles.layerRow}>
-            <button className={styles.layerBtn} onClick={() => bringToFront()} title="Bring to Front">
-              <ChevronsUp size={12} /> Front
-            </button>
-            <button className={styles.layerBtn} onClick={() => bringForward()} title="Bring Forward">
-              <ArrowUp size={12} /> Up
-            </button>
-            <button className={styles.layerBtn} onClick={() => sendBackward()} title="Send Backward">
-              <ArrowDown size={12} /> Down
-            </button>
-            <button className={styles.layerBtn} onClick={() => sendToBack()} title="Send to Back">
-              <ChevronsDown size={12} /> Back
-            </button>
-          </div>
-          <div style={{ marginTop: 4, fontSize: 10, color: '#94a3b8', textAlign: 'center' }}>
-            Z-index: {element.zIndex}
-          </div>
-        </Section>
 
         {/* ── PAGE BACKGROUND (when no element but doc exists — not shown here, handled at page level) ── */}
       </div>

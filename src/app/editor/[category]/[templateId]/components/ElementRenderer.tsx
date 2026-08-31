@@ -228,7 +228,7 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({ element, isEdi
             style={{
               width: '100%',
               height: '100%',
-              objectFit: element.objectFit,
+              objectFit: element.objectFit || 'contain',
               objectPosition: element.objectPosition,
               transform,
               transformOrigin: `${element.cropX ?? 50}% ${element.cropY ?? 50}%`,
