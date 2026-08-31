@@ -39,7 +39,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
 # backups
 src.zip
+
+# editor / IDE artifacts
+$null
+.roo/
+.agents/
+checkar/
+*.log
+
+# build / debug logs
+build.log
+devserver.log
 
