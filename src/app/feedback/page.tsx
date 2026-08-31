@@ -268,29 +268,24 @@ export default function FeedbackPage() {
                             </div>
                         ) : (
                             <div className={styles.feedbackList}>
-                                {feedbackList.map((group) => (
-                                    <div key={group.date} className={styles.dateGroup}>
-                                        <div className={styles.dateHeading}>
-                                            📅 {formatDate(group.items[0].created_at)}
-                                        </div>
-                                        {group.items.map((item) => (
-                                            <div key={item.id} className={styles.feedbackItem}>
-                                                <div className={styles.feedbackStars}>
-                                                    {'★'.repeat(item.rating)}
-                                                    {'☆'.repeat(5 - item.rating)}
-                                                </div>
-                                                <p className={styles.feedbackMessage}>
-                                                    &ldquo;{item.message}&rdquo;
-                                                </p>
-                                                <div className={styles.feedbackMeta}>
-                                                    <span>{item.email || 'Anonymous'}</span>
-                                                    <span>·</span>
-                                                    <span>{formatTime(item.created_at)}</span>
-                                                </div>
+                                {feedbackList.map((group) =>
+                                    group.items.map((item) => (
+                                        <div key={item.id} className={styles.feedbackItem}>
+                                            <div className={styles.feedbackStars}>
+                                                {'★'.repeat(item.rating)}
+                                                {'☆'.repeat(5 - item.rating)}
                                             </div>
-                                        ))}
-                                    </div>
-                                ))}
+                                            <p className={styles.feedbackMessage}>
+                                                &ldquo;{item.message}&rdquo;
+                                            </p>
+                                            <div className={styles.feedbackMeta}>
+                                                <span>{item.email || 'Anonymous'}</span>
+                                                <span>·</span>
+                                                <span>{formatTime(item.created_at)}</span>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         )}
                     </div>
