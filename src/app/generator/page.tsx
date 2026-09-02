@@ -844,6 +844,7 @@ export default function GeneratorPage() {
   const previewWrapperStyle: React.CSSProperties = {
     transform: `scale(${scale})`,
     transformOrigin: 'top center',
+    width: '210mm',
   };
 
   return (

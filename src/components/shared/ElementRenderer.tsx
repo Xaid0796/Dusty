@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useRef } from 'react';
 import { CanvasElement, ChartElement } from '@/canvas/types';
 import { mmToPx, pxToMm } from '@/canvas/utils';
