@@ -22,7 +22,7 @@ export default function TermsOfServicePage() {
                             1. Acceptance of Terms
                         </h2>
                         <p>
-                            By accessing and using Dusty, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by these terms, please do not use this service.
+                            By accessing and using DocXume, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by these terms, please do not use this service.
                         </p>
                     </div>
 
@@ -31,7 +31,7 @@ export default function TermsOfServicePage() {
                             2. Use of Service
                         </h2>
                         <p>
-                            Dusty provides tools for creating professional resumes, CVs, biodatas, and cover letters. You are solely responsible for the content, accuracy, and professional presentation of any documents generated using our platform.
+                            DocXume provides tools for creating professional resumes, CVs, and cover letters. You are solely responsible for the content, accuracy, and professional presentation of any documents generated using our platform.
                         </p>
                     </div>
 
@@ -40,7 +40,7 @@ export default function TermsOfServicePage() {
                             3. Intellectual Property
                         </h2>
                         <p>
-                            All templates, UI designs, code architecture, and graphical assets provided on Dusty are the property of Dusty and are protected by applicable intellectual property laws. Generated documents remain the intellectual property of the user.
+                            All templates, UI designs, code architecture, and graphical assets provided on DocXume are the property of DocXume and are protected by applicable intellectual property laws. Generated documents remain the intellectual property of the user.
                         </p>
                     </div>
 

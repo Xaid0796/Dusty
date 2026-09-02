@@ -6,7 +6,7 @@ interface PreviewWatermarkProps {
 }
 
 export const PreviewWatermark: React.FC<PreviewWatermarkProps> = ({
-  text = 'DUSTY • PREVIEW',
+  text = 'DOCXUME • PREVIEW',
   opacity = 0.06
 }) => {
   // Use a repeated SVG pattern as a background image

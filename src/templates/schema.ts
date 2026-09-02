@@ -87,7 +87,7 @@ export interface ThemeSettings {
 export interface DocumentSchema {
   id: string;
   templateId: string;
-  category: 'resume' | 'cv' | 'biodata' | 'cover-letter' | 'basic';
+  category: 'resume' | 'cv' | 'cover-letter' | 'basic';
   theme: ThemeSettings;
   sections: {
     personalInfo: PersonalInfo;

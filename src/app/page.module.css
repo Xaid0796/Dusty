@@ -444,38 +444,18 @@
 }
 
 @media (max-width: 768px) {
-  .modalDialog {
-    max-width: 100%;
-    max-height: 90vh;
-    border-radius: 16px;
-  }
-
-  .choiceGrid {
-    flex-direction: column;
-  }
-
-  .pickerGrid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 10px;
-  }
-
-  .pickerThumb,
-  .pickerThumbPlaceholder {
-    height: 140px;
-  }
-}
-
-@media (max-width: 768px) {
   .title {
-    font-size: 2.5rem;
+    font-size: 1.8rem;
+    letter-spacing: -0.3px;
   }
 
   .subtitle {
-    font-size: 1.1rem;
+    font-size: 0.95rem;
+    margin-bottom: 28px;
   }
 
   .hero {
-    padding: 80px 20px 60px 20px;
+    padding: 60px 16px 50px 16px;
   }
 
   .heroActions {
@@ -483,10 +463,136 @@
     width: 100%;
     max-width: 320px;
     margin: 0 auto;
+    gap: 12px;
   }
 
+  .heroActions button,
   .heroActions a {
     width: 100%;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    padding: 14px 24px;
+    border-radius: 12px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .features {
+    padding: 50px 16px;
+  }
+
+  .sectionTitle {
+    font-size: 1.6rem;
+  }
+
+  .sectionSubtitle {
+    font-size: 0.95rem;
+  }
+
+  .featureGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .featureCard {
+    padding: 24px 20px;
+  }
+
+  /* Carousel */
+  .carouselSection {
+    padding: 40px 0 60px 0;
+  }
+
+  .carouselTitle {
+    font-size: 1.4rem;
+  }
+
+  .carouselSubtitle {
+    font-size: 0.9rem;
+  }
+
+  .carouselCard {
+    width: 240px;
+    height: 80px;
+    padding: 8px 12px;
+  }
+
+  .carouselAvatar {
+    width: 44px;
+    height: 44px;
+  }
+
+  .carouselName {
+    font-size: 0.85rem;
+  }
+
+  .carouselRole {
+    font-size: 0.72rem;
+  }
+
+  /* FAQ */
+  .faqSection {
+    padding: 50px 16px;
+  }
+
+  .faqQuestion {
+    font-size: 0.95rem;
+  }
+
+  .faqAnswer {
+    font-size: 0.88rem;
+  }
+
+  .timelineContent {
+    padding: 18px;
+  }
+
+  /* CTA */
+  .cta {
+    padding: 50px 16px;
+  }
+
+  .ctaTitle {
+    font-size: 1.6rem;
+  }
+
+  .ctaDesc {
+    font-size: 0.95rem;
+  }
+
+  /* Modal on mobile */
+  .modalDialog {
+    max-width: 100%;
+    max-height: 92vh;
+    border-radius: 16px 16px 0 0;
+    margin-top: auto;
+  }
+
+  .choiceGrid {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .choiceCard {
+    padding: 20px 16px;
+    min-height: 48px;
+  }
+
+  .pickerGrid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+  }
+
+  .pickerThumb,
+  .pickerThumbPlaceholder {
+    height: 120px;
+  }
+
+  .exploreMoreWrapper {
+    margin-top: 30px;
   }
 }
 
@@ -563,10 +669,7 @@
   animation: scrollRight 40s linear infinite;
 }
 
-.marqueeContainer:hover .marqueeRow,
-.marqueeContainer:hover .marqueeRowReverse {
-  animation-play-state: paused;
-}
+/* Hover pause removed – carousel scrolls continuously regardless of interaction */
 
 @keyframes scrollLeft {
   0% {
@@ -598,18 +701,13 @@
   background: var(--card-bg);
   position: relative;
   flex-shrink: 0;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 10px 14px;
   text-decoration: none;
-}
-
-.carouselCard:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.12);
-  border-color: var(--primary-color);
+  pointer-events: none;
+  user-select: none;
 }
 
 .carouselAvatar {

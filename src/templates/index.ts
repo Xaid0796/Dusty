@@ -17,7 +17,7 @@ import { coverLetterVintageEleganceTemplate as coverLetterVintageElegance } from
 export interface TemplateDefinition {
   id: string;
   name: string;
-  category: 'resume' | 'cv' | 'biodata' | 'cover-letter' | 'basic';
+  category: 'resume' | 'cv' | 'cover-letter' | 'basic';
   thumbnailText: string;
   thumbnailGradient: string; // Dynamic placeholder colors for Version 1
   thumbnail?: string;
@@ -538,7 +538,7 @@ export const getTemplateById = (id: string): TemplateDefinition | undefined => {
   return getCombinedRegistry()[id];
 };
 
-export const getTemplatesByCategory = (category: 'resume' | 'cv' | 'biodata' | 'cover-letter' | 'basic'): TemplateDefinition[] => {
+export const getTemplatesByCategory = (category: 'resume' | 'cv' | 'cover-letter' | 'basic'): TemplateDefinition[] => {
   return Object.values(getCombinedRegistry()).filter(tpl => tpl.category === category);
 };
 

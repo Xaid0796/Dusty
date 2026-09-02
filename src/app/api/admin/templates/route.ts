@@ -14,7 +14,7 @@ export const runtime = 'nodejs';
 const SAFE_ID = /^[a-z0-9][a-z0-9-]*$/;
 const SAFE_NAME = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
 const SAFE_FILENAME = /^[a-z0-9][a-z0-9-]*\.ts$/;
-const CATEGORIES = new Set(['resume', 'biodata', 'cv', 'cover-letter']);
+const CATEGORIES = new Set(['resume', 'cv', 'cover-letter']);
 
 /** Parse a template JSON object from a TypeScript file without using eval(). */
 const parseTemplateJson = (content: string): Record<string, unknown> | null => {

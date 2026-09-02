@@ -22,7 +22,7 @@ export default function PrivacyPolicyPage() {
                             1. Introduction
                         </h2>
                         <p>
-                            Welcome to Dusty ("we", "our", or "us"). We respect your privacy and are committed to protecting your personal data. This privacy policy will inform you as to how we look after your personal data when you visit our website and tell you about your privacy rights and how the law protects you.
+                            Welcome to DocXume ("we", "our", or "us"). We respect your privacy and are committed to protecting your personal data. This privacy policy will inform you as to how we look after your personal data when you visit our website and tell you about your privacy rights and how the law protects you.
                         </p>
                     </div>
 
@@ -31,7 +31,7 @@ export default function PrivacyPolicyPage() {
                             2. Client-Side Data Processing
                         </h2>
                         <p>
-                            Dusty is designed with privacy at its core. All document creation, template customization, photo cropping, and PDF generation occur entirely within your web browser on your local device. We do not store your resumes, cover letters, biodatas, or personal photos on our remote servers.
+                            DocXume is designed with privacy at its core. All document creation, template customization, photo cropping, and PDF generation occur entirely within your web browser on your local device. We do not store your resumes, cover letters, or personal photos on our remote servers.
                         </p>
                     </div>
 

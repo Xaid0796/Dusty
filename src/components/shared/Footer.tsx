@@ -1,13 +1,15 @@
 import React from 'react';
 import Link from 'next/link';
+import { Logo } from '@/components/shared/Logo';
 import styles from './Footer.module.css';
 
 export const Footer: React.FC = () => {
   return (
     <footer className={styles.footer}>
       <div className={styles.container}>
-        <div>
-          © {new Date().getFullYear()} Dusty. All rights reserved.
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <Logo href="/" size="sm" showTagline={false} />
+          <span>© {new Date().getFullYear()} DocXume. All rights reserved.</span>
         </div>
         <div className={styles.links}>
           <Link href="/feedback" className={styles.link}>

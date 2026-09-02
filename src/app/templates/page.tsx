@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Header } from '@/components/shared/Header';
 import { Footer } from '@/components/shared/Footer';
 import { getAllTemplates } from '@/templates/index';
-import { Edit3, Zap, ArrowRight, Search, Plus, FileText, Mail, Briefcase, Filter, ArrowLeft, X, FileCheck, User } from 'lucide-react';
+import { Edit3, Zap, ArrowRight, Search, Plus, FileText, Mail, Briefcase, Filter, ArrowLeft, X, FileCheck } from 'lucide-react';
 import styles from './page.module.css';
 import { TemplateThumbnail } from '@/components/shared/TemplateThumbnail';
 
@@ -19,18 +19,11 @@ const RESUME_OPTIONS = [
   { id: 'william', name: 'William Executive Designer', desc: 'Bold, high-impact header for creative and executive leaders.', gradient: 'linear-gradient(135deg, #581c87, #c084fc)', emoji: '💼' },
 ];
 
-// Biodata template picker options (mirrored from Home)
-const BIODATA_OPTIONS = [
-  { id: 'classic' as const, name: 'Classic', desc: 'Timeless professional layout with a clean, formal structure.', gradient: 'linear-gradient(135deg, #1e3a8a, #3b82f6)', emoji: '📄' },
-  { id: 'modern' as const, name: 'Modern', desc: 'Contemporary two-tone design with a fresh, balanced look.', gradient: 'linear-gradient(135deg, #0f766e, #14b8a6)', emoji: '✨' },
-  { id: 'floral' as const, name: 'Floral', desc: 'Elegant wedding-style floral background.', gradient: 'linear-gradient(135deg, #881337, #f472b6)', emoji: '🌸' },
-];
-
 export default function TemplatesPage() {
-  const [selectedCategory, setSelectedCategory] = useState<'all' | 'resume' | 'cv' | 'biodata' | 'cover-letter'>('all');
-  const [priceFilter, setPriceFilter] = useState<'all' | 'free' | 'paid'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<'all' | 'resume' | 'cv' | 'cover-letter'>('all');
+  const [priceFilter, setPriceFilter] = useState<'all' | 'free' | 'support'>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [modalStep, setModalStep] = useState<'choice' | 'resume' | 'biodata' | null>(null);
+  const [modalStep, setModalStep] = useState<'resume' | null>(null);
   const router = useRouter();
   const templates = getAllTemplates();
 
@@ -38,15 +31,11 @@ export default function TemplatesPage() {
     window.open(`/generator?template=${templateId}`, '_blank');
   };
 
-  const openBiodataTemplate = (templateId: 'classic' | 'modern' | 'floral') => {
-    window.open(`/biodata-generator?template=${templateId}`, '_blank');
-  };
-
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const cat = params.get('category');
-      if (cat && ['all', 'resume', 'cv', 'biodata', 'cover-letter'].includes(cat)) {
+      if (cat && ['all', 'resume', 'cv', 'cover-letter'].includes(cat)) {
         setSelectedCategory(cat as any);
       }
     }
@@ -57,7 +46,7 @@ export default function TemplatesPage() {
     const handlePop = () => {
       const params = new URLSearchParams(window.location.search);
       const cat = params.get('category');
-      if (cat && ['all', 'resume', 'cv', 'biodata', 'cover-letter'].includes(cat)) {
+      if (cat && ['all', 'resume', 'cv', 'cover-letter'].includes(cat)) {
         setSelectedCategory(cat as any);
       } else {
         setSelectedCategory('all');
@@ -67,7 +56,7 @@ export default function TemplatesPage() {
     return () => window.removeEventListener('popstate', handlePop);
   }, []);
 
-  const handleSelectCategory = (category: 'all' | 'resume' | 'cv' | 'biodata' | 'cover-letter') => {
+  const handleSelectCategory = (category: 'all' | 'resume' | 'cv' | 'cover-letter') => {
     setSelectedCategory(category);
     if (typeof window !== 'undefined') {
       const url = category === 'all' ? '/templates' : `/templates?category=${category}`;
@@ -78,7 +67,7 @@ export default function TemplatesPage() {
   const filteredTemplates = templates.filter(tpl => {
     if (selectedCategory !== 'all' && tpl.category !== selectedCategory) return false;
     if (priceFilter === 'free' && tpl.isPremium) return false;
-    if (priceFilter === 'paid' && !tpl.isPremium) return false;
+    if (priceFilter === 'support') return true; // show all templates in support mode
     if (searchQuery.trim() !== '') {
       const q = searchQuery.toLowerCase();
       const matchName = tpl.name.toLowerCase().includes(q);
@@ -89,11 +78,10 @@ export default function TemplatesPage() {
     return true;
   });
 
-  const categoryLabels: { id: 'all' | 'resume' | 'cv' | 'biodata' | 'cover-letter'; label: string; icon: any }[] = [
+  const categoryLabels: { id: 'all' | 'resume' | 'cv' | 'cover-letter'; label: string; icon: any }[] = [
     { id: 'all', label: 'All Templates', icon: FileText },
     { id: 'resume', label: 'Resumes', icon: Edit3 },
     { id: 'cv', label: 'CVs', icon: FileText },
-    { id: 'biodata', label: 'Biodatas', icon: User },
     { id: 'cover-letter', label: 'Cover Letters', icon: Mail },
   ];
 
@@ -107,7 +95,7 @@ export default function TemplatesPage() {
           <div className={styles.header}>
             <h1 className={styles.title}>Template Marketplace</h1>
             <p className={styles.subtitle}>
-              Browse our complete collection of professional, pixel-perfect resumes, CVs, biodatas, and cover letters.
+              Browse our complete collection of professional, pixel-perfect resumes, CVs, and cover letters.
             </p>
           </div>
 
@@ -156,29 +144,76 @@ export default function TemplatesPage() {
 
               {/* Pricing Filter */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#f1f5f9', padding: '4px', borderRadius: '10px' }}>
-                {(['all', 'free', 'paid'] as const).map((filterOpt) => (
+                {([
+                  { value: 'free' as const, label: 'Free Templates' },
+                  { value: 'support' as const, label: 'Support Us ❤️' },
+                ]).map((filterOpt) => (
                   <button
-                    key={filterOpt}
-                    onClick={() => setPriceFilter(filterOpt)}
+                    key={filterOpt.value}
+                    onClick={() => setPriceFilter(filterOpt.value)}
                     style={{
-                      padding: '7px 16px',
+                      padding: '9px 20px',
                       borderRadius: '8px',
                       border: 'none',
-                      fontSize: '0.8rem',
+                      fontSize: '0.82rem',
                       fontWeight: 700,
-                      textTransform: 'uppercase',
                       cursor: 'pointer',
                       transition: 'all 0.15s',
-                      background: priceFilter === filterOpt ? '#ffffff' : 'transparent',
-                      color: priceFilter === filterOpt ? '#0f172a' : '#64748b',
-                      boxShadow: priceFilter === filterOpt ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                      background: priceFilter === filterOpt.value ? (filterOpt.value === 'support' ? 'linear-gradient(135deg, #e11d48, #f472b6)' : '#ffffff') : 'transparent',
+                      color: priceFilter === filterOpt.value ? (filterOpt.value === 'support' ? '#ffffff' : '#0f172a') : '#64748b',
+                      boxShadow: priceFilter === filterOpt.value && filterOpt.value !== 'support' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                      whiteSpace: 'nowrap',
+                      minHeight: '44px',
                     }}
                   >
-                    {filterOpt}
+                    {filterOpt.label}
                   </button>
                 ))}
               </div>
             </div>
+
+            {/* Support Us QR Code Section (shown when "Support Us" tab is active) */}
+            {priceFilter === 'support' && (
+              <div style={{
+                background: 'linear-gradient(135deg, #fff1f2, #fce7f3, #fef3c7)',
+                borderRadius: '16px',
+                padding: '28px 24px',
+                textAlign: 'center',
+                marginBottom: '24px',
+                border: '1px solid #fecdd3',
+                animation: 'sp-scale-in 0.3s ease',
+              }}>
+                <div style={{ fontSize: '2rem', marginBottom: '8px' }}>❤️</div>
+                <h3 style={{ margin: '0 0 8px', fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
+                  Enjoying Our Free Templates?
+                </h3>
+                <p style={{ margin: '0 0 6px', fontSize: '0.9rem', color: '#475569', lineHeight: 1.6, maxWidth: '480px', marginLeft: 'auto', marginRight: 'auto' }}>
+                  Every template is free — no watermarks, no subscriptions, no hidden fees.
+                  If DocXume helped you create a professional document, you can support us by scanning the QR code below.
+                </p>
+                <p style={{ margin: '0 0 20px', fontSize: '0.85rem', color: '#94a3b8' }}>
+                  Even ₹1 helps us create more free templates for everyone. 😊
+                </p>
+                <div style={{
+                  display: 'inline-block',
+                  padding: '12px',
+                  background: '#ffffff',
+                  border: '2px solid #fecdd3',
+                  borderRadius: '16px',
+                  marginBottom: '10px',
+                  boxShadow: '0 2px 12px rgba(225, 29, 72, 0.08)',
+                }}>
+                  <img
+                    src="/upi-qr.png"
+                    alt="Google Pay / UPI QR Code for donation"
+                    style={{ width: '200px', height: '200px', objectFit: 'contain', borderRadius: '8px', display: 'block' }}
+                  />
+                </div>
+                <p style={{ margin: 0, fontSize: '0.82rem', color: '#94a3b8', fontWeight: 600 }}>
+                  UPI • Google Pay • Pay What You Want
+                </p>
+              </div>
+            )}
 
             {/* Category Filter Tabs */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
@@ -227,22 +262,22 @@ export default function TemplatesPage() {
               </div>
               <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, color: '#fff' }}>Quick Document Generator</h2>
               <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)', lineHeight: 1.5 }}>
-                No canvas adjustments. Fill in your fields and export polished resumes or biodatas instantly.
+                No canvas adjustments. Fill in your fields and export polished resumes instantly.
               </p>
             </div>
-            <button onClick={() => setModalStep('choice')} style={{
+            <button onClick={() => setModalStep('resume')} style={{
               display: 'inline-flex', alignItems: 'center', gap: '7px',
               padding: '11px 22px', borderRadius: '8px', background: '#fff',
               color: '#1e3a8a', fontWeight: 700, fontSize: '0.88rem', border: 'none',
               cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
               transition: 'opacity 0.15s'
             }}>
-              Quick Start <ArrowRight size={15} />
+              Create Resume Now <ArrowRight size={15} />
             </button>
           </div>
 
           {/* Quick Start Modal (Unified with Home Page design) */}
-          {modalStep && (
+          {modalStep === 'resume' && (
             <div className={styles.modalBackdrop} onClick={() => setModalStep(null)}>
               <div
                 className={styles.modalDialog}
@@ -251,24 +286,10 @@ export default function TemplatesPage() {
                 aria-modal="true"
               >
                 <div className={styles.modalHeader}>
-                  {modalStep === 'resume' || modalStep === 'biodata' ? (
-                    <button
-                      className={styles.modalBackBtn}
-                      onClick={() => setModalStep('choice')}
-                      aria-label="Go back"
-                    >
-                      <ArrowLeft size={18} />
-                    </button>
-                  ) : (
-                    <span className={styles.modalHeaderIcon}>
-                      <Zap size={18} />
-                    </span>
-                  )}
-                  <h2 className={styles.modalTitle}>
-                    {modalStep === 'choice' && 'What would you like to build?'}
-                    {modalStep === 'resume' && 'Choose a Resume Template'}
-                    {modalStep === 'biodata' && 'Choose a Biodata Template'}
-                  </h2>
+                  <span className={styles.modalHeaderIcon}>
+                    <Zap size={18} />
+                  </span>
+                  <h2 className={styles.modalTitle}>Choose a Resume Template</h2>
                   <button
                     className={styles.modalCloseBtn}
                     onClick={() => setModalStep(null)}
@@ -279,56 +300,17 @@ export default function TemplatesPage() {
                 </div>
 
                 <div className={styles.modalBody}>
-                  {modalStep === 'choice' && (
-                    <div className={styles.choiceGrid}>
-                      <button className={styles.choiceCard} onClick={() => setModalStep('resume')}>
-                        <span className={styles.choiceIcon} style={{ background: 'linear-gradient(135deg, #2563eb, #60a5fa)' }}>
-                          <FileText size={28} />
-                        </span>
-                        <span className={styles.choiceName}>Resume</span>
-                        <span className={styles.choiceDesc}>Pick from professional resume designs and start editing instantly.</span>
-                        <span className={styles.choiceCta}>Choose Resume <ArrowRight size={16} /></span>
+                  <div className={styles.pickerGrid}>
+                    {RESUME_OPTIONS.map((opt) => (
+                      <button key={opt.id} className={styles.pickerCard} onClick={() => openResumeTemplate(opt.id)}>
+                        <span className={styles.pickerThumbPlaceholder} style={{ background: opt.gradient, fontSize: '3rem' }}>{opt.emoji}</span>
+                        <span className={styles.pickerName}>{opt.name}</span>
+                        <span className={styles.pickerDesc}>{opt.desc}</span>
+                        <span className={styles.pickerSelect}>Select <ArrowRight size={14} /></span>
                       </button>
-
-                      <button className={styles.choiceCard} onClick={() => setModalStep('biodata')}>
-                        <span className={styles.choiceIcon} style={{ background: 'linear-gradient(135deg, #9d174d, #f472b6)' }}>
-                          <User size={28} />
-                        </span>
-                        <span className={styles.choiceName}>Biodata</span>
-                        <span className={styles.choiceDesc}>Choose a classic, modern, or floral biodata layout for marriage & profiles.</span>
-                        <span className={styles.choiceCta}>Choose Biodata <ArrowRight size={16} /></span>
-                      </button>
-                    </div>
-                  )}
-
-                  {modalStep === 'resume' && (
-                    <div className={styles.pickerGrid}>
-                      {RESUME_OPTIONS.map((opt) => (
-                        <button key={opt.id} className={styles.pickerCard} onClick={() => openResumeTemplate(opt.id)}>
-                          <span className={styles.pickerThumbPlaceholder} style={{ background: opt.gradient, fontSize: '3rem' }}>{opt.emoji}</span>
-                          <span className={styles.pickerName}>{opt.name}</span>
-                          <span className={styles.pickerDesc}>{opt.desc}</span>
-                          <span className={styles.pickerSelect}>Select <ArrowRight size={14} /></span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {modalStep === 'biodata' && (
-                    <div className={styles.pickerGrid}>
-                      {BIODATA_OPTIONS.map((opt) => (
-                        <button key={opt.id} className={styles.pickerCard} onClick={() => openBiodataTemplate(opt.id)}>
-                          <span className={styles.pickerThumbPlaceholder} style={{ background: opt.gradient, fontSize: '3rem' }}>{opt.emoji}</span>
-                          <span className={styles.pickerName}>{opt.name}</span>
-                          <span className={styles.pickerDesc}>{opt.desc}</span>
-                          <span className={styles.pickerSelect}>Select <ArrowRight size={14} /></span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                    ))}
+                  </div>
                 </div>
-
-                {/* Footer section removed */}
               </div>
             </div>
           )}
@@ -336,7 +318,7 @@ export default function TemplatesPage() {
           {/* Unified Template Card Grid */}
           <div className={styles.grid}>
             {/* Blank Template / Start from Scratch Option (shown when specific category is selected and price allows) */}
-            {selectedCategory !== 'all' && priceFilter !== 'paid' && (
+            {selectedCategory !== 'all' && priceFilter !== 'support' && (
               <Link
                 href={`/editor/${selectedCategory}/blank`}
                 target="_blank"
@@ -401,11 +383,9 @@ export default function TemplatesPage() {
                         ? 'Resume'
                         : selectedCategory === 'cv'
                           ? 'CV'
-                          : selectedCategory === 'biodata'
-                            ? 'Biodata'
-                            : selectedCategory === 'cover-letter'
-                              ? 'Cover Letter'
-                              : 'Document'}
+                          : selectedCategory === 'cover-letter'
+                            ? 'Cover Letter'
+                            : 'Document'}
                     </h3>
                     <p className={styles.cardDesc}>
                       Start with a completely blank canvas and build your document from scratch using custom elements.

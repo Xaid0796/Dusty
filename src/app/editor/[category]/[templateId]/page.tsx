@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useCanvasStore } from '@/canvas/store';
 import { sampleTemplates } from '@/templates/registry';
 import { exportCanvasToPDF } from '@/canvas/pdfExport';
+import { showSupportPopup } from '@/components/shared/SupportPopup';
 import { Toolbar } from './components/Toolbar';
 import { LeftToolbar } from './components/LeftToolbar';
 import { CanvasStage } from './components/CanvasStage';
@@ -191,7 +192,6 @@ export default function GenericCanvasEditorPage() {
       const categoryNames: Record<string, string> = {
         resume: 'Resume',
         cv: 'CV',
-        biodata: 'Biodata',
         'cover-letter': 'Cover Letter'
       };
       const catName = categoryNames[cat] || 'Document';
@@ -511,6 +511,7 @@ export default function GenericCanvasEditorPage() {
       if (textEd) useCanvasStore.setState({ isTextEditing: true });
       if (cropId) useCanvasStore.setState({ croppingId: cropId });
       setSaveStatus('saved');
+      showSupportPopup();
     } catch (err) {
       console.error('PDF export failed', err);
       setSaveStatus('unsaved');

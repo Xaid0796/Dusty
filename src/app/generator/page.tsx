@@ -34,6 +34,7 @@ import {
 } from '@/components/generator/SectionEditors';
 import { generatePDF } from '@/utils/pdfGenerator';
 import { detectGender, getPhotoForGender } from '@/utils/genderPhoto';
+import { showSupportPopup } from '@/components/shared/SupportPopup';
 import {
   ADDABLE_SECTION_KINDS,
   SECTION_KIND_LABELS,
@@ -708,6 +709,7 @@ export default function GeneratorPage() {
       await generatePDF(el, filename);
       setExportSuccess(true);
       setTimeout(() => setExportSuccess(false), 3000);
+      showSupportPopup();
     } catch (err) {
       console.error('PDF export failed:', err);
       setExportError('PDF generation failed. Please try again.');

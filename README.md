@@ -1,6 +1,6 @@
-# Dusty — Smart Resume, CV & Biodata Builder
+# DocXume — Smart Resume, CV & Biodata Builder
 
-Dusty is a client-side document builder (Next.js 15 + React 19 + TypeScript) that lets users create professional resumes, CVs, cover letters, and traditional biodatas entirely in the browser, then export polished PDFs. No data leaves the user's device for document creation.
+DocXume is a client-side document builder (Next.js 15 + React 19 + TypeScript) that lets users create professional resumes, CVs, cover letters, and traditional biodatas entirely in the browser, then export polished PDFs. No data leaves the user's device for document creation.
 
 ## Tech Stack
 
@@ -22,7 +22,7 @@ npm run lint      # run ESLint
 
 ## Project Architecture
 
-Dusty has **two parallel but complementary template systems** plus a standalone PDF-tools module.
+DocXume has **two parallel but complementary template systems** plus a standalone PDF-tools module.
 
 ### 1. Canvas / Registry System (design-led)
 

@@ -38,7 +38,13 @@ export const DraggableSections: React.FC<DraggableSectionsProps> = ({
     ghost.style.cssText = 'position:fixed;top:-1000px;opacity:0;';
     document.body.appendChild(ghost);
     e.dataTransfer.setDragImage(ghost, 0, 0);
-    setTimeout(() => document.body.removeChild(ghost), 0);
+    setTimeout(() => {
+      try {
+        if (ghost && ghost.parentNode) {
+          ghost.parentNode.removeChild(ghost);
+        }
+      } catch { }
+    }, 0);
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>, index: number) => {

@@ -11,15 +11,13 @@ import {
   Download,
   FileText,
   ArrowRight,
-  ArrowLeft,
-  User,
   FileCheck,
   X,
   Sparkles,
 } from 'lucide-react';
 import styles from './page.module.css';
 
-type ModalStep = 'choice' | 'resume' | 'biodata' | null;
+type ModalStep = 'resume' | null;
 
 // Generator resume templates (matches /generator template ids)
 const RESUME_OPTIONS: { id: string; name: string; desc: string; gradient: string; emoji: string }[] = [
@@ -28,13 +26,6 @@ const RESUME_OPTIONS: { id: string; name: string; desc: string; gradient: string
   { id: 'sidebar', name: 'Executive Sidebar', desc: 'Structured two-column layout highlighting key skills and experience.', gradient: 'linear-gradient(135deg, #312e81, #6366f1)', emoji: '📊' },
   { id: 'greta', name: 'Greta Student Minimalist', desc: 'Soft pastel tones tailored for graduates and early professionals.', gradient: 'linear-gradient(135deg, #9a3412, #f97316)', emoji: '🎓' },
   { id: 'william', name: 'William Executive Designer', desc: 'Bold, high-impact header for creative and executive leaders.', gradient: 'linear-gradient(135deg, #581c87, #c084fc)', emoji: '💼' },
-];
-
-// Biodata generator templates (matches /biodata-generator template ids)
-const BIODATA_OPTIONS: { id: 'classic' | 'modern' | 'floral'; name: string; desc: string; gradient: string; emoji: string }[] = [
-  { id: 'classic', name: 'Classic', desc: 'Timeless professional layout with a clean, formal structure.', gradient: 'linear-gradient(135deg, #1e3a8a, #3b82f6)', emoji: '📄' },
-  { id: 'modern', name: 'Modern', desc: 'Contemporary two-tone design with a fresh, balanced look.', gradient: 'linear-gradient(135deg, #0f766e, #14b8a6)', emoji: '✨' },
-  { id: 'floral', name: 'Floral', desc: 'Elegant wedding-style floral background.', gradient: 'linear-gradient(135deg, #881337, #f472b6)', emoji: '🌸' },
 ];
 
 const ROW_1_CANDIDATES = [
@@ -61,15 +52,15 @@ const ROW_2_CANDIDATES = [
 
 const FAQ_ITEMS: { q: string; a: string }[] = [
   {
-    q: 'Is Dusty completely free to use?',
-    a: 'Yes! Dusty is 100% free with no hidden subscription fees, watermark limitations, or paywalls for standard PDF downloads.',
+    q: 'Is DocXume completely free to use?',
+    a: 'Yes! DocXume is 100% free with no hidden subscription fees, watermark limitations, or paywalls for standard PDF downloads.',
   },
   {
-    q: 'How does Dusty protect my personal data and privacy?',
+    q: 'How does DocXume protect my personal data and privacy?',
     a: 'All data and uploaded photos are processed strictly client-side on your own browser. Nothing sensitive is ever uploaded to our servers.',
   },
   {
-    q: 'Can I download my resume or biodata as a high-quality PDF?',
+    q: 'Can I download my resume as a high-quality PDF?',
     a: 'Absolutely. You can instantly export your fully formatted document into a crisp, professional A4 PDF with one click.',
   },
   {
@@ -81,16 +72,16 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
     a: 'Yes, you can upload square, circular, or rounded candidate photos and pick custom brand colors and fonts directly in the editor.',
   },
   {
-    q: 'Are there templates available for both job resumes and marriage biodatas?',
-    a: 'Yes! We provide dedicated professional resume layouts as well as formal, modern, and floral biodata templates for marriage profiles.',
+    q: 'Are there templates available for resumes, CVs, and cover letters?',
+    a: 'Yes! We provide dedicated professional resume layouts, CV templates, and matching cover letter styles including modern minimal, classic, and executive.',
   },
   {
     q: 'Do I need to create an account or sign up before building?',
     a: 'No sign-up or registration is required. You can jump straight into the editor and start creating your document immediately.',
   },
   {
-    q: 'Can I use Dusty offline on my computer or device?',
-    a: 'Yes, Dusty is offline-first. Your drafts are saved automatically in your browser’s local storage so you can work anywhere.',
+    q: 'Can I use DocXume offline on my computer or device?',
+    a: 'Yes, DocXume is offline-first. Your drafts are saved automatically in your browser’s local storage so you can work anywhere.',
   },
   {
     q: 'How do I adjust font styles, sizes, and layout margins?',
@@ -114,26 +105,36 @@ export default function Home() {
   const [modalStep, setModalStep] = useState<ModalStep>(null);
   const router = useRouter();
 
-  // Lock body scroll + close on Escape while the modal is open
+  // Lock body scroll + close on Escape or Browser Back while the modal is open
   useEffect(() => {
     if (!modalStep) return;
     document.body.style.overflow = 'hidden';
+
+    // Push history state so back button closes/steps back in modal
+    window.history.pushState({ modal: modalStep }, '');
+
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setModalStep(null);
+      if (e.key === 'Escape') {
+        window.history.back();
+      }
     };
+
+    const handlePopState = () => {
+      setModalStep(null);
+    };
+
     window.addEventListener('keydown', handleKey);
+    window.addEventListener('popstate', handlePopState);
+
     return () => {
       document.body.style.overflow = '';
       window.removeEventListener('keydown', handleKey);
+      window.removeEventListener('popstate', handlePopState);
     };
   }, [modalStep]);
 
   const openResumeTemplate = (templateId: string) => {
     window.open(`/generator?template=${templateId}`, '_blank');
-  };
-
-  const openBiodataTemplate = (templateId: 'classic' | 'modern' | 'floral') => {
-    window.open(`/biodata-generator?template=${templateId}`, '_blank');
   };
 
   return (
@@ -152,11 +153,11 @@ export default function Home() {
             </p>
             <div className={styles.heroActions}>
               <button
-                onClick={() => setModalStep('choice')}
+                onClick={() => setModalStep('resume')}
                 className="btn btn-primary"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
               >
-                Quick Start <ArrowRight size={16} />
+                Create Resume Now <ArrowRight size={16} />
               </button>
               <Link href="/templates" className="btn btn-secondary btn-secondary-dark">
                 Browse Templates
@@ -168,7 +169,7 @@ export default function Home() {
         {/* Feature Highlights Grid */}
         <section className={styles.features}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Why Choose Dusty?</h2>
+            <h2 className={styles.sectionTitle}>Why Choose DocXume?</h2>
             <p className={styles.sectionSubtitle}>
               Our editor is fully data-driven, allowing you to instantly switch designs without losing your typed text.
             </p>
@@ -222,7 +223,7 @@ export default function Home() {
           <div className={styles.carouselHeader}>
             <h2 className={styles.carouselTitle}>Explore Our Stunning Template Collection</h2>
             <p className={styles.carouselSubtitle}>
-              Hover to pause. Click Explore More below to browse our template marketplace.
+              Check out our most popular template designs. Click Explore More below to browse the full collection.
             </p>
           </div>
 
@@ -270,12 +271,12 @@ export default function Home() {
         </section>
 
         {/* Frequently Asked Questions Section */}
-        <section className={styles.faqSection}>
+        <section id="faq" className={styles.faqSection}>
           <div className={styles.faqContainer}>
             <div className={styles.sectionHeader}>
               <h2 className={styles.sectionTitle}>Frequently Asked Questions</h2>
               <p className={styles.sectionSubtitle}>
-                Everything you need to know about building your resume and biodata with Dusty.
+                Everything you need to know about building your resume, CV, and cover letter with DocXume.
               </p>
             </div>
 
@@ -295,6 +296,44 @@ export default function Home() {
                 );
               })}
             </div>
+          </div>
+        </section>
+
+        {/* Support / Donate Section */}
+        <section style={{
+          padding: '60px 20px',
+          background: 'linear-gradient(135deg, #fff1f2, #fce7f3, #fef3c7)',
+          textAlign: 'center',
+        }}>
+          <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>❤️</div>
+            <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', margin: '0 0 12px' }}>
+              Enjoying DocXume?
+            </h2>
+            <p style={{ fontSize: '1rem', color: '#475569', lineHeight: 1.6, margin: '0 0 8px' }}>
+              Every template is <strong>completely free</strong> — no watermarks, no subscriptions, no hidden fees.
+            </p>
+            <p style={{ fontSize: '0.95rem', color: '#64748b', lineHeight: 1.6, margin: '0 0 24px' }}>
+              If DocXume helped you create a professional document, you can support us by scanning the QR code and contributing any amount you like. Even ₹1 helps us build more free templates for everyone. 😊
+            </p>
+            <div style={{
+              display: 'inline-block',
+              padding: '14px',
+              background: '#ffffff',
+              border: '2px solid #fecdd3',
+              borderRadius: '18px',
+              boxShadow: '0 4px 20px rgba(225, 29, 72, 0.08)',
+              marginBottom: '12px',
+            }}>
+              <img
+                src="/upi-qr.png"
+                alt="Google Pay / UPI QR Code for donation"
+                style={{ width: '200px', height: '200px', objectFit: 'contain', borderRadius: '8px' }}
+              />
+            </div>
+            <p style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 600, margin: 0 }}>
+              UPI • Google Pay • Pay What You Want
+            </p>
           </div>
         </section>
 
@@ -323,23 +362,11 @@ export default function Home() {
           >
             {/* Modal header */}
             <div className={styles.modalHeader}>
-              {modalStep === 'resume' || modalStep === 'biodata' ? (
-                <button
-                  className={styles.modalBackBtn}
-                  onClick={() => setModalStep('choice')}
-                  aria-label="Go back"
-                >
-                  <ArrowLeft size={18} />
-                </button>
-              ) : (
-                <span className={styles.modalHeaderIcon}>
-                  <Zap size={18} />
-                </span>
-              )}
+              <span className={styles.modalHeaderIcon}>
+                <Zap size={18} />
+              </span>
               <h2 className={styles.modalTitle}>
-                {modalStep === 'choice' && 'What would you like to build?'}
-                {modalStep === 'resume' && 'Choose a Resume Template'}
-                {modalStep === 'biodata' && 'Choose a Biodata Template'}
+                Choose a Resume Template
               </h2>
               <button
                 className={styles.modalCloseBtn}
@@ -351,85 +378,23 @@ export default function Home() {
             </div>
 
             <div className={styles.modalBody}>
-              {/* Step 1: Resume or Biodata? */}
-              {modalStep === 'choice' && (
-                <div className={styles.choiceGrid}>
+              <div className={styles.pickerGrid}>
+                {RESUME_OPTIONS.map((opt) => (
                   <button
-                    className={styles.choiceCard}
-                    onClick={() => setModalStep('resume')}
+                    key={opt.id}
+                    className={styles.pickerCard}
+                    onClick={() => openResumeTemplate(opt.id)}
                   >
-                    <span className={styles.choiceIcon} style={{ background: 'linear-gradient(135deg, #2563eb, #60a5fa)' }}>
-                      <FileText size={28} />
+                    <span className={styles.pickerThumbPlaceholder} style={{ background: opt.gradient, fontSize: '3rem' }}>
+                      {opt.emoji}
                     </span>
-                    <span className={styles.choiceName}>Resume</span>
-                    <span className={styles.choiceDesc}>
-                      Pick from professional resume designs and start editing instantly.
-                    </span>
-                    <span className={styles.choiceCta}>
-                      Choose Resume <ArrowRight size={16} />
-                    </span>
+                    <span className={styles.pickerName}>{opt.name}</span>
+                    <span className={styles.pickerDesc}>{opt.desc}</span>
+                    <span className={styles.pickerSelect}>Select <ArrowRight size={14} /></span>
                   </button>
-
-                  <button
-                    className={styles.choiceCard}
-                    onClick={() => setModalStep('biodata')}
-                  >
-                    <span className={styles.choiceIcon} style={{ background: 'linear-gradient(135deg, #9d174d, #f472b6)' }}>
-                      <User size={28} />
-                    </span>
-                    <span className={styles.choiceName}>Biodata</span>
-                    <span className={styles.choiceDesc}>
-                      Choose a classic, modern, or floral biodata layout for marriage & profiles.
-                    </span>
-                    <span className={styles.choiceCta}>
-                      Choose Biodata <ArrowRight size={16} />
-                    </span>
-                  </button>
-                </div>
-              )}
-
-              {/* Step 2: Resume generator template picker */}
-              {modalStep === 'resume' && (
-                <div className={styles.pickerGrid}>
-                  {RESUME_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.id}
-                      className={styles.pickerCard}
-                      onClick={() => openResumeTemplate(opt.id)}
-                    >
-                      <span className={styles.pickerThumbPlaceholder} style={{ background: opt.gradient, fontSize: '3rem' }}>
-                        {opt.emoji}
-                      </span>
-                      <span className={styles.pickerName}>{opt.name}</span>
-                      <span className={styles.pickerDesc}>{opt.desc}</span>
-                      <span className={styles.pickerSelect}>Select <ArrowRight size={14} /></span>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Step 2: Biodata template picker */}
-              {modalStep === 'biodata' && (
-                <div className={styles.pickerGrid}>
-                  {BIODATA_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.id}
-                      className={styles.pickerCard}
-                      onClick={() => openBiodataTemplate(opt.id)}
-                    >
-                      <span className={styles.pickerThumbPlaceholder} style={{ background: opt.gradient, fontSize: '3rem' }}>
-                        {opt.emoji}
-                      </span>
-                      <span className={styles.pickerName}>{opt.name}</span>
-                      <span className={styles.pickerDesc}>{opt.desc}</span>
-                      <span className={styles.pickerSelect}>Select <ArrowRight size={14} /></span>
-                    </button>
-                  ))}
-                </div>
-              )}
+                ))}
+              </div>
             </div>
-
-
           </div>
         </div>
       )}

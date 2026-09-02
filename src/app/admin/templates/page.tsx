@@ -15,20 +15,6 @@ import { CanvasDocument } from '@/canvas/types';
 import styles from '@/app/editor/[category]/[templateId]/editor.module.css';
 import { ArrowLeft, Download, Upload, Send, Save, RefreshCw, Check, Loader2, FileCode, Layers } from 'lucide-react';
 
-// Biodata-specific enhanced canvas is code-split so it is only loaded when a
-// Biodata template is being edited — keeps the default admin bundle smaller.
-const AdminBiodataCanvas = dynamic(
-    () => import('@/components/admin/BiodataCanvas').then((m) => m.AdminBiodataCanvas),
-    {
-        ssr: false,
-        loading: () => (
-            <div className={styles.loadingScreen}>
-                <div className={styles.loadingSpinner} />
-                <p>Loading Biodata Canvas…</p>
-            </div>
-        ),
-    }
-);
 
 function AdminTemplateBuilderInner() {
     const router = useRouter();
@@ -68,7 +54,7 @@ function AdminTemplateBuilderInner() {
     const [filename, setFilename] = useState('my-new-template.ts');
     const [exportName, setExportName] = useState('myNewTemplate');
     const [templateId, setTemplateId] = useState('resume-custom');
-    const [category, setCategory] = useState<'resume' | 'biodata' | 'cv' | 'cover-letter'>('resume');
+    const [category, setCategory] = useState<'resume' | 'cv' | 'cover-letter'>('resume');
     const [displayName, setDisplayName] = useState('My Custom Template');
     const [isPremium, setIsPremium] = useState(false);
     const [thumbnail, setThumbnail] = useState('');
@@ -366,7 +352,11 @@ export const ${exportName}: CanvasDocument = ${JSON.stringify(
         a.download = filename.endsWith('.ts') ? filename : `${filename}.ts`;
         document.body.appendChild(a);
         a.click();
-        document.body.removeChild(a);
+        try {
+            if (a.parentNode) {
+                a.parentNode.removeChild(a);
+            }
+        } catch { }
         URL.revokeObjectURL(url);
     };
 
@@ -467,11 +457,6 @@ export const ${exportName}: CanvasDocument = ${JSON.stringify(
 
     const selectedElement = doc.elements.find((el) => el.id === selectedId) || null;
 
-    // Choose the editor layout: Biodata templates get the enhanced Biodata
-    // canvas (photo frames, ornaments, section titles); everything else keeps
-    // the full-featured generic builder.
-    const isBiodataMode = category === 'biodata';
-
     return (
         <div className={styles.workspace} data-theme={theme} style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
             {/* Hidden file inputs */}
@@ -507,7 +492,6 @@ export const ${exportName}: CanvasDocument = ${JSON.stringify(
                         title="Template Category"
                     >
                         <option value="resume">Resume</option>
-                        <option value="biodata">Biodata</option>
                         <option value="cv">CV</option>
                         <option value="cover-letter">Cover Letter</option>
                     </select>
@@ -642,49 +626,37 @@ export const ${exportName}: CanvasDocument = ${JSON.stringify(
                 </div>
             )}
 
-            {/* EDITOR BODY — enhanced Biodata canvas OR generic builder */}
-            {isBiodataMode ? (
-                <div className={styles.editorBody} style={{ flex: 1, overflow: 'hidden' }}>
-                    <AdminBiodataCanvas
-                        pageRef={pageRef}
-                        showGrid={showGrid}
-                        previewMode={previewMode}
-                        onToggleGrid={() => setShowGrid((v) => !v)}
-                        onToggleSnap={() => setSnapToGrid(!snapToGrid)}
-                    />
-                </div>
-            ) : (
-                <div className={styles.editorBody} style={{ flex: 1, overflow: 'hidden' }}>
-                    <LeftToolbar
-                        onUploadRasterImage={() => sidebarImageInputRef.current?.click()}
-                        onUploadSVG={() => svgInputRef.current?.click()}
-                        showGrid={showGrid}
-                        snapToGrid={snapToGrid}
-                        onToggleGrid={() => setShowGrid((v) => !v)}
-                        onToggleSnap={() => setSnapToGrid(!snapToGrid)}
-                    />
+            {/* EDITOR BODY */}
+            <div className={styles.editorBody} style={{ flex: 1, overflow: 'hidden' }}>
+                <LeftToolbar
+                    onUploadRasterImage={() => sidebarImageInputRef.current?.click()}
+                    onUploadSVG={() => svgInputRef.current?.click()}
+                    showGrid={showGrid}
+                    snapToGrid={snapToGrid}
+                    onToggleGrid={() => setShowGrid((v) => !v)}
+                    onToggleSnap={() => setSnapToGrid(!snapToGrid)}
+                />
 
-                    <main className={styles.canvasPane}>
-                        <div className={styles.canvasScroll}>
-                            <CanvasStage
-                                pageRef={pageRef}
-                                showGrid={showGrid}
-                                previewMode={previewMode}
-                            />
-                        </div>
-                    </main>
+                <main className={styles.canvasPane}>
+                    <div className={styles.canvasScroll}>
+                        <CanvasStage
+                            pageRef={pageRef}
+                            showGrid={showGrid}
+                            previewMode={previewMode}
+                        />
+                    </div>
+                </main>
 
-                    <aside className={styles.propertiesPane}>
-                        <div className={styles.propertiesPaneInner}>
-                            <PropertiesPanel
-                                element={selectedElement}
-                                onUploadClick={() => fileInputRef.current?.click()}
-                                previewMode={previewMode}
-                            />
-                        </div>
-                    </aside>
-                </div>
-            )}
+                <aside className={styles.propertiesPane}>
+                    <div className={styles.propertiesPaneInner}>
+                        <PropertiesPanel
+                            element={selectedElement}
+                            onUploadClick={() => fileInputRef.current?.click()}
+                            previewMode={previewMode}
+                        />
+                    </div>
+                </aside>
+            </div>
 
             {/* ── TRANSPARENT IMAGE QUESTION MODAL ── */}
             {showTransPrompt && (

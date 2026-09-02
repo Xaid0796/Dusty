@@ -4,7 +4,7 @@ export const cvBiotechInnovatorTemplate: CanvasDocument = {
   "id": "cv-biotech-innovator",
   "category": "cv",
   "name": "Biotech Innovator CV",
-  "thumbnail": "/thumbnails/cv-biotech-innovator.png",
+  "thumbnail": "/thumbnails/cv-biotech-innovator.png?v=1788239143898",
   "isPremium": false,
   "description": "An avant-garde, sophisticated Curriculum Vitae template featuring a deep burgundy and rose gold palette, asymmetric split-column layout, Garamond-Inter typography, and bespoke biotech innovation sections.",
   "page": {
@@ -738,3 +738,4 @@ export const cvBiotechInnovatorTemplate: CanvasDocument = {
     }
   ]
 };
+export { cvBiotechInnovatorTemplate as cvBiotechInnovator };

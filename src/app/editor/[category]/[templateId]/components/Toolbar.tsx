@@ -1,7 +1,6 @@
 'use client';
 import React from 'react';
 import {
-  ArrowLeft,
   Undo2,
   Redo2,
   Save,
@@ -93,9 +92,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     <header className={styles.toolbar}>
       {/* LEFT: Title */}
       <div className={styles.toolbarLeft}>
-        <button className={styles.backBtn} onClick={onBack} title="Back to Templates">
-          <ArrowLeft size={16} />
-        </button>
         <input
           type="text"
           value={documentName}

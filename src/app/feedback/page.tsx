@@ -163,7 +163,7 @@ export default function FeedbackPage() {
                         <>
                             <h1 className={styles.title}>We'd Love Your Feedback</h1>
                             <p className={styles.subtitle}>
-                                Your thoughts help us improve Dusty. Let us know what you think!
+                                Your thoughts help us improve DocXume. Let us know what you think!
                             </p>
 
                             <form onSubmit={handleSubmit}>
@@ -212,7 +212,7 @@ export default function FeedbackPage() {
                                     </label>
                                     <textarea
                                         className={styles.formTextarea}
-                                        placeholder="Tell us about your experience with Dusty..."
+                                        placeholder="Tell us about your experience with DocXume..."
                                         value={message}
                                         onChange={(e) => setMessage(e.target.value)}
                                         maxLength={1000}
