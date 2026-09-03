@@ -10,12 +10,6 @@ const nextConfig: NextConfig = {
   generateBuildId: async () => {
     return 'build-' + Date.now()
   },
-  webpack: (config, { dev }) => {
-    if (!dev) {
-      config.cache = false;
-    }
-    return config;
-  },
 };
 
 export default nextConfig;
