@@ -32,6 +32,9 @@
     "eslint": "^9",
     "eslint-config-next": "^15.1.0",
     "typescript": "^5",
-    "wrangler": "^4.128.0"
+    "wrangler": "4.128.0"
+  },
+  "overrides": {
+    "workerd": "1.20260831.1"
   }
 }
