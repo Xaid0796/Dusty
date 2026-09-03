@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && npx @cloudflare/next-on-pages",
     "start": "next start",
     "lint": "eslint"
   },
@@ -17,18 +17,24 @@
     "lucide-react": "^0.475.0",
     "next": "^15.1.0",
     "pdf-lib": "^1.17.1",
+    "picomatch": "2.3.2",
     "qrcode": "^1.5.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.16",
     "@types/node": "^20",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "^15.1.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "4.128.0"
+  },
+  "overrides": {
+    "workerd": "1.20260831.1"
   }
 }

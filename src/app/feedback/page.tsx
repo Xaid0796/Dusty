@@ -1,15 +1,10 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
 import { Header } from '@/components/shared/Header'
 import { Footer } from '@/components/shared/Footer'
-import { createClient } from '@supabase/supabase-js'
+import { Star } from 'lucide-react'
 import styles from './page.module.css'
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-)
 
 interface FeedbackRecord {
     id: number
@@ -79,12 +74,10 @@ export default function FeedbackPage() {
     const fetchFeedback = async () => {
         setIsLoadingFeedback(true)
         try {
-            const { data, error } = await supabase
-                .from('feedback')
-                .select('*')
-                .order('created_at', { ascending: false })
-            if (!error && data) {
-                setFeedbackList(groupByDate(data as FeedbackRecord[]))
+            const res = await fetch('/api/feedback')
+            const json = await res.json()
+            if (json.data) {
+                setFeedbackList(groupByDate(json.data))
             }
         } catch (err) {
             console.error('Failed to fetch feedback:', err)
@@ -109,18 +102,21 @@ export default function FeedbackPage() {
         setIsSubmitting(true)
 
         try {
-            const { error } = await supabase
-                .from('feedback')
-                .insert([{
+            const res = await fetch('/api/feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
                     message: message.trim(),
                     rating,
                     email: email.trim() || '',
                     category: 'general',
-                    status: 'new',
-                }])
+                }),
+            })
 
-            if (error) {
-                setError(error.message || 'Something went wrong. Please try again.')
+            const json = await res.json()
+
+            if (!res.ok) {
+                setError(json.error || 'Something went wrong. Please try again.')
                 return
             }
 
@@ -189,7 +185,7 @@ export default function FeedbackPage() {
                                                 onMouseLeave={() => setHoverRating(0)}
                                                 aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
                                             >
-                                                ★
+                                                <Star size={20} fill={star <= displayRating ? '#f59e0b' : 'transparent'} color={star <= displayRating ? '#f59e0b' : '#d1d5db'} />
                                             </button>
                                         ))}
                                     </div>
@@ -267,7 +263,7 @@ export default function FeedbackPage() {
                         ) : feedbackList.length === 0 ? (
                             <div className={styles.noFeedback}>
                                 <div className={styles.emptyState}>
-                                    <span className={styles.emptyIcon}>💬</span>
+                                    <span className={styles.emptyIcon}>📝</span>
                                     <span>No feedback yet. Be the first to share your thoughts!</span>
                                 </div>
                             </div>
@@ -277,15 +273,16 @@ export default function FeedbackPage() {
                                     group.items.map((item) => (
                                         <div key={item.id} className={styles.feedbackItem}>
                                             <div className={styles.feedbackStars}>
-                                                {'★'.repeat(item.rating)}
-                                                {'☆'.repeat(5 - item.rating)}
+                                                {[...Array(5)].map((_, i) => (
+                                                    <Star key={i} size={14} fill={i < item.rating ? '#f59e0b' : 'transparent'} color={i < item.rating ? '#f59e0b' : '#d1d5db'} />
+                                                ))}
                                             </div>
                                             <p className={styles.feedbackMessage}>
                                                 &ldquo;{item.message}&rdquo;
                                             </p>
                                             <div className={styles.feedbackMeta}>
                                                 <span>{item.email || 'Anonymous'}</span>
-                                                <span>·</span>
+                                                <span>┬╖</span>
                                                 <span>{formatTime(item.created_at)}</span>
                                             </div>
                                         </div>

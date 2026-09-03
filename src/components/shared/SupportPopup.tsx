@@ -76,6 +76,12 @@ export function SupportPopupProvider({ children }: { children: React.ReactNode }
                                 alt="Google Pay / UPI QR Code"
                                 className="support-popup-qr"
                             />
+                            <a
+                                href="upi://pay?pa=safirabiya@oksbi&pn=Receiver&cu=INR"
+                                className="support-popup-upi-button"
+                            >
+                                Pay via UPI App
+                            </a>
                         </div>
 
                         <p className="support-popup-upi-label">

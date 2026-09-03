@@ -121,6 +121,23 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
+.support-popup-upi-button {
+    display: block;
+    margin-top: 10px;
+    padding: 10px 16px;
+    background: #0f172a;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+}
+
+.support-popup-upi-button:hover {
+    background: #334155;
+}
+
 .support-popup-qr {
     width: 180px;
     height: 180px;
@@ -293,6 +310,13 @@
     .support-popup-qr {
         width: 160px;
         height: 160px;
+    }
+}
+
+/* ─── Desktop hide UPI button ───────────────────────────────────────────── */
+@media (min-width: 481px) {
+    .support-popup-upi-button {
+        display: none !important;
     }
 }
 
