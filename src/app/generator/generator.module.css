@@ -389,6 +389,7 @@
 
 /* ─── Right Preview Panel ─────────────────────────────────── */
 .previewPanel {
+  overflow-x: hidden;
   overflow-y: auto;
   background: var(--bg-workspace);
   display: flex;
@@ -408,6 +409,9 @@
   box-shadow: 0 4px 32px rgba(0, 0, 0, 0.15);
   border-radius: 2px;
   overflow: hidden;
+  width: 210mm;
+  max-width: 100%;
+  flex-shrink: 0;
 }
 
 /* ─── Mobile tabs ─────────────────────────────────────────── */

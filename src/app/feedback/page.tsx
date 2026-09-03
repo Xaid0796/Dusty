@@ -83,11 +83,16 @@ export default function FeedbackPage() {
                 .from('feedback')
                 .select('*')
                 .order('created_at', { ascending: false })
+<<<<<<< HEAD
 
             if (error) {
                 console.error('Failed to fetch feedback:', error)
             } else if (data) {
                 setFeedbackList(groupByDate(data))
+=======
+            if (!error && data) {
+                setFeedbackList(groupByDate(data as FeedbackRecord[]))
+>>>>>>> eb300216e39e1e488edd2282b7fd9185ee54cde4
             }
         } catch (err) {
             console.error('Failed to fetch feedback:', err)
@@ -112,18 +117,31 @@ export default function FeedbackPage() {
         setIsSubmitting(true)
 
         try {
+<<<<<<< HEAD
             const { error: insertError } = await supabase.from('feedback').insert([
                 {
+=======
+            const { error } = await supabase
+                .from('feedback')
+                .insert([{
+>>>>>>> eb300216e39e1e488edd2282b7fd9185ee54cde4
                     message: message.trim(),
                     rating,
                     email: email.trim() || '',
                     category: 'general',
                     status: 'new',
+<<<<<<< HEAD
                 },
             ])
 
             if (insertError) {
                 setError(insertError.message || 'Something went wrong. Please try again.')
+=======
+                }])
+
+            if (error) {
+                setError(error.message || 'Something went wrong. Please try again.')
+>>>>>>> eb300216e39e1e488edd2282b7fd9185ee54cde4
                 return
             }
 
