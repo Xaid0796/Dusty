@@ -3,7 +3,13 @@
 import React, { useState, useEffect } from 'react'
 import { Header } from '@/components/shared/Header'
 import { Footer } from '@/components/shared/Footer'
+import { createClient } from '@supabase/supabase-js'
 import styles from './page.module.css'
+
+const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+)
 
 interface FeedbackRecord {
     id: number
@@ -73,10 +79,15 @@ export default function FeedbackPage() {
     const fetchFeedback = async () => {
         setIsLoadingFeedback(true)
         try {
-            const res = await fetch('/api/feedback')
-            const json = await res.json()
-            if (json.data) {
-                setFeedbackList(groupByDate(json.data))
+            const { data, error } = await supabase
+                .from('feedback')
+                .select('*')
+                .order('created_at', { ascending: false })
+
+            if (error) {
+                console.error('Failed to fetch feedback:', error)
+            } else if (data) {
+                setFeedbackList(groupByDate(data))
             }
         } catch (err) {
             console.error('Failed to fetch feedback:', err)
@@ -101,26 +112,22 @@ export default function FeedbackPage() {
         setIsSubmitting(true)
 
         try {
-            const res = await fetch('/api/feedback', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
+            const { error: insertError } = await supabase.from('feedback').insert([
+                {
                     message: message.trim(),
                     rating,
                     email: email.trim() || '',
                     category: 'general',
-                }),
-            })
+                    status: 'new',
+                },
+            ])
 
-            const json = await res.json()
-
-            if (!res.ok) {
-                setError(json.error || 'Something went wrong. Please try again.')
+            if (insertError) {
+                setError(insertError.message || 'Something went wrong. Please try again.')
                 return
             }
 
             setIsSubmitted(true)
-            // Refresh the feedback list
             fetchFeedback()
         } catch (err) {
             setError('Network error. Please check your connection and try again.')

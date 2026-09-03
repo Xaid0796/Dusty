@@ -31,8 +31,7 @@ export const ResumePreviewWilliam: React.FC<ResumePreviewWilliamProps> = ({ docu
     return (
         <div
             style={{
-                width: '100%',
-                maxWidth: '210mm',
+                width: '210mm',
                 minHeight: '297mm',
                 background: '#ffffff',
                 color: '#222222',

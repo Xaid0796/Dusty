@@ -208,6 +208,13 @@ export default function TemplatesPage() {
                     alt="Google Pay / UPI QR Code for donation"
                     style={{ width: '200px', height: '200px', objectFit: 'contain', borderRadius: '8px', display: 'block' }}
                   />
+                  <a
+                    href="upi://pay?pa=safirabiya@oksbi&pn=Receiver&cu=INR"
+                    className="support-popup-upi-button"
+                    style={{ display: 'block', marginTop: '10px' }}
+                  >
+                    Pay via UPI App
+                  </a>
                 </div>
                 <p style={{ margin: 0, fontSize: '0.82rem', color: '#94a3b8', fontWeight: 600 }}>
                   UPI • Google Pay • Pay What You Want

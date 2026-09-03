@@ -37,8 +37,7 @@ export const ResumePreviewSidebar: React.FC<ResumePreviewSidebarProps> = ({ docu
     return (
         <div
             style={{
-                width: '100%',
-                maxWidth: '210mm',
+                width: '210mm',
                 minHeight: '297mm',
                 background: '#ffffff',
                 color: '#1e293b',
