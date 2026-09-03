@@ -284,7 +284,7 @@ export default function FeedbackPage() {
                                             </p>
                                             <div className={styles.feedbackMeta}>
                                                 <span>{item.email || 'Anonymous'}</span>
-                                                <span>┬╖</span>
+                                                <span>·</span>
                                                 <span>{formatTime(item.created_at)}</span>
                                             </div>
                                         </div>
