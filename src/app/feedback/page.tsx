@@ -1,15 +1,9 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
 import { Header } from '@/components/shared/Header'
 import { Footer } from '@/components/shared/Footer'
-import { createClient } from '@supabase/supabase-js'
 import styles from './page.module.css'
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-)
 
 interface FeedbackRecord {
     id: number
@@ -79,20 +73,10 @@ export default function FeedbackPage() {
     const fetchFeedback = async () => {
         setIsLoadingFeedback(true)
         try {
-            const { data, error } = await supabase
-                .from('feedback')
-                .select('*')
-                .order('created_at', { ascending: false })
-<<<<<<< HEAD
-
-            if (error) {
-                console.error('Failed to fetch feedback:', error)
-            } else if (data) {
-                setFeedbackList(groupByDate(data))
-=======
-            if (!error && data) {
-                setFeedbackList(groupByDate(data as FeedbackRecord[]))
->>>>>>> eb300216e39e1e488edd2282b7fd9185ee54cde4
+            const res = await fetch('/api/feedback')
+            const json = await res.json()
+            if (json.data) {
+                setFeedbackList(groupByDate(json.data))
             }
         } catch (err) {
             console.error('Failed to fetch feedback:', err)
@@ -117,35 +101,26 @@ export default function FeedbackPage() {
         setIsSubmitting(true)
 
         try {
-<<<<<<< HEAD
-            const { error: insertError } = await supabase.from('feedback').insert([
-                {
-=======
-            const { error } = await supabase
-                .from('feedback')
-                .insert([{
->>>>>>> eb300216e39e1e488edd2282b7fd9185ee54cde4
+            const res = await fetch('/api/feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
                     message: message.trim(),
                     rating,
                     email: email.trim() || '',
                     category: 'general',
-                    status: 'new',
-<<<<<<< HEAD
-                },
-            ])
+                }),
+            })
 
-            if (insertError) {
-                setError(insertError.message || 'Something went wrong. Please try again.')
-=======
-                }])
+            const json = await res.json()
 
-            if (error) {
-                setError(error.message || 'Something went wrong. Please try again.')
->>>>>>> eb300216e39e1e488edd2282b7fd9185ee54cde4
+            if (!res.ok) {
+                setError(json.error || 'Something went wrong. Please try again.')
                 return
             }
 
             setIsSubmitted(true)
+            // Refresh the feedback list
             fetchFeedback()
         } catch (err) {
             setError('Network error. Please check your connection and try again.')
@@ -171,7 +146,7 @@ export default function FeedbackPage() {
                 <div className={styles.card}>
                     {isSubmitted ? (
                         <div className={styles.successMessage}>
-                            <span className={styles.successIcon}>🎉</span>
+                            <span className={styles.successIcon}>≡ƒÄë</span>
                             <h2 className={styles.successTitle}>Thank you!</h2>
                             <p className={styles.successText}>
                                 Your feedback means the world to us. It helps us build a better
@@ -209,7 +184,7 @@ export default function FeedbackPage() {
                                                 onMouseLeave={() => setHoverRating(0)}
                                                 aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
                                             >
-                                                ★
+                                                Γÿà
                                             </button>
                                         ))}
                                     </div>
@@ -287,7 +262,7 @@ export default function FeedbackPage() {
                         ) : feedbackList.length === 0 ? (
                             <div className={styles.noFeedback}>
                                 <div className={styles.emptyState}>
-                                    <span className={styles.emptyIcon}>💬</span>
+                                    <span className={styles.emptyIcon}>≡ƒÆ¼</span>
                                     <span>No feedback yet. Be the first to share your thoughts!</span>
                                 </div>
                             </div>
@@ -297,15 +272,15 @@ export default function FeedbackPage() {
                                     group.items.map((item) => (
                                         <div key={item.id} className={styles.feedbackItem}>
                                             <div className={styles.feedbackStars}>
-                                                {'★'.repeat(item.rating)}
-                                                {'☆'.repeat(5 - item.rating)}
+                                                {'Γÿà'.repeat(item.rating)}
+                                                {'Γÿå'.repeat(5 - item.rating)}
                                             </div>
                                             <p className={styles.feedbackMessage}>
                                                 &ldquo;{item.message}&rdquo;
                                             </p>
                                             <div className={styles.feedbackMeta}>
                                                 <span>{item.email || 'Anonymous'}</span>
-                                                <span>·</span>
+                                                <span>┬╖</span>
                                                 <span>{formatTime(item.created_at)}</span>
                                             </div>
                                         </div>
