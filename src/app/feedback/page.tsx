@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { Header } from '@/components/shared/Header'
 import { Footer } from '@/components/shared/Footer'
 import { Star } from 'lucide-react'
+import { supabase } from '@/utils/supabase'
 import styles from './page.module.css'
 
 interface FeedbackRecord {
@@ -74,10 +75,13 @@ export default function FeedbackPage() {
     const fetchFeedback = async () => {
         setIsLoadingFeedback(true)
         try {
-            const res = await fetch('/api/feedback')
-            const json = await res.json()
-            if (json.data) {
-                setFeedbackList(groupByDate(json.data))
+            const { data, error } = await supabase
+                .from('feedback')
+                .select('*')
+                .order('created_at', { ascending: false })
+            if (error) throw error
+            if (data) {
+                setFeedbackList(groupByDate(data))
             }
         } catch (err) {
             console.error('Failed to fetch feedback:', err)
@@ -102,29 +106,27 @@ export default function FeedbackPage() {
         setIsSubmitting(true)
 
         try {
-            const res = await fetch('/api/feedback', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
+            const { data, error } = await supabase
+                .from('feedback')
+                .insert({
                     message: message.trim(),
                     rating,
                     email: email.trim() || '',
                     category: 'general',
-                }),
-            })
+                    status: 'new',
+                })
+                .select()
 
-            const json = await res.json()
-
-            if (!res.ok) {
-                setError(json.error || 'Something went wrong. Please try again.')
+            if (error) {
+                setError(error.message || 'Something went wrong. Please try again.')
                 return
             }
 
             setIsSubmitted(true)
             // Refresh the feedback list
             fetchFeedback()
-        } catch (err) {
-            setError('Network error. Please check your connection and try again.')
+        } catch (err: any) {
+            setError(err.message || 'Network error. Please check your connection and try again.')
         } finally {
             setIsSubmitting(false)
         }
