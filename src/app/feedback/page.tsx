@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { Header } from '@/components/shared/Header'
 import { Footer } from '@/components/shared/Footer'
+import { Star } from 'lucide-react'
 import styles from './page.module.css'
 
 interface FeedbackRecord {
@@ -146,7 +147,7 @@ export default function FeedbackPage() {
                 <div className={styles.card}>
                     {isSubmitted ? (
                         <div className={styles.successMessage}>
-                            <span className={styles.successIcon}>≡ƒÄë</span>
+                            <span className={styles.successIcon}>🎉</span>
                             <h2 className={styles.successTitle}>Thank you!</h2>
                             <p className={styles.successText}>
                                 Your feedback means the world to us. It helps us build a better
@@ -184,7 +185,7 @@ export default function FeedbackPage() {
                                                 onMouseLeave={() => setHoverRating(0)}
                                                 aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
                                             >
-                                                Γÿà
+                                                <Star size={20} fill={star <= displayRating ? '#f59e0b' : 'transparent'} color={star <= displayRating ? '#f59e0b' : '#d1d5db'} />
                                             </button>
                                         ))}
                                     </div>
@@ -262,7 +263,7 @@ export default function FeedbackPage() {
                         ) : feedbackList.length === 0 ? (
                             <div className={styles.noFeedback}>
                                 <div className={styles.emptyState}>
-                                    <span className={styles.emptyIcon}>≡ƒÆ¼</span>
+                                    <span className={styles.emptyIcon}>📝</span>
                                     <span>No feedback yet. Be the first to share your thoughts!</span>
                                 </div>
                             </div>
@@ -272,8 +273,9 @@ export default function FeedbackPage() {
                                     group.items.map((item) => (
                                         <div key={item.id} className={styles.feedbackItem}>
                                             <div className={styles.feedbackStars}>
-                                                {'Γÿà'.repeat(item.rating)}
-                                                {'Γÿå'.repeat(5 - item.rating)}
+                                                {[...Array(5)].map((_, i) => (
+                                                    <Star key={i} size={14} fill={i < item.rating ? '#f59e0b' : 'transparent'} color={i < item.rating ? '#f59e0b' : '#d1d5db'} />
+                                                ))}
                                             </div>
                                             <p className={styles.feedbackMessage}>
                                                 &ldquo;{item.message}&rdquo;
