@@ -30,14 +30,13 @@ export default function ContactPage() {
 
         try {
             const { error: insertError } = await supabase
-                .from('feedback')
+                .from('contact')
                 .insert({
                     name: name.trim() || 'Anonymous',
                     email: email.trim() || '',
-                    message: `[${category}] ${message.trim()}`,
                     category,
+                    message: message.trim(),
                     status: 'new',
-                    rating: 0,
                 })
                 .select();
 
