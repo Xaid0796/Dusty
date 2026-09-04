@@ -1,0 +1,9 @@
+# DocXume robots.txt
+User-agent: *
+Allow: /
+
+# Block private / non-public utility routes
+Disallow: /admin/
+Disallow: /api/
+
+Sitemap: https://docxume.in/sitemap.xml

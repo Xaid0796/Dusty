@@ -49,7 +49,7 @@ export default function PrivacyPolicyPage() {
                             4. Contact Us
                         </h2>
                         <p>
-                            If you have any questions about this Privacy Policy, please feel free to reach out through our community channels or repository.
+                            If you have any questions about this Privacy Policy, you can reach us through our <a href="/contact" style={{ color: '#2563eb', textDecoration: 'underline' }}>Contact page</a>. We read every message and will respond as soon as we can.
                         </p>
                     </div>
                 </section>

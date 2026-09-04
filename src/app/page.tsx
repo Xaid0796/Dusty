@@ -29,25 +29,25 @@ const RESUME_OPTIONS: { id: string; name: string; desc: string; gradient: string
 ];
 
 const ROW_1_CANDIDATES = [
-  { name: 'Alex Turner', role: 'Senior Software Engineer', image: '/resume-photo-1.jpeg', rating: '★ 5.0' },
-  { name: 'Elena Rostova', role: 'Product Manager', image: '/resume-photo-2.jpeg', rating: '★ 4.9' },
-  { name: 'Marcus Vance', role: 'Full Stack Architect', image: '/photos/male/american.jpeg', rating: '★ 5.0' },
-  { name: 'Sophia Chen', role: 'UI/UX Lead Designer', image: '/photos/female/office-girl.jpeg', rating: '★ 4.8' },
-  { name: 'Liam O’Connor', role: 'DevOps Specialist', image: '/photos/male/scottish-office.jpeg', rating: '★ 4.9' },
-  { name: 'Priya Sharma', role: 'Data Scientist', image: '/photos/female/office-women.jpeg', rating: '★ 5.0' },
-  { name: 'Ryan Gosling', role: 'Solutions Architect', image: '/photos/male/american-office.jpeg', rating: '★ 4.9' },
-  { name: 'Clara Oswald', role: 'Technical Writer', image: '/photos/female/women-01.png', rating: '★ 5.0' },
+  { name: 'Alex Turner', role: 'Senior Software Engineer', image: '/resume-photo-1.jpeg' },
+  { name: 'Elena Rostova', role: 'Product Manager', image: '/resume-photo-2.jpeg' },
+  { name: 'Marcus Vance', role: 'Full Stack Architect', image: '/photos/male/american.jpeg' },
+  { name: 'Sophia Chen', role: 'UI/UX Lead Designer', image: '/photos/female/office-girl.jpeg' },
+  { name: 'Liam O’Connor', role: 'DevOps Specialist', image: '/photos/male/scottish-office.jpeg' },
+  { name: 'Priya Sharma', role: 'Data Scientist', image: '/photos/female/office-women.jpeg' },
+  { name: 'Ryan Gosling', role: 'Solutions Architect', image: '/photos/male/american-office.jpeg' },
+  { name: 'Clara Oswald', role: 'Technical Writer', image: '/photos/female/women-01.png' },
 ];
 
 const ROW_2_CANDIDATES = [
-  { name: 'David Miller', role: 'Investment Strategist', image: '/photos/male/italian-office.jpeg', rating: '★ 4.9' },
-  { name: 'Aisha Patel', role: 'Clinical Researcher', image: '/resume-photo-3.jpeg', rating: '★ 5.0' },
-  { name: 'Lucas Gabriel', role: 'Marketing Director', image: '/photos/male/office-man.jpeg', rating: '★ 4.8' },
-  { name: 'Isabella Rossi', role: 'Legal Consultant', image: '/resume-photo-4.jpeg', rating: '★ 4.9' },
-  { name: 'Noah Wright', role: 'Cybersecurity Analyst', image: '/photos/male/men-01.png', rating: '★ 5.0' },
-  { name: 'Zoe Alverez', role: 'Brand Strategist', image: '/resume-photo-5.jpeg', rating: '★ 4.9' },
-  { name: 'Ethan Hunt', role: 'Security Engineer', image: '/photos/male/office-man.jpeg', rating: '★ 5.0' },
-  { name: 'Mia Wong', role: 'Product Analyst', image: '/photos/female/women-01.png', rating: '★ 4.9' },
+  { name: 'David Miller', role: 'Investment Strategist', image: '/photos/male/italian-office.jpeg' },
+  { name: 'Aisha Patel', role: 'Clinical Researcher', image: '/resume-photo-3.jpeg' },
+  { name: 'Lucas Gabriel', role: 'Marketing Director', image: '/photos/male/office-man.jpeg' },
+  { name: 'Isabella Rossi', role: 'Legal Consultant', image: '/resume-photo-4.jpeg' },
+  { name: 'Noah Wright', role: 'Cybersecurity Analyst', image: '/photos/male/men-01.png' },
+  { name: 'Zoe Alverez', role: 'Brand Strategist', image: '/resume-photo-5.jpeg' },
+  { name: 'Ethan Hunt', role: 'Security Engineer', image: '/photos/male/office-man.jpeg' },
+  { name: 'Mia Wong', role: 'Product Analyst', image: '/photos/female/women-01.png' },
 ];
 
 const FAQ_ITEMS: { q: string; a: string }[] = [
@@ -236,10 +236,6 @@ export default function Home() {
                   <div className={styles.carouselInfo}>
                     <span className={styles.carouselName}>{person.name}</span>
                     <span className={styles.carouselRole}>{person.role}</span>
-                    <div className={styles.carouselBadgeRow}>
-                      <span className={styles.carouselTag}>{person.rating}</span>
-                      <span className={styles.carouselTag} style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#059669' }}>Verified</span>
-                    </div>
                   </div>
                 </div>
               ))}
@@ -253,10 +249,6 @@ export default function Home() {
                   <div className={styles.carouselInfo}>
                     <span className={styles.carouselName}>{person.name}</span>
                     <span className={styles.carouselRole}>{person.role}</span>
-                    <div className={styles.carouselBadgeRow}>
-                      <span className={styles.carouselTag}>{person.rating}</span>
-                      <span className={styles.carouselTag} style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#059669' }}>Verified</span>
-                    </div>
                   </div>
                 </div>
               ))}

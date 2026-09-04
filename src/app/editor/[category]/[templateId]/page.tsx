@@ -2,10 +2,17 @@ import { getAllTemplates } from '@/templates/index';
 import EditorClient from './EditorClient';
 
 export function generateStaticParams() {
-  return getAllTemplates().map((t) => ({
+  const paths = getAllTemplates().map((t) => ({
     category: t.category,
     templateId: t.id,
   }));
+
+  // Add blank templates
+  paths.push({ category: 'resume', templateId: 'blank' });
+  paths.push({ category: 'cv', templateId: 'blank' });
+  paths.push({ category: 'cover-letter', templateId: 'blank' });
+
+  return paths;
 }
 
 export default function EditorPage() {

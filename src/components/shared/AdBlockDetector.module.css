@@ -14,6 +14,12 @@
     padding: 20px;
     animation: ab-fade-in 0.4s ease;
     overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.overlay::-webkit-scrollbar {
+    display: none;
 }
 
 /* ─── Card ───────────────────────────────────────────────────────────── */
@@ -25,8 +31,14 @@
     max-width: 500px;
     max-height: 90vh;
     overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     padding: 36px 32px 28px;
     text-align: center;
+}
+
+.card::-webkit-scrollbar {
+    display: none;
     box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
     animation: ab-scale-in 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }

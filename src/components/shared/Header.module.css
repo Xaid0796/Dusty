@@ -91,18 +91,101 @@
   box-shadow: 0 2px 8px rgba(225, 29, 72, 0.12);
 }
 
-/* ─── Mobile: hide desktop nav, show hamburger ─────────────────────────── */
+/* ─── Hamburger visible on ALL screen sizes (secondary links live in menu) ── */
 .mobileMenuWrap {
-  display: none;
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin-left: 8px;
 }
 
 .hamburgerBtn {
-  display: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* ─── Mobile: Overflow menu (hidden by default) ────────────────────────── */
+.hamburgerBtn:active {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* ─── Overflow dropdown menu (visible on ALL screen sizes when open) ────── */
 .overflowMenu {
-  display: none;
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 260px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  z-index: 200;
+  padding: 6px;
+  animation: menuSlideIn 0.2s ease;
+}
+
+.overflowMenuHeader {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  padding: 8px 14px 6px;
+}
+
+.overflowMenuItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 10px;
+  text-decoration: none;
+  font-family: inherit;
+  transition: background 0.15s;
+  min-height: 46px;
+  -webkit-tap-highlight-color: transparent;
+  width: 100%;
+  text-align: left;
+}
+
+.overflowMenuItem:active {
+  background: #f1f5f9;
+}
+
+.overflowMenuItemActive {
+  color: var(--primary-color);
+  background: rgba(37, 99, 235, 0.06);
+  font-weight: 600;
+}
+
+.overflowChevron {
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.overflowDivider {
+  height: 1px;
+  background: #e2e8f0;
+  margin: 4px 8px;
 }
 
 /* ─── Mobile Styles ─────────────────────────────────────────────────────── */
@@ -117,120 +200,9 @@
     padding: 0 16px;
   }
 
-  /* Hide desktop nav completely */
+  /* Hide desktop nav completely on small screens */
   .nav {
     display: none;
-  }
-
-  /* Show hamburger button */
-  .mobileMenuWrap {
-    display: flex;
-    align-items: center;
-    position: relative;
-  }
-
-  .hamburgerBtn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    border: none;
-    background: transparent;
-    color: var(--text-primary);
-    cursor: pointer;
-    border-radius: 10px;
-    transition: background 0.15s;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .hamburgerBtn:active {
-    background: rgba(0, 0, 0, 0.06);
-  }
-
-  /* Overflow dropdown menu */
-  .overflowMenu {
-    display: flex;
-    flex-direction: column;
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    width: 260px;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-    overflow: hidden;
-    z-index: 200;
-    padding: 6px;
-    animation: menuSlideIn 0.2s ease;
-  }
-
-  .overflowMenuItem {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 16px;
-    font-size: 0.92rem;
-    font-weight: 500;
-    color: var(--text-primary);
-    border: none;
-    background: none;
-    cursor: pointer;
-    border-radius: 10px;
-    text-decoration: none;
-    font-family: inherit;
-    transition: background 0.15s;
-    min-height: 48px;
-    -webkit-tap-highlight-color: transparent;
-    width: 100%;
-    text-align: left;
-  }
-
-  .overflowMenuItem:active {
-    background: #f1f5f9;
-  }
-
-  .overflowMenuItemActive {
-    color: var(--primary-color);
-    background: rgba(37, 99, 235, 0.06);
-    font-weight: 600;
-  }
-
-  .overflowChevron {
-    color: #94a3b8;
-    flex-shrink: 0;
-  }
-
-  .overflowDivider {
-    height: 1px;
-    background: #e2e8f0;
-    margin: 4px 8px;
-  }
-
-  .overflowMenuCTA {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 6px;
-    padding: 14px 16px;
-    font-size: 0.92rem;
-    font-weight: 700;
-    color: #ffffff;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    text-decoration: none;
-    font-family: inherit;
-    min-height: 48px;
-    -webkit-tap-highlight-color: transparent;
-    text-align: center;
-  }
-
-  .overflowMenuCTA:active {
-    opacity: 0.9;
   }
 }
 

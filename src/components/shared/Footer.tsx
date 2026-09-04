@@ -12,6 +12,12 @@ export const Footer: React.FC = () => {
           <span>© {new Date().getFullYear()} DocXume. All rights reserved.</span>
         </div>
         <div className={styles.links}>
+          <Link href="/about" className={styles.link}>
+            About
+          </Link>
+          <Link href="/contact" className={styles.link}>
+            Contact
+          </Link>
           <Link href="/feedback" className={styles.link}>
             Feedback
           </Link>

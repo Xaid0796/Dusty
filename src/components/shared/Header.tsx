@@ -55,11 +55,20 @@ export const Header: React.FC = () => {
     showSupportPopup();
   };
 
-  const menuItems = [
+  // Visible in the top bar (primary actions)
+  const primaryItems = [
     { href: '/', label: 'Home', active: isActive('/') },
     { href: '/templates', label: 'Templates', active: isActive('/templates') || isActive('/editor') },
     { href: '/pdf-tools', label: 'PDF Tools', active: isActive('/pdf-tools') },
+  ];
+
+  // Grouped inside the three-line (hamburger) menu
+  const menuItems = [
+    { href: '/about', label: 'About', active: isActive('/about') },
+    { href: '/contact', label: 'Contact', active: isActive('/contact') },
     { href: '/feedback', label: 'Feedback', active: isActive('/feedback') },
+    { href: '/privacy-policy', label: 'Privacy Policy', active: isActive('/privacy-policy') },
+    { href: '/terms-of-service', label: 'Terms of Service', active: isActive('/terms-of-service') },
   ];
 
   return (
@@ -67,9 +76,9 @@ export const Header: React.FC = () => {
       <div className={styles.container}>
         <Logo href="/" size="md" />
 
-        {/* Desktop Navigation */}
+        {/* Primary items kept visible in the bar */}
         <nav className={styles.nav}>
-          {menuItems.map((item) => (
+          {primaryItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -91,7 +100,7 @@ export const Header: React.FC = () => {
           </Link>
         </nav>
 
-        {/* Mobile Hamburger Button */}
+        {/* Three-line menu (shown on all screen sizes) */}
         <div className={styles.mobileMenuWrap} ref={menuRef}>
           <button
             className={styles.hamburgerBtn}
@@ -102,9 +111,10 @@ export const Header: React.FC = () => {
             {menuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
 
-          {/* Mobile Overflow Dropdown */}
+          {/* Overflow Dropdown */}
           {menuOpen && (
             <div className={styles.overflowMenu} role="menu">
+              <div className={styles.overflowMenuHeader}>Menu</div>
               {menuItems.map((item) => (
                 <Link
                   key={item.href}
@@ -117,6 +127,7 @@ export const Header: React.FC = () => {
                   <ChevronRight size={16} className={styles.overflowChevron} />
                 </Link>
               ))}
+              <div className={styles.overflowDivider} />
               <button
                 className={styles.overflowMenuItem}
                 role="menuitem"
@@ -125,25 +136,6 @@ export const Header: React.FC = () => {
                 <span>FAQ</span>
                 <ChevronRight size={16} className={styles.overflowChevron} />
               </button>
-              <div className={styles.overflowDivider} />
-              <button
-                className={styles.overflowMenuItem}
-                role="menuitem"
-                onClick={handleDonateClick}
-                style={{ color: '#e11d48', fontWeight: 600 }}
-              >
-                <span>❤️ Donate Us</span>
-                <Heart size={14} fill="#e11d48" color="#e11d48" />
-              </button>
-              <div className={styles.overflowDivider} />
-              <Link
-                href="/templates"
-                className={styles.overflowMenuCTA}
-                role="menuitem"
-                onClick={() => setMenuOpen(false)}
-              >
-                Build Now
-              </Link>
             </div>
           )}
         </div>
