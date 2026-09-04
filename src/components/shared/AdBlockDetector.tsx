@@ -29,7 +29,7 @@ export function AdBlockDetector({ children }: { children: React.ReactNode }) {
         // Try loading a script with ad-related name; ad blockers block it
         const scriptTest = new Promise<boolean>((resolve) => {
             const script = document.createElement('script');
-            script.src = '/ad-script.js';
+            script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
             script.async = true;
             script.onload = () => resolve(false); // Script loaded = no blocker
             script.onerror = () => resolve(true); // Script blocked = blocker
@@ -324,10 +324,10 @@ export function AdBlockDetector({ children }: { children: React.ReactNode }) {
                                 <strong>Samsung Internet</strong>: Settings → Ad blockers → Disable
                             </div>
                             <div className={styles.hintItem}>
-                                <strong>Chrome Mobile</strong>: Extensions → Disable ad blocker
+                                <strong>Chrome</strong>: Extensions → Disable ad blocker
                             </div>
                             <div className={styles.hintItem}>
-                                <strong>Firefox Mobile</strong>: Add-ons → uBlock → Disable
+                                <strong>Firefox</strong>: Add-ons → uBlock → Disable
                             </div>
                             <div className={styles.hintItem}>
                                 <strong>Safari iOS</strong>: Settings → Safari → Extensions → Off
