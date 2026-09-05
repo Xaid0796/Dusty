@@ -223,12 +223,16 @@ export const AdvancedColorPickerPopup: React.FC<AdvancedColorPickerPopupProps> =
             <div
                 className={styles.modalContent}
                 style={{
-                    maxWidth: 300,
+                    maxWidth: 400,
+                    width: '100%',
+                    maxHeight: '85vh',
+                    overflowY: 'auto',
                     background: 'var(--bg-panel)',
                     color: 'var(--text-panel)',
                     border: '1px solid var(--border-panel)',
-                    padding: '20px',
-                    position: 'relative',
+                    padding: '24px',
+                    borderRadius: 16,
+                    boxShadow: '0 24px 60px rgba(0, 0, 0, 0.3), 0 8px 20px rgba(0, 0, 0, 0.15)',
                 }}
             >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -335,86 +339,94 @@ export const AdvancedColorPickerPopup: React.FC<AdvancedColorPickerPopupProps> =
                     </div>
                 </div>
 
-                <div style={{ marginBottom: 24 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-                        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-panel)', marginRight: 8 }}>Hue:</span>
-                        <input
-                            type="range"
-                            min="0"
-                            max="360"
-                            value={rgbToHsl(internalColor.r, internalColor.g, internalColor.b).h}
-                            onChange={(e) => {
-                                const h = parseInt(e.target.value, 10);
-                                const { s, l } = rgbToHsl(internalColor.r, internalColor.g, internalColor.b);
-                                const rgb = hslToRgb(h, s, l);
-                                setInternalColor({ ...rgb, a: internalColor.a });
-                                setHex(rgbToHex(rgb.r, rgb.g, rgb.b));
-                                setRgbInput(`${rgb.r}, ${rgb.g}, ${rgb.b}`);
-                                setHslInput(`${h}, ${s}%, ${l}%`);
-                            }}
-                            style={{ width: 200 }}
-                        />
-                        <span style={{ fontSize: 12, color: 'var(--text-panel-muted)', marginLeft: 8 }}>
-                            {rgbToHsl(internalColor.r, internalColor.g, internalColor.b).h}°
-                        </span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    <div className={styles.fieldGroup}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                            <label className={styles.fieldLabel}>Hue</label>
+                            <span className={styles.sliderValue}>{rgbToHsl(internalColor.r, internalColor.g, internalColor.b).h}°</span>
+                        </div>
+                        <div className={styles.sliderRow}>
+                            <input
+                                type="range"
+                                className={styles.slider}
+                                min="0"
+                                max="360"
+                                value={rgbToHsl(internalColor.r, internalColor.g, internalColor.b).h}
+                                onChange={(e) => {
+                                    const h = parseInt(e.target.value, 10);
+                                    const { s, l } = rgbToHsl(internalColor.r, internalColor.g, internalColor.b);
+                                    const rgb = hslToRgb(h, s, l);
+                                    setInternalColor({ ...rgb, a: internalColor.a });
+                                    setHex(rgbToHex(rgb.r, rgb.g, rgb.b));
+                                    setRgbInput(`${rgb.r}, ${rgb.g}, ${rgb.b}`);
+                                    setHslInput(`${h}, ${s}%, ${l}%`);
+                                }}
+                            />
+                        </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-                        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-panel)', marginRight: 8 }}>Saturation:</span>
-                        <input
-                            type="range"
-                            min="0"
-                            max="100"
-                            value={rgbToHsl(internalColor.r, internalColor.g, internalColor.b).s}
-                            onChange={(e) => {
-                                const s = parseInt(e.target.value, 10);
-                                const { h, l } = rgbToHsl(internalColor.r, internalColor.g, internalColor.b);
-                                const rgb = hslToRgb(h, s, l);
-                                setInternalColor({ ...rgb, a: internalColor.a });
-                                setHex(rgbToHex(rgb.r, rgb.g, rgb.b));
-                                setRgbInput(`${rgb.r}, ${rgb.g}, ${rgb.b}`);
-                                setHslInput(`${h}, ${s}%, ${l}%`);
-                            }}
-                            style={{ width: 200 }}
-                        />
-                        <span style={{ fontSize: 12, color: 'var(--text-panel-muted)', marginLeft: 8 }}>
-                            {rgbToHsl(internalColor.r, internalColor.g, internalColor.b).s}%
-                        </span>
+                    <div className={styles.fieldGroup}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                            <label className={styles.fieldLabel}>Saturation</label>
+                            <span className={styles.sliderValue}>{rgbToHsl(internalColor.r, internalColor.g, internalColor.b).s}%</span>
+                        </div>
+                        <div className={styles.sliderRow}>
+                            <input
+                                type="range"
+                                className={styles.slider}
+                                min="0"
+                                max="100"
+                                value={rgbToHsl(internalColor.r, internalColor.g, internalColor.b).s}
+                                onChange={(e) => {
+                                    const s = parseInt(e.target.value, 10);
+                                    const { h, l } = rgbToHsl(internalColor.r, internalColor.g, internalColor.b);
+                                    const rgb = hslToRgb(h, s, l);
+                                    setInternalColor({ ...rgb, a: internalColor.a });
+                                    setHex(rgbToHex(rgb.r, rgb.g, rgb.b));
+                                    setRgbInput(`${rgb.r}, ${rgb.g}, ${rgb.b}`);
+                                    setHslInput(`${h}, ${s}%, ${l}%`);
+                                }}
+                            />
+                        </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-                        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-panel)', marginRight: 8 }}>Lightness:</span>
-                        <input
-                            type="range"
-                            min="0"
-                            max="100"
-                            value={rgbToHsl(internalColor.r, internalColor.g, internalColor.b).l}
-                            onChange={(e) => {
-                                const l = parseInt(e.target.value, 10);
-                                const { h, s } = rgbToHsl(internalColor.r, internalColor.g, internalColor.b);
-                                const rgb = hslToRgb(h, s, l);
-                                setInternalColor({ ...rgb, a: internalColor.a });
-                                setHex(rgbToHex(rgb.r, rgb.g, rgb.b));
-                                setRgbInput(`${rgb.r}, ${rgb.g}, ${rgb.b}`);
-                                setHslInput(`${h}, ${s}%, ${l}%`);
-                            }}
-                            style={{ width: 200 }}
-                        />
-                        <span style={{ fontSize: 12, color: 'var(--text-panel-muted)', marginLeft: 8 }}>
-                            {rgbToHsl(internalColor.r, internalColor.g, internalColor.b).l}%
-                        </span>
+                    <div className={styles.fieldGroup}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                            <label className={styles.fieldLabel}>Lightness</label>
+                            <span className={styles.sliderValue}>{rgbToHsl(internalColor.r, internalColor.g, internalColor.b).l}%</span>
+                        </div>
+                        <div className={styles.sliderRow}>
+                            <input
+                                type="range"
+                                className={styles.slider}
+                                min="0"
+                                max="100"
+                                value={rgbToHsl(internalColor.r, internalColor.g, internalColor.b).l}
+                                onChange={(e) => {
+                                    const l = parseInt(e.target.value, 10);
+                                    const { h, s } = rgbToHsl(internalColor.r, internalColor.g, internalColor.b);
+                                    const rgb = hslToRgb(h, s, l);
+                                    setInternalColor({ ...rgb, a: internalColor.a });
+                                    setHex(rgbToHex(rgb.r, rgb.g, rgb.b));
+                                    setRgbInput(`${rgb.r}, ${rgb.g}, ${rgb.b}`);
+                                    setHslInput(`${h}, ${s}%, ${l}%`);
+                                }}
+                            />
+                        </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-                        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-panel)', marginRight: 8 }}>Alpha:</span>
-                        <input
-                            type="range"
-                            min="0"
-                            max="100"
-                            value={alpha}
-                            onChange={handleAlphaChange}
-                            style={{ width: 200 }}
-                        />
-                        <span style={{ fontSize: 12, color: 'var(--text-panel-muted)', marginLeft: 8 }}>
-                            {alpha}%
-                        </span>
+                    <div className={styles.fieldGroup}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                            <label className={styles.fieldLabel}>Alpha</label>
+                            <span className={styles.sliderValue}>{alpha}%</span>
+                        </div>
+                        <div className={styles.sliderRow}>
+                            <input
+                                type="range"
+                                className={styles.slider}
+                                min="0"
+                                max="100"
+                                value={alpha}
+                                onChange={handleAlphaChange}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>

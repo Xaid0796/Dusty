@@ -153,6 +153,9 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
       const cropY = element.cropY !== undefined ? element.cropY : 50;
       const objectPosition = `${cropX}% ${cropY}%`;
 
+      const isSignature = (element as any).isSignature;
+      const sigColor = (element as any).signatureColor || '#000000';
+
       const imgStyle: React.CSSProperties = {
         width: '100%',
         height: '100%',
@@ -166,6 +169,21 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
         userSelect: 'none',
         pointerEvents: 'none', // Prevents browser image dragging
       };
+
+      // For signatures, tint the drawing by using the image as a luminance mask
+      // and filling it with the chosen signature color.
+      if (isSignature) {
+        imgStyle.backgroundColor = sigColor;
+        (imgStyle as any).maskImage = `url(${element.src})`;
+        (imgStyle as any).webkitMaskImage = `url(${element.src})`;
+        (imgStyle as any).maskRepeat = 'no-repeat';
+        (imgStyle as any).webkitMaskRepeat = 'no-repeat';
+        (imgStyle as any).maskSize = element.objectFit === 'cover' ? 'cover' : element.objectFit === 'fill' ? '100% 100%' : 'contain';
+        (imgStyle as any).webkitMaskSize = (imgStyle as any).maskSize;
+        (imgStyle as any).maskPosition = objectPosition;
+        (imgStyle as any).webkitMaskPosition = objectPosition;
+        imgStyle.filter = 'none';
+      }
 
       return (
         <div

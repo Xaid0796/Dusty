@@ -468,7 +468,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({ element, onUpl
         })()}
 
         {/* ── IMAGE PROPERTIES ── */}
-        {element.type === 'image' && (
+        {element.type === 'image' && !(element as any).isSignature && (
           <Section title="Image">
             <button
               className={styles.panelBtn}
@@ -540,6 +540,19 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({ element, onUpl
               <RotateCcw size={13} />
               Reset Image
             </button>
+          </Section>
+        )}
+
+        {/* ── SIGNATURE PROPERTIES ── */}
+        {element.type === 'image' && (element as any).isSignature && (
+          <Section title="Signature">
+            <ColorField
+              label="Signature Color"
+              value={(element as any).signatureColor || '#000000'}
+              onChange={(v) => update({ signatureColor: v } as any)}
+            />
+            <SliderField label="Opacity" value={Math.round(((element as any).opacity ?? 1) * 100)} onChange={(v) => update({ opacity: v / 100 } as any)} min={0} max={100} unit="%" />
+            <SliderField label="Border Radius" value={(element as any).borderRadius || 0} onChange={(v) => update({ borderRadius: v } as any)} min={0} max={100} unit="px" />
           </Section>
         )}
 

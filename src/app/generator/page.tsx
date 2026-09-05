@@ -1113,7 +1113,7 @@ export default function GeneratorPage() {
       {/* ── Photo Crop Modal ──────────────────────────────────────────────── */}
       {showCropModal && cropImageSrc && (
         <div className={styles.modalOverlay}>
-          <div className={styles.modal} role="dialog" aria-modal="true" style={{ maxWidth: '400px' }}>
+          <div className={styles.modal} role="dialog" aria-modal="true" style={{ maxWidth: '400px', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 className={styles.modalTitle} style={{ margin: 0 }}>Adjust Photo</h3>
               <button onClick={() => setShowCropModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}>

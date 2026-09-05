@@ -103,6 +103,10 @@ export interface ImageElement extends BaseElement {
   saturation?: number;
   blur?: number;
   backgroundColor?: string;
+  /** When true, this image element is a signature (hand-drawn/imported) and should be tinted with `signatureColor`. */
+  isSignature?: boolean;
+  /** Tint color applied to a signature element (treated as a monochrome mask). Defaults to black. */
+  signatureColor?: string;
 }
 
 export interface RectElement extends BaseElement {

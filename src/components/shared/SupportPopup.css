@@ -319,12 +319,7 @@
     }
 }
 
-/* ─── Desktop hide UPI button ───────────────────────────────────────────── */
-@media (min-width: 481px) {
-    .support-popup-upi-button {
-        display: none !important;
-    }
-}
+
 
 /* ─── Desktop larger screens ───────────────────────────────────────────── */
 @media (min-width: 769px) {

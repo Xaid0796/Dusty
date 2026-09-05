@@ -160,6 +160,8 @@ export const LeftToolbar: React.FC<LeftToolbarProps> = ({
       zoom: 1,
       borderRadius: 0,
       opacity: 1,
+      isSignature: true,
+      signatureColor: '#000000',
     });
   };
 
@@ -214,15 +216,17 @@ export const LeftToolbar: React.FC<LeftToolbarProps> = ({
           <span className={styles.sidebarBtnLabel}>Select</span>
         </SidebarBtn>
 
-        <SidebarBtn
-          onClick={() => setActiveTool(isDraw ? 'select' : 'draw')}
-          active={isDraw}
-          disabledInPreview
-          tooltip="Freehand Draw (D)"
-        >
-          <PenTool size={19} />
-          <span className={styles.sidebarBtnLabel}>Draw</span>
-        </SidebarBtn>
+        {!isMobileOrTouch && (
+          <SidebarBtn
+            onClick={() => setActiveTool(isDraw ? 'select' : 'draw')}
+            active={isDraw}
+            disabledInPreview
+            tooltip="Freehand Draw (D)"
+          >
+            <PenTool size={19} />
+            <span className={styles.sidebarBtnLabel}>Draw</span>
+          </SidebarBtn>
+        )}
 
         <div className={styles.leftSidebarDivider} />
 

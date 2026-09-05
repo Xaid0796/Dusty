@@ -170,7 +170,7 @@ export const ImageCropModal: React.FC = () => {
 
   return (
     <div className={styles.modalOverlay} style={{ zIndex: 99999 }}>
-      <div className={styles.modalContent} style={{ maxWidth: 400, background: 'var(--bg-panel)', color: 'var(--text-panel)', border: '1px solid var(--border-panel)', padding: 20 }}>
+      <div className={styles.modalContent} style={{ maxWidth: 400, maxHeight: '90vh', overflowY: 'auto', background: 'var(--bg-panel)', color: 'var(--text-panel)', border: '1px solid var(--border-panel)', padding: 20 }}>
         <h3 style={{ margin: '0 0 16px 0', fontSize: 18, fontWeight: 700, color: 'var(--text-panel)' }}>Adjust Photo</h3>
 
         <div

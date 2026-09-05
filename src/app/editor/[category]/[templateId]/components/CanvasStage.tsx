@@ -78,27 +78,43 @@ export const CanvasStage: React.FC<CanvasStageProps> = ({
   const [lasso, setLasso] = useState<LassoState | null>(null);
   const [smartGuides, setSmartGuides] = useState<GuideLineData[]>([]);
   const [longPressedId, setLongPressedId] = useState<string | null>(null);
+  const outerPointerDownRef = useRef<{ x: number; y: number; time: number } | null>(null);
 
   const canvasRef = useRef<HTMLDivElement | null>(null);
+
+  const handleOuterPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    // Element taps call e.stopPropagation() in handleElementPointerDown, so if the
+    // event reaches this outer handler it is a background tap (page or gray margin).
+    // Record the start so we can distinguish a tap from a scroll/pan gesture.
+    outerPointerDownRef.current = { x: e.clientX, y: e.clientY, time: Date.now() };
+  };
+
+  const handleOuterPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!outerPointerDownRef.current) return;
+    const dist = Math.hypot(e.clientX - outerPointerDownRef.current.x, e.clientY - outerPointerDownRef.current.y);
+    const dt = Date.now() - outerPointerDownRef.current.time;
+    // Only deselect on a complete tap (small move + short time), never while the
+    // user is scrolling/panning the canvas.
+    if (dist < 10 && dt < 500) {
+      selectElement(null);
+    }
+    outerPointerDownRef.current = null;
+  };
 
   const handlePointerDown = (e: React.PointerEvent) => {
     // Setup canvasRef if needed
     if (!canvasRef.current) canvasRef.current = document.getElementById('canvas-a4-page') as HTMLDivElement;
+
+    // Also trigger the outer handler logic for deselection
+    handleOuterPointerDown(e as React.PointerEvent<HTMLDivElement>);
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    // Exclusively handle single-pointer panning by translating canvas based on delta (e.clientX, e.clientY)
-    // Only allow panning if not actively dragging/moving an element, not during marquee (lasso), not during text editing, and not during resizing
-    if (e.buttons === 1 && !longPressedId && !lasso && !isTextEditing && !isResizing) {
-      const pane = document.querySelector(`.${styles.canvasPane}`) as HTMLDivElement;
-      if (pane) {
-        pane.scrollLeft -= e.movementX;
-        pane.scrollTop -= e.movementY;
-      }
-    }
+    // Pointer move handler on container
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
+    handleOuterPointerUp(e as React.PointerEvent<HTMLDivElement>);
   };
 
   useEffect(() => { selectedIdsRef.current = selectedIds; }, [selectedIds]);
@@ -439,6 +455,12 @@ export const CanvasStage: React.FC<CanvasStageProps> = ({
 
     const z = zoom / 100;
 
+    // When an element drag actually begins, block the browser's native touch
+    // scrolling/panning of the canvas via a non-passive touchmove listener.
+    // This is added ONLY while actively dragging (not merely when selected),
+    // so the canvas can still scroll when the user just taps or scrolls.
+    const preventTouchScroll = (ev: TouchEvent) => { ev.preventDefault(); };
+
     const initiateSelection = (ev: PointerEvent | React.PointerEvent) => {
       if (selectionInitiated || pointersRef.current.size >= 2) return;
       selectionInitiated = true;
@@ -458,6 +480,8 @@ export const CanvasStage: React.FC<CanvasStageProps> = ({
 
       dragData = { ids, positions, historySaved: false, moved: false };
       try { target.setPointerCapture(pointerId); } catch { }
+      // Lock canvas panning for the duration of this drag gesture.
+      window.addEventListener('touchmove', preventTouchScroll, { passive: false });
     };
 
     // If mouse, trigger immediately. If touch, use 500ms delay.
@@ -533,6 +557,8 @@ export const CanvasStage: React.FC<CanvasStageProps> = ({
       target.removeEventListener('pointermove', move);
       target.removeEventListener('pointerup', up);
       target.removeEventListener('pointercancel', up);
+      // Restore native canvas scrolling now that the drag has ended.
+      window.removeEventListener('touchmove', preventTouchScroll);
 
       if (!selectionInitiated && !exceeded && pointersRef.current.size < 2) {
         // Allow selection ONLY if it was a long press, otherwise do nothing (scrolling is handled natively)
@@ -594,7 +620,9 @@ export const CanvasStage: React.FC<CanvasStageProps> = ({
   return (
     <div
       className={styles.canvasOuter}
-      style={{ position: 'relative' }}
+      style={{
+        position: 'relative',
+      }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
@@ -654,7 +682,7 @@ export const CanvasStage: React.FC<CanvasStageProps> = ({
 
           {/* Master Elements Overlay for seamless cross-page dragging (like Microsoft Word) */}
           {/* Each element is clipped to its A4 page band so content never bleeds into the gap or adjacent pages. */}
-          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 100 }}>
+          <div id="master-elements-overlay" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 100 }}>
             {sortedElements.map((el) => {
               const isLongPressed = longPressedId === el.id;
               // Determine which A4 page band the element's center falls in, then clip to that page's vertical bounds.

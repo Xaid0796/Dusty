@@ -8,7 +8,7 @@ import {
   ChevronDown,
   RefreshCw,
   Layers,
-  Grid2X2,
+  Magnet,
   Eye,
   ChevronsUp,
   ArrowUp,
@@ -170,7 +170,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           onClick={onToggleSnap}
           title={snapToGrid ? 'Snap: ON' : 'Snap: OFF'}
         >
-          <Grid2X2 size={16} />
+          <Magnet size={16} />
         </button>
         <button
           className={`${styles.iconBtn} ${styles.mobileHidden} ${showGrid ? styles.active : ''}`}

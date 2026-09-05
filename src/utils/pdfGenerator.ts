@@ -1,23 +1,3 @@
-/**
- * Client-Side PDF Generation Service
- *
- * Strategy:
- * 1. Accepts the inner HTMLElement directly (the live canvas page)
- * 2. Synchronizes font rendering with document.fonts.ready
- * 3. Measures exact offsetWidth and offsetHeight of the source canvas element for 100% visual consistency
- * 4. Clones it into a clean off-screen container matching exact canvas dimensions
- * 5. Strips all watermark/editor overlays from the clone
- * 6. Uses html2canvas at 2x scale for retina-quality output
- * 7. Configures jsPDF with custom format [widthMm, heightMm] matching the canvas exactly to guarantee a single page with zero extra blank pages
- * 8. Downloads a valid PDF Blob and cleans up memory
- */
-
-/**
- * Multi-page export: rasterizes each page slot independently and assembles
- * them into a single PDF with one page per slot. This guarantees clean page
- * boundaries (each stacked page becomes exactly one PDF page) even though the
- * editor renders them as one continuous vertical strip.
- */
 export const generateMultiPagePDF = async (
   pageElements: HTMLElement[],
   filename: string
@@ -41,8 +21,9 @@ export const generateMultiPagePDF = async (
   let widthMm = 210;
   let heightMm = 297;
 
+  const liveMasterOverlay = document.getElementById('master-elements-overlay');
+
   try {
-    // Clone every page slot off-screen, stripping editor-only overlays.
     const wrapper = document.createElement('div');
     wrapper.style.position = 'fixed';
     wrapper.style.top = '-9999px';
@@ -50,22 +31,14 @@ export const generateMultiPagePDF = async (
     wrapper.style.background = '#ffffff';
     document.body.appendChild(wrapper);
 
-    pageElements.forEach((source) => {
+    pageElements.forEach((source, pageIndex) => {
       const clone = source.cloneNode(true) as HTMLElement;
       clone.querySelectorAll(
         '[data-grid-overlay], [data-page-guide], [data-page-break], [class*="pageBadge"], [class*="selectionBox"], [class*="contextToolbar"]'
       ).forEach((el) => el.remove());
 
-      // Force display:block on children hidden by the visible flag.
-      Array.from(clone.children).forEach((child) => {
-        const el = child as HTMLElement;
-        if (el.style && el.style.display === 'none') {
-          el.style.display = 'block';
-        }
-      });
-
-      const wPx = source.offsetWidth || source.clientWidth || 794;
-      const hPx = source.offsetHeight || source.clientHeight || 1123;
+      const wPx = source.offsetWidth || 794;
+      const hPx = source.offsetHeight || 1123;
 
       clone.style.setProperty('width', `${wPx}px`, 'important');
       clone.style.setProperty('min-width', `${wPx}px`, 'important');
@@ -81,6 +54,24 @@ export const generateMultiPagePDF = async (
       clone.style.transform = 'none';
       clone.style.border = 'none';
 
+      if (liveMasterOverlay) {
+        const pageTopPx = pageIndex * (hPx + 24);
+        const pageBottomPx = pageTopPx + hPx;
+
+        Array.from(liveMasterOverlay.children).forEach((elChild) => {
+          const htmlChild = elChild as HTMLElement;
+          const topPx = parseFloat(htmlChild.style.top) || 0;
+          const heightElPx = parseFloat(htmlChild.style.height) || 0;
+          if (topPx + heightElPx > pageTopPx && topPx < pageBottomPx) {
+            const elClone = htmlChild.cloneNode(true) as HTMLElement;
+            elClone.style.top = `${topPx - pageTopPx}px`;
+            elClone.style.pointerEvents = 'none';
+            elClone.querySelectorAll('[class*="selectionBox"], [class*="contextToolbar"]').forEach(e => e.remove());
+            clone.appendChild(elClone);
+          }
+        });
+      }
+
       wrapper.appendChild(clone);
       clones.push(clone);
 
@@ -88,7 +79,6 @@ export const generateMultiPagePDF = async (
       heightMm = (hPx * 25.4) / 96;
     });
 
-    // Render each clone to canvas at 2x scale.
     const canvases = await Promise.all(
       clones.map((clone) =>
         html2canvas(clone, {
@@ -129,42 +119,20 @@ export const generatePDF = async (
   sourceElement: HTMLElement,
   filename: string
 ): Promise<void> => {
-  console.log("generatePDF: entering function with html2pdf.js", { filename });
+  if (typeof document === 'undefined') return;
+  await document.fonts?.ready;
 
-  // 1. Synchronize Font Rendering: Ensure document.fonts.ready resolves entirely before starting PDF conversion
-  if (typeof document !== 'undefined' && document.fonts) {
-    await document.fonts.ready;
-  }
-
-  // Dynamic import to avoid SSR errors
   const html2pdfModule = await import('html2pdf.js');
   const html2pdf = html2pdfModule.default;
 
-  console.log("generatePDF: html2pdf.js dynamically imported");
-
   const safeFilename = filename.endsWith('.pdf') ? filename : `${filename}.pdf`;
-
-  // Clone only the actual canvas resume document element
   const clone = sourceElement.cloneNode(true) as HTMLElement;
 
-  // Remove grid overlays, page guides/gaps, and selection indicators from the clone before PDF generation
   clone.querySelectorAll('[data-grid-overlay], [data-page-guide], [class*="selectionBox"], [class*="contextToolbar"]').forEach((el) => el.remove());
 
-  // Force display:block on any direct children that have display:none so they appear in the PDF.
-  Array.from(clone.children).forEach((child) => {
-    const el = child as HTMLElement;
-    if (el.style && el.style.display === 'none') {
-      el.style.display = 'block';
-    }
-  });
+  const widthPx = sourceElement.offsetWidth || 794;
+  const heightPx = sourceElement.offsetHeight || 1123;
 
-  // Measure exact dimensions of source element to maintain 100% visual consistency with the canvas
-  const widthPx = sourceElement.offsetWidth || sourceElement.clientWidth || 794;
-  const heightPx = sourceElement.offsetHeight || sourceElement.clientHeight || 1123;
-
-  console.log("generatePDF measured dimensions for exact canvas match:", { widthPx, heightPx });
-
-  // Apply styling overrides matching source element dimensions exactly
   clone.style.setProperty('width', `${widthPx}px`, 'important');
   clone.style.setProperty('min-width', `${widthPx}px`, 'important');
   clone.style.setProperty('max-width', `${widthPx}px`, 'important');
@@ -179,7 +147,22 @@ export const generatePDF = async (
   clone.style.transform = 'none';
   clone.style.border = 'none';
 
-  // Temporarily append clone in an off-screen container matching exact dimensions
+  const liveMasterOverlay = document.getElementById('master-elements-overlay');
+  if (liveMasterOverlay) {
+    Array.from(liveMasterOverlay.children).forEach((elChild) => {
+      const htmlChild = elChild as HTMLElement;
+      const topPx = parseFloat(htmlChild.style.top) || 0;
+      const heightElPx = parseFloat(htmlChild.style.height) || 0;
+      if (topPx + heightElPx > 0 && topPx < heightPx) {
+        const elClone = htmlChild.cloneNode(true) as HTMLElement;
+        elClone.style.top = `${topPx}px`;
+        elClone.style.pointerEvents = 'none';
+        elClone.querySelectorAll('[class*="selectionBox"], [class*="contextToolbar"]').forEach(e => e.remove());
+        clone.appendChild(elClone);
+      }
+    });
+  }
+
   const wrapper = document.createElement('div');
   wrapper.style.position = 'fixed';
   wrapper.style.top = '-9999px';
@@ -190,7 +173,6 @@ export const generatePDF = async (
   wrapper.appendChild(clone);
   document.body.appendChild(wrapper);
 
-  // Convert dimensions to mm for exact single-page format in jsPDF (preventing blank pages)
   const widthMm = (widthPx * 25.4) / 96;
   const heightMm = (heightPx * 25.4) / 96;
 
@@ -199,7 +181,7 @@ export const generatePDF = async (
     filename: safeFilename,
     image: { type: 'jpeg', quality: 0.98 },
     html2canvas: {
-      scale: 2, // High-definition rendering
+      scale: 2,
       useCORS: true,
       logging: false,
       backgroundColor: '#ffffff',
@@ -218,7 +200,6 @@ export const generatePDF = async (
   };
 
   try {
-    console.log("generatePDF: invoking html2pdf with link annotations");
     const worker = html2pdf().from(clone).set(opt);
     const pdf = await worker.toPdf().get('pdf');
 
@@ -243,7 +224,6 @@ export const generatePDF = async (
     });
 
     await worker.save();
-    console.log("generatePDF: html2pdf save completed");
   } finally {
     if (document.body.contains(wrapper)) {
       document.body.removeChild(wrapper);
