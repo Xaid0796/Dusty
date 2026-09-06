@@ -93,7 +93,7 @@ export const Header: React.FC = () => {
             type="button"
           >
             <Heart size={14} fill="currentColor" />
-            Donate Us
+            Support Us
           </button>
           <Link href="/templates" className="btn btn-primary btn-sm ctaBtn">
             Build Now

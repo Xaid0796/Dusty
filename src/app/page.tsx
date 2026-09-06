@@ -101,6 +101,19 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
   },
 ];
 
+const FAQ_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": FAQ_ITEMS.map((item) => ({
+    "@type": "Question",
+    "name": item.q,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": item.a,
+    },
+  })),
+};
+
 export default function Home() {
   const [modalStep, setModalStep] = useState<ModalStep>(null);
   const router = useRouter();
@@ -145,11 +158,12 @@ export default function Home() {
         {/* Hero Banner Section */}
         <section className={styles.hero}>
           <div className={styles.heroContent}>
+            <span className={styles.badge}>Free • No Signup Required</span>
             <h1 className={styles.title}>
-              Create Professional <span className={styles.titleAccent}>Career & Personal Documents</span> in Minutes
+              Free & Professional <span className={styles.titleAccent}>Resume, CV & Cover Letter</span> Builder
             </h1>
             <p className={styles.subtitle}>
-              Choose a design, edit directly in your browser, upload your photo, customize colors, and download a professional PDF immediately. Completely free and offline-first.
+              Create, customize, and download your resume, CV, or cover letter in minutes. No account, no login, no complicated registration — completely free and private.
             </p>
             <div className={styles.heroActions}>
               <button
@@ -341,7 +355,7 @@ export default function Home() {
           <div className={styles.ctaContent}>
             <h2 className={styles.ctaTitle}>Ready to build your document?</h2>
             <p className={styles.ctaDesc}>
-              Join thousands of job seekers and professionals who create polished PDFs using our clean, standard templates.
+              Create a polished, professional PDF in minutes — free, private, and with no account required.
             </p>
             <Link href="/templates" className="btn btn-secondary ctaBtn">
               Select a Template Now
@@ -397,6 +411,11 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_JSON_LD) }}
+      />
 
       <Footer />
     </>
