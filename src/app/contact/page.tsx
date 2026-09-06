@@ -106,7 +106,7 @@ export default function ContactPage() {
                                 <div className={styles.formGroup}>
                                     <label className={styles.formLabel}>
                                         Email
-                                        <span className={styles.optionalLabel}>(optional, for replies)</span>
+                                        <span className={styles.optionalLabel}>(required, for replies)</span>
                                     </label>
                                     <input
                                         type="email"
@@ -115,6 +115,7 @@ export default function ContactPage() {
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         maxLength={200}
+                                        required
                                     />
                                 </div>
 
