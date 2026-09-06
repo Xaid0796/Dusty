@@ -86,6 +86,7 @@ export default function GenericCanvasEditorPage() {
   const [infoBlinkLandscape, setInfoBlinkLandscape] = useState(false);
   const landscapeBlinkActiveRef = useRef(false);
   const wasLandscapeRef = useRef(false);
+  const isExportingRef = useRef(false);
 
   // Listen to orientation changes (matchMedia + resize + orientationchange).
   // The 4-blink glow fires exactly once per portrait→landscape transition and
@@ -95,6 +96,7 @@ export default function GenericCanvasEditorPage() {
 
     const mql = window.matchMedia('(orientation: landscape)');
     const apply = () => {
+      if (isExportingRef.current) return;
       const landscape = mql.matches || window.innerWidth > window.innerHeight;
       setIsLandscape(landscape);
 
@@ -491,6 +493,7 @@ export default function GenericCanvasEditorPage() {
   // ── Export PDF ────────────────────────────────────────
   const handleExportPDF = async () => {
     if (!pageRef.current || !doc) return;
+    isExportingRef.current = true;
     try {
       setSaveStatus('saving');
       const currentSelected = selectedId;
@@ -507,6 +510,13 @@ export default function GenericCanvasEditorPage() {
     } catch (err) {
       console.error('PDF export failed', err);
       setSaveStatus('unsaved');
+    } finally {
+      setTimeout(() => {
+        isExportingRef.current = false;
+        // Re-check orientation after export finishes
+        const landscape = window.matchMedia('(orientation: landscape)').matches || window.innerWidth > window.innerHeight;
+        setIsLandscape(landscape);
+      }, 500);
     }
   };
 
@@ -992,9 +1002,35 @@ export default function GenericCanvasEditorPage() {
           className={styles.rotateVideo}
         />
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '8px' }}>Please Rotate Your Device</h2>
-        <p style={{ fontSize: '14px', color: '#94a3b8', maxWidth: '280px', lineHeight: 1.5 }}>
+        <p style={{ fontSize: '14px', color: '#94a3b8', maxWidth: '280px', lineHeight: 1.5, marginBottom: '16px' }}>
           This editor is strictly optimized for mobile devices in landscape mode. Please rotate your phone to landscape to continue editing.
         </p>
+        <button
+          onClick={() => {
+            if (document.documentElement.requestFullscreen) {
+              document.documentElement.requestFullscreen().catch(() => { });
+            }
+            if (screen.orientation && (screen.orientation as any).lock) {
+              (screen.orientation as any).lock('landscape').catch(() => { });
+            }
+          }}
+          style={{
+            background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+            color: '#ffffff',
+            border: 'none',
+            padding: '12px 24px',
+            borderRadius: '10px',
+            fontSize: '14px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            boxShadow: '0 4px 14px rgba(99, 102, 241, 0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}
+        >
+          <span> Switch to Landscape / Fullscreen</span>
+        </button>
       </div>
     </div>
   );

@@ -18,14 +18,14 @@ export const ImageCropModal: React.FC = () => {
 
   // Calculate cropping window/frame size based on selected element's aspect ratio
   const frameGeometry = React.useMemo(() => {
-    if (!element) return { width: 240, height: 240 };
+    if (!element) return { width: 160, height: 160 };
     const elementRatio = element.width / Math.max(1, element.height);
-    let width = 240;
-    let height = 240;
+    let width = 160;
+    let height = 160;
     if (elementRatio > 1) {
-      height = 240 / elementRatio;
+      height = 160 / elementRatio;
     } else {
-      width = 240 * elementRatio;
+      width = 160 * elementRatio;
     }
     return { width, height };
   }, [element]);
@@ -39,6 +39,18 @@ export const ImageCropModal: React.FC = () => {
       setDisplaySize({ width: 0, height: 0 });
     }
   }, [element?.id]);
+
+  // Lock background scroll + suppress pull-to-refresh while the crop modal is open (mobile)
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    const prevOverscroll = document.body.style.overscrollBehavior;
+    document.body.style.overflow = 'hidden';
+    document.body.style.overscrollBehavior = 'none';
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.body.style.overscrollBehavior = prevOverscroll;
+    };
+  }, []);
 
   if (!element || (element.type !== 'image' && element.type !== 'frame')) return null;
 
@@ -72,6 +84,7 @@ export const ImageCropModal: React.FC = () => {
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     if (!isDragging || !displaySize.width) return;
+    if ('touches' in e) e.preventDefault(); // stop background scroll / pull-to-refresh while dragging
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
 
@@ -169,9 +182,9 @@ export const ImageCropModal: React.FC = () => {
   };
 
   return (
-    <div className={styles.modalOverlay} style={{ zIndex: 99999 }}>
-      <div className={styles.modalContent} style={{ maxWidth: 400, maxHeight: '90vh', overflowY: 'auto', background: 'var(--bg-panel)', color: 'var(--text-panel)', border: '1px solid var(--border-panel)', padding: 20 }}>
-        <h3 style={{ margin: '0 0 16px 0', fontSize: 18, fontWeight: 700, color: 'var(--text-panel)' }}>Adjust Photo</h3>
+    <div className={styles.modalOverlay} style={{ zIndex: 99999, overscrollBehavior: 'none' }}>
+      <div className={styles.modalContent} style={{ maxWidth: 360, maxHeight: '85vh', overflowY: 'auto', overscrollBehavior: 'none', background: 'var(--bg-panel)', color: 'var(--text-panel)', border: '1px solid var(--border-panel)', padding: 14 }}>
+        <h3 style={{ margin: '0 0 10px 0', fontSize: 16, fontWeight: 700, color: 'var(--text-panel)' }}>Adjust Photo</h3>
 
         <div
           style={{
@@ -182,10 +195,12 @@ export const ImageCropModal: React.FC = () => {
               ? '50%'
               : (element.borderRadius > 50 ? '50%' : `${element.borderRadius}px`),
             border: '2px solid var(--border-panel)',
-            margin: '20px auto',
+            margin: '10px auto',
             position: 'relative',
             cursor: isDragging ? 'grabbing' : 'grab',
-            background: '#0f172a'
+            background: '#0f172a',
+            touchAction: 'none',
+            overscrollBehavior: 'none'
           }}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
@@ -216,12 +231,12 @@ export const ImageCropModal: React.FC = () => {
         </div>
 
         {/* Zoom control */}
-        <div style={{ marginTop: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button
-            style={{ background: 'var(--bg-panel-btn)', border: 'none', color: 'var(--text-panel)', padding: 8, borderRadius: '50%', cursor: 'pointer', display: 'flex' }}
+            style={{ background: 'var(--bg-panel-btn)', border: 'none', color: 'var(--text-panel)', padding: 6, borderRadius: '50%', cursor: 'pointer', display: 'flex' }}
             onClick={() => handleZoomChange(cropZoom - 0.1)}
           >
-            <ZoomOut size={16} />
+            <ZoomOut size={14} />
           </button>
           <input
             type="range"
@@ -233,14 +248,14 @@ export const ImageCropModal: React.FC = () => {
             style={{ flex: 1, accentColor: 'var(--primary-color)', cursor: 'pointer' }}
           />
           <button
-            style={{ background: 'var(--bg-panel-btn)', border: 'none', color: 'var(--text-panel)', padding: 8, borderRadius: '50%', cursor: 'pointer', display: 'flex' }}
+            style={{ background: 'var(--bg-panel-btn)', border: 'none', color: 'var(--text-panel)', padding: 6, borderRadius: '50%', cursor: 'pointer', display: 'flex' }}
             onClick={() => handleZoomChange(cropZoom + 0.1)}
           >
-            <ZoomIn size={16} />
+            <ZoomIn size={14} />
           </button>
         </div>
 
-        <div className={styles.modalActions} style={{ marginTop: 32, display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+        <div className={styles.modalActions} style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
           <button
             style={{ background: 'transparent', border: '1px solid var(--border-panel)', color: 'var(--text-panel)', padding: '8px 16px', borderRadius: 6, cursor: 'pointer', fontWeight: 500 }}
             onClick={() => setCroppingId(null)}

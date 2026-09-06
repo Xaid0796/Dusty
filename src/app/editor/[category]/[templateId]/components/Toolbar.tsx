@@ -17,6 +17,8 @@ import {
   FileText,
   Minus,
   Plus,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react';
 import { useCanvasStore } from '@/canvas/store';
 import { MAX_PAGE_COUNT } from '@/canvas/types';
@@ -69,9 +71,65 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   } = useCanvasStore();
 
   const [showZoomMenu, setShowZoomMenu] = React.useState(false);
+  const [showLayerMenu, setShowLayerMenu] = React.useState(false);
+  const [isFullscreen, setIsFullscreen] = React.useState(false);
+  const [showFullscreenHint, setShowFullscreenHint] = React.useState(false);
   const zoomRef = React.useRef<HTMLDivElement>(null);
+  const layerMenuRef = React.useRef<HTMLDivElement>(null);
   const hasSel = selectedIds.length > 0;
   const isMobileOrTouch = useIsMobileOrTouch();
+
+  React.useEffect(() => {
+    let hideTimer: NodeJS.Timeout;
+
+    const handleFullscreenChange = () => {
+      const isFs = !!document.fullscreenElement;
+      setIsFullscreen(isFs);
+      if (isFs) {
+        setShowFullscreenHint(false);
+        if (hideTimer) clearTimeout(hideTimer);
+      } else if (isMobileOrTouch) {
+        setShowFullscreenHint(true);
+        if (hideTimer) clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => {
+          setShowFullscreenHint(false);
+        }, 15000);
+      }
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+
+    if (isMobileOrTouch && !document.fullscreenElement) {
+      setShowFullscreenHint(true);
+      hideTimer = setTimeout(() => {
+        setShowFullscreenHint(false);
+      }, 15000);
+    }
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      if (hideTimer) clearTimeout(hideTimer);
+    };
+  }, [isMobileOrTouch]);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((err) => console.error(err));
+      setShowFullscreenHint(false);
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
+  React.useEffect(() => {
+    if (!showLayerMenu) return;
+    const handle = (e: MouseEvent) => {
+      if (layerMenuRef.current && !layerMenuRef.current.contains(e.target as Node)) {
+        setShowLayerMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handle);
+    return () => document.removeEventListener('mousedown', handle);
+  }, [showLayerMenu]);
 
   const onToggleSnap = () => setSnapToGrid(!snapToGrid);
   const onToggleGrid = () => setShowGrid(!showGrid);
@@ -125,42 +183,44 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <div className={`${styles.toolbarDivider} ${styles.mobileHidden}`} />
 
         {/* Layer Controls */}
-        <button
-          className={`${styles.iconBtn} ${styles.mobileHidden}`}
-          onClick={() => bringToFront()}
-          disabled={!hasSel}
-          title="Bring to Front"
-          style={!hasSel ? { opacity: 0.3, cursor: 'not-allowed' } : undefined}
-        >
-          <ChevronsUp size={16} />
-        </button>
-        <button
-          className={`${styles.iconBtn} ${styles.mobileHidden}`}
-          onClick={() => bringForward()}
-          disabled={!hasSel}
-          title="Bring Forward"
-          style={!hasSel ? { opacity: 0.3, cursor: 'not-allowed' } : undefined}
-        >
-          <ArrowUp size={16} />
-        </button>
-        <button
-          className={`${styles.iconBtn} ${styles.mobileHidden}`}
-          onClick={() => sendBackward()}
-          disabled={!hasSel}
-          title="Send Backward"
-          style={!hasSel ? { opacity: 0.3, cursor: 'not-allowed' } : undefined}
-        >
-          <ArrowDown size={16} />
-        </button>
-        <button
-          className={`${styles.iconBtn} ${styles.mobileHidden}`}
-          onClick={() => sendToBack()}
-          disabled={!hasSel}
-          title="Send to Back"
-          style={!hasSel ? { opacity: 0.3, cursor: 'not-allowed' } : undefined}
-        >
-          <ChevronsDown size={16} />
-        </button>
+        <div className={styles.layerControls}>
+          {isMobileOrTouch ? (
+            <div className={styles.dropdownWrapper} ref={layerMenuRef}>
+              <button className={`${styles.iconBtn}`} onClick={() => setShowLayerMenu(!showLayerMenu)} title="Layers">
+                <Layers size={16} />
+              </button>
+              {showLayerMenu && (
+                <div className={styles.dropdownList} style={{ width: 140, right: 0, left: 'auto' }}>
+                  <button className={styles.dropdownItem} onClick={() => { bringToFront(); setShowLayerMenu(false); }} disabled={!hasSel}>Bring to Front</button>
+                  <button className={styles.dropdownItem} onClick={() => { bringForward(); setShowLayerMenu(false); }} disabled={!hasSel}>Bring Forward</button>
+                  <button className={styles.dropdownItem} onClick={() => { sendBackward(); setShowLayerMenu(false); }} disabled={!hasSel}>Send Backward</button>
+                  <button className={styles.dropdownItem} onClick={() => { sendToBack(); setShowLayerMenu(false); }} disabled={!hasSel}>Send to Back</button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <button className={styles.iconBtn} onClick={() => bringToFront()} disabled={!hasSel} title="Bring to Front" style={!hasSel ? { opacity: 0.3 } : undefined}><ChevronsUp size={16} /></button>
+              <button className={styles.iconBtn} onClick={() => bringForward()} disabled={!hasSel} title="Bring Forward" style={!hasSel ? { opacity: 0.3 } : undefined}><ArrowUp size={16} /></button>
+              <button className={styles.iconBtn} onClick={() => sendBackward()} disabled={!hasSel} title="Send Backward" style={!hasSel ? { opacity: 0.3 } : undefined}><ArrowDown size={16} /></button>
+              <button className={styles.iconBtn} onClick={() => sendToBack()} disabled={!hasSel} title="Send to Back" style={!hasSel ? { opacity: 0.3 } : undefined}><ChevronsDown size={16} /></button>
+            </>
+          )}
+          <button
+            className={`${styles.iconBtn} ${styles.mobileVisible} ${showFullscreenHint ? styles.fullscreenBtnHighlight : ''}`}
+            onClick={toggleFullscreen}
+            title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+            style={{ position: 'relative' }}
+          >
+            {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+            {showFullscreenHint && (
+              <div className={styles.fullscreenHint}>
+                <span> Tap to full screen</span>
+                <div className={styles.fullscreenHintArrow} />
+              </div>
+            )}
+          </button>
+        </div>
 
         <div className={`${styles.toolbarDivider} ${styles.mobileHidden}`} />
 

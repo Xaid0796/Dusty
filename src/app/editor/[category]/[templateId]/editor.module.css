@@ -1015,8 +1015,8 @@
 .dropdownList {
   position: absolute;
   top: calc(100% + 4px);
-  left: 0;
   right: 0;
+  width: 140px;
   background: var(--bg-panel);
   border: 1px solid var(--border-panel);
   border-radius: 9px;
@@ -1506,6 +1506,85 @@
   color: var(--text-panel-muted);
   line-height: 1.6;
   margin-bottom: 24px;
+}
+
+.layerControls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dropdownItem {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  color: var(--text-panel);
+  text-align: left;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.dropdownItem:hover {
+  background: var(--bg-panel-btn-hover);
+}
+
+.dropdownItem:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+@keyframes fullscreenPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.6);
+  }
+
+  70% {
+    box-shadow: 0 0 0 8px rgba(99, 102, 241, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+  }
+}
+
+.fullscreenBtnHighlight {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  animation: fullscreenPulse 2s infinite;
+}
+
+.fullscreenHint {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+  color: #ffffff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  z-index: 1000;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(129, 140, 248, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fullscreenHintArrow {
+  position: absolute;
+  top: -6px;
+  right: 10px;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid #312e81;
 }
 
 .modalFooter {
