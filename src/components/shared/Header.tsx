@@ -64,6 +64,8 @@ export const Header: React.FC = () => {
 
   // Grouped inside the three-line (hamburger) menu
   const menuItems = [
+    { href: '/templates', label: 'Templates', active: isActive('/templates') || isActive('/editor') },
+    { href: '/pdf-tools', label: 'PDF Tools', active: isActive('/pdf-tools') },
     { href: '/about', label: 'About', active: isActive('/about') },
     { href: '/contact', label: 'Contact', active: isActive('/contact') },
     { href: '/feedback', label: 'Feedback', active: isActive('/feedback') },
