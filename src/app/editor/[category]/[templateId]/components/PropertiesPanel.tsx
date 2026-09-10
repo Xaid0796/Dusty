@@ -28,6 +28,7 @@ import {
 import { CanvasElement, TextElement, TextStyle, ChartElement } from '@/canvas/types';
 import { useCanvasStore } from '@/canvas/store';
 import { AdvancedColorPickerPopup } from './AdvancedColorPickerPopup';
+import { ResumeScorecardPanel } from './ResumeScorecardPanel';
 import styles from '../editor.module.css';
 interface PropertiesPanelProps {
   element: CanvasElement | null;
@@ -248,6 +249,12 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({ element, onUpl
           <div className={styles.noSelectionTipItem}><span className={styles.noSelectionTipIcon}>⤵</span> Double-click to edit text</div>
           <div className={styles.noSelectionTipItem}><span className={styles.noSelectionTipIcon}>⌨</span> Ctrl+Z to undo, Del to delete</div>
         </div>
+
+        {canvasDocument?.category === 'resume' && (
+          <div style={{ marginTop: '20px', width: '100%' }}>
+            <ResumeScorecardPanel />
+          </div>
+        )}
       </div>
     );
   }

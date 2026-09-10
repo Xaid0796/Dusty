@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/shared/Header';
@@ -18,6 +18,127 @@ const RESUME_OPTIONS = [
   { id: 'greta', name: 'Greta Student Minimalist', desc: 'Soft pastel tones tailored for graduates and early professionals.', gradient: 'linear-gradient(135deg, #9a3412, #f97316)', emoji: '🎓' },
   { id: 'william', name: 'William Executive Designer', desc: 'Bold, high-impact header for creative and executive leaders.', gradient: 'linear-gradient(135deg, #581c87, #c084fc)', emoji: '💼' },
 ];
+
+function AdBannerBox() {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const container = containerRef.current;
+    container.innerHTML = '';
+
+    const adDiv = document.createElement('div');
+    adDiv.id = 'container-00cb33acccce7b29a65480e5dd625a14';
+    container.appendChild(adDiv);
+
+    const script = document.createElement('script');
+    script.async = true;
+    script.setAttribute('data-cfasync', 'false');
+    script.src = 'https://pl31225128.profitableratecpmnetwork.com/00cb33acccce7b29a65480e5dd625a14/invoke.js';
+    container.appendChild(script);
+  }, []);
+
+  return (
+    <div
+      className={styles.card}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '20px',
+        minHeight: '380px',
+        background: '#ffffff',
+        border: '1px solid var(--border-color)',
+        borderRadius: 'var(--radius-lg)',
+        boxShadow: 'var(--shadow-sm)',
+      }}
+    >
+      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '12px', letterSpacing: '0.05em' }}>
+        Sponsored Advertisement
+      </div>
+      <div
+        ref={containerRef}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          width: '100%',
+          minHeight: '280px',
+          overflow: 'hidden',
+          background: '#f8fafc',
+          borderRadius: '8px',
+          border: '1px dashed #cbd5e1'
+        }}
+      />
+    </div>
+  );
+}
+
+function AdBannerBox2() {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const container = containerRef.current;
+    container.innerHTML = '';
+
+    const script1 = document.createElement('script');
+    script1.type = 'text/javascript';
+    script1.text = `
+      atOptions = {
+        'key' : '79a7be8081332e04df66cb0048c0c9c4',
+        'format' : 'iframe',
+        'height' : 250,
+        'width' : 300,
+        'params' : {}
+      };
+    `;
+    container.appendChild(script1);
+
+    const script2 = document.createElement('script');
+    script2.type = 'text/javascript';
+    script2.src = 'https://www.highrevenueformat.com/79a7be8081332e04df66cb0048c0c9c4/invoke.js';
+    container.appendChild(script2);
+  }, []);
+
+  return (
+    <div
+      className={styles.card}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '20px',
+        minHeight: '380px',
+        background: '#ffffff',
+        border: '1px solid var(--border-color)',
+        borderRadius: 'var(--radius-lg)',
+        boxShadow: 'var(--shadow-sm)',
+      }}
+    >
+      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '12px', letterSpacing: '0.05em' }}>
+        Sponsored Advertisement
+      </div>
+      <div
+        ref={containerRef}
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          width: '300px',
+          height: '250px',
+          overflow: 'hidden',
+          background: '#f8fafc',
+          borderRadius: '8px',
+          border: '1px dashed #cbd5e1'
+        }}
+      />
+    </div>
+  );
+}
 
 export default function TemplatesPage() {
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'resume' | 'cv' | 'cover-letter'>('all');
@@ -324,141 +445,100 @@ export default function TemplatesPage() {
 
           {/* Unified Template Card Grid */}
           <div className={styles.grid}>
-            {/* Blank Template / Start from Scratch Option (shown when specific category is selected and price allows) */}
-            {selectedCategory !== 'all' && priceFilter !== 'support' && (
-              <Link
-                href={`/editor/${selectedCategory}/blank`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.card}
-                style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', cursor: 'pointer' }}
-              >
-                <div
-                  className={styles.thumbnail}
-                  style={{
-                    overflow: 'hidden',
-                    height: '280px',
-                    position: 'relative',
-                    background: 'var(--bg-panel-input, #f8fafc)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderBottom: '1px solid #e2e8f0',
-                  }}
-                >
-                  <div style={{
-                    width: '90px',
-                    height: '127px',
-                    background: '#ffffff',
-                    border: '2px dashed #cbd5e1',
-                    borderRadius: '6px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
-                    transition: 'all 0.2s',
-                  }}>
-                    <Plus size={28} color="#94a3b8" />
+            {(() => {
+              const items: Array<{ type: 'scratch' } | { type: 'template'; tpl: any } | { type: 'ad1' } | { type: 'ad2' }> = [];
+              if (selectedCategory !== 'all' && priceFilter !== 'support') {
+                items.push({ type: 'scratch' });
+              }
+              filteredTemplates.forEach((tpl) => {
+                items.push({ type: 'template', tpl });
+              });
+
+              // 6th position - Native Banner
+              if (items.length >= 5) {
+                items.splice(5, 0, { type: 'ad1' });
+              } else {
+                items.push({ type: 'ad1' });
+              }
+
+              // 12th position - 300x250 Banner
+              if (items.length >= 11) {
+                items.splice(11, 0, { type: 'ad2' });
+              } else if (items.length >= 6) {
+                items.push({ type: 'ad2' });
+              }
+
+              if (items.length === 0) {
+                return (
+                  <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px', color: '#64748b' }}>
+                    <FileText size={48} color="#cbd5e1" style={{ marginBottom: '16px' }} />
+                    <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>No templates found</h3>
+                    <p style={{ fontSize: '0.9rem', margin: 0 }}>Try adjusting your search query, category filter, or pricing filter.</p>
                   </div>
-                  <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700, marginTop: '12px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Start from Scratch</span>
+                );
+              }
 
-                  <span
-                    style={{
-                      position: 'absolute',
-                      top: '12px',
-                      left: '12px',
-                      backgroundColor: '#475569',
-                      color: 'white',
-                      fontSize: '0.7rem',
-                      fontWeight: 800,
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      zIndex: 10,
-                      textTransform: 'uppercase',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                    }}
-                  >
-                    Free
-                  </span>
-                </div>
-
-                <div className={styles.content}>
-                  <div className={styles.details}>
-                    <h3 className={styles.cardTitle}>
-                      Blank {selectedCategory === 'resume'
-                        ? 'Resume'
-                        : selectedCategory === 'cv'
-                          ? 'CV'
-                          : selectedCategory === 'cover-letter'
-                            ? 'Cover Letter'
-                            : 'Document'}
-                    </h3>
-                    <p className={styles.cardDesc}>
-                      Start with a completely blank canvas and build your document from scratch using custom elements.
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            )}
-
-            {filteredTemplates.length === 0 ? (
-              <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px', color: '#64748b' }}>
-                <FileText size={48} color="#cbd5e1" style={{ marginBottom: '16px' }} />
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>No templates found</h3>
-                <p style={{ fontSize: '0.9rem', margin: 0 }}>Try adjusting your search query, category filter, or pricing filter.</p>
-              </div>
-            ) : (
-              filteredTemplates.map((tpl) => (
-                <Link
-                  key={tpl.id}
-                  href={`/editor/${tpl.category}/${tpl.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.card}
-                  style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', cursor: 'pointer' }}
-                >
-                  <div
-                    className={styles.thumbnail}
-                    style={{ overflow: 'hidden', height: '280px', position: 'relative', background: '#f8fafc' }}
-                  >
-                    <TemplateThumbnail template={tpl} />
-                    <span className={styles.categoryTag}>{tpl.category}</span>
-
-                    {/* Free or Premium badge positioned at the top-left */}
-                    <span
-                      style={{
-                        position: 'absolute',
-                        top: '12px',
-                        left: '12px',
-                        backgroundColor: tpl.isPremium ? '#f59e0b' : '#10b981',
-                        color: 'white',
-                        fontSize: '0.7rem',
-                        fontWeight: 800,
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        zIndex: 10,
-                        textTransform: 'uppercase',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                      }}
+              return items.map((item, idx) => {
+                if (item.type === 'scratch') {
+                  return (
+                    <Link
+                      key="scratch"
+                      href={`/editor/${selectedCategory}/blank`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.card}
+                      style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', cursor: 'pointer' }}
                     >
-                      {tpl.isPremium ? 'Premium' : 'Free'}
-                    </span>
-                  </div>
+                      <div className={styles.thumbnail} style={{ overflow: 'hidden', height: '280px', position: 'relative', background: 'var(--bg-panel-input, #f8fafc)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid #e2e8f0' }}>
+                        <div style={{ width: '90px', height: '127px', background: '#ffffff', border: '2px dashed #cbd5e1', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', transition: 'all 0.2s' }}>
+                          <Plus size={28} color="#94a3b8" />
+                        </div>
+                        <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700, marginTop: '12px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Start from Scratch</span>
+                        <span style={{ position: 'absolute', top: '12px', left: '12px', backgroundColor: '#475569', color: 'white', fontSize: '0.7rem', fontWeight: 800, padding: '4px 8px', borderRadius: '4px', zIndex: 10, textTransform: 'uppercase', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>Free</span>
+                      </div>
+                      <div className={styles.content}>
+                        <div className={styles.details}>
+                          <h3 className={styles.cardTitle}>Blank {selectedCategory === 'resume' ? 'Resume' : selectedCategory === 'cv' ? 'CV' : selectedCategory === 'cover-letter' ? 'Cover Letter' : 'Document'}</h3>
+                          <p className={styles.cardDesc}>Start with a completely blank canvas and build your document from scratch using custom elements.</p>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                }
 
-                  <div className={styles.content}>
-                    <div className={styles.details}>
-                      <h3 className={styles.cardTitle}>{tpl.name}</h3>
-                      <p className={styles.cardDesc}>
-                        {tpl.description || (tpl.category === 'resume'
-                          ? 'Single-column professional resume layout for design editor customisation.'
-                          : 'Classic layout containing professional document details.')}
-                      </p>
+                if (item.type === 'ad1') {
+                  return <AdBannerBox key={`ad1-${idx}`} />;
+                }
+
+                if (item.type === 'ad2') {
+                  return <AdBannerBox2 key={`ad2-${idx}`} />;
+                }
+
+                const tpl = item.tpl;
+                return (
+                  <Link
+                    key={tpl.id}
+                    href={`/editor/${tpl.category}/${tpl.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.card}
+                    style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', cursor: 'pointer' }}
+                  >
+                    <div className={styles.thumbnail} style={{ overflow: 'hidden', height: '280px', position: 'relative', background: '#f8fafc' }}>
+                      <TemplateThumbnail template={tpl} />
+                      <span className={styles.categoryTag}>{tpl.category}</span>
+                      <span style={{ position: 'absolute', top: '12px', left: '12px', backgroundColor: tpl.isPremium ? '#f59e0b' : '#10b981', color: 'white', fontSize: '0.7rem', fontWeight: 800, padding: '4px 8px', borderRadius: '4px', zIndex: 10, textTransform: 'uppercase', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>{tpl.isPremium ? 'Premium' : 'Free'}</span>
                     </div>
-                  </div>
-                </Link>
-              ))
-            )}
+                    <div className={styles.content}>
+                      <div className={styles.details}>
+                        <h3 className={styles.cardTitle}>{tpl.name}</h3>
+                        <p className={styles.cardDesc}>{tpl.description || (tpl.category === 'resume' ? 'Single-column professional resume layout for design editor customisation.' : 'Classic layout containing professional document details.')}</p>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              });
+            })()}
           </div>
 
         </div>
