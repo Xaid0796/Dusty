@@ -9,7 +9,7 @@ export const resumeEmeraldLuxuryTemplate: CanvasDocument = {
     "id": "page-1",
     "width": 210,
     "height": 297,
-    "background": "#ffffff"
+    "background": "#f0fdf4"
   },
   "elements": [
     {

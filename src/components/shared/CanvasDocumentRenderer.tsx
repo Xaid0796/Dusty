@@ -1,7 +1,7 @@
 import React from 'react';
 import { CanvasDocument } from '@/canvas/types';
 import { ElementRenderer } from '@/components/shared/ElementRenderer';
-import { mmToPx } from '@/canvas/utils';
+import { mmToPx, getBackgroundStyle } from '@/canvas/utils';
 
 interface CanvasDocumentRendererProps {
     doc: CanvasDocument;
@@ -29,7 +29,7 @@ export const CanvasDocumentRenderer: React.FC<CanvasDocumentRendererProps> = ({ 
                 width: `${pageW}px`,
                 height: `${pageH}px`,
                 position: 'relative',
-                backgroundColor: doc.page.background,
+                ...getBackgroundStyle(doc.page.background),
                 overflow: 'hidden',
                 transform: `scale(${scale})`,
                 transformOrigin: 'top left',

@@ -79,16 +79,21 @@ export const SelectionBox: React.FC<SelectionBoxProps> = ({ element, zoom }) => 
       const rad = (rotation * Math.PI) / 180;
       const cos = Math.cos(rad);
       const sin = Math.sin(rad);
-      const localDx = dx * cos + dy * sin;
-      const localDy = -dx * sin + dy * cos;
+      let localDx = dx * cos + dy * sin;
+      let localDy = -dx * sin + dy * cos;
+      if (handle === 'ml' || handle === 'mr') {
+        localDy = 0;
+      } else if (handle === 'tc' || handle === 'bc') {
+        localDx = 0;
+      }
       const minSize = 4;
 
       let newX = initX, newY = initY, newW = initW, newH = initH;
 
-      const isFrameProportional = element.type === 'frame' && ((element as any).shape === 'circle' || (element as any).shape === 'square');
+      const isCorner = ['tl', 'tr', 'bl', 'br'].includes(handle);
+      const ratio = initH / Math.max(initW, 0.01);
 
-      if (isFrameProportional && ['tl', 'tr', 'bl', 'br'].includes(handle)) {
-        const ratio = 1.0;
+      if (isCorner) {
         if (handle === 'br' || handle === 'tr') {
           newW = Math.max(minSize, initW + localDx);
         } else {

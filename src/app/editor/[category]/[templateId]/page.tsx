@@ -11,6 +11,7 @@ export function generateStaticParams() {
   paths.push({ category: 'resume', templateId: 'blank' });
   paths.push({ category: 'cv', templateId: 'blank' });
   paths.push({ category: 'cover-letter', templateId: 'blank' });
+  paths.push({ category: 'resume', templateId: 'resume-neo-modern-gradient-grid' });
 
   return paths;
 }

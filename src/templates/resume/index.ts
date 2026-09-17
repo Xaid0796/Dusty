@@ -18,6 +18,9 @@ import { resumeCreativeTerracottaTemplate } from './resume-creative-terracotta';
 import { resumeProfessionalTemplate } from './resume-professional';
 import { resumeModernTemplate } from './resume-modern';
 import { resumeAcademicBlueprintTemplate } from './resume-academic-blueprint';
+import { resumeAtelierGridTemplate } from './resume-atelier-grid';
+import { resumeModernIdentityCardTemplate } from './resume-modern-identity-card';
+import { resumeOliverBennettTemplate } from './resume-oliver-bennett';
 export const resumeTemplates: Record<string, CanvasDocument> = {
   'resume-orange-vanguard': resumeOrangeVanguardTemplate,
   'resume-cobalt-frame': resumeCobaltFrameTemplate,
@@ -38,4 +41,7 @@ export const resumeTemplates: Record<string, CanvasDocument> = {
   'resume-professional': resumeProfessionalTemplate,
   'resume-modern': resumeModernTemplate,
   'resume-academic-blueprint': resumeAcademicBlueprintTemplate,
-  };
+  'resume-atelier-grid': resumeAtelierGridTemplate,
+  'resume-modern-identity-card': resumeModernIdentityCardTemplate,
+  'resume-oliver-bennett': resumeOliverBennettTemplate,
+};

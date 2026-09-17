@@ -101,7 +101,7 @@ export const TemplateThumbnail: React.FC<ThumbnailProps> = ({ template }) => {
           top: '50%',
           marginLeft: '-397px',
           marginTop: '-561.5px',
-          backgroundColor: canvasDoc ? canvasDoc.page.background : '#ffffff',
+          backgroundColor: canvasDoc ? (typeof canvasDoc.page.background === 'string' ? canvasDoc.page.background : '#ffffff') : '#ffffff',
         }}
       >
         {canvasDoc ? (

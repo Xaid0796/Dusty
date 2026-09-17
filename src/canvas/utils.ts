@@ -4,6 +4,8 @@
 //  At standard 96 DPI: 1 inch = 25.4 mm, so 1 mm = 96 / 25.4 pixels.
 // ============================================================
 
+import React from 'react';
+
 export const MM_TO_PX = 96 / 25.4; // ~3.7795
 
 export const mmToPx = (mm: number): number => {
@@ -13,3 +15,8 @@ export const mmToPx = (mm: number): number => {
 export const pxToMm = (px: number): number => {
   return px / MM_TO_PX;
 };
+
+export const getBackgroundStyle = (background: string): React.CSSProperties => {
+  return { backgroundColor: background || '#ffffff' };
+};
+

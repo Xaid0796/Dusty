@@ -5,7 +5,7 @@ import { ElementRenderer } from './ElementRenderer';
 import { SelectionBox } from './SelectionBox';
 import { ContextToolbar } from './ContextToolbar';
 import { SmartGuides, GuideLineData, computeSmartGuides } from './SmartGuides';
-import { mmToPx, pxToMm } from '@/canvas/utils';
+import { mmToPx, pxToMm, getBackgroundStyle } from '@/canvas/utils';
 import { CanvasDocument, CanvasElement, DrawingElement } from '@/canvas/types';
 import styles from '../editor.module.css';
 
@@ -647,7 +647,7 @@ export const CanvasStage: React.FC<CanvasStageProps> = ({
                   style={{
                     width: `${mmToPx(doc.page.width)}px`,
                     height: `${pagePxHeight}px`,
-                    backgroundColor: doc.page.background,
+                    ...getBackgroundStyle(doc.page.background),
                     position: 'absolute',
                     top: `${pagePxTop}px`,
                     left: 0,

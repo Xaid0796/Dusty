@@ -29,6 +29,19 @@ export interface TemplateDefinition {
 }
 
 export const templateMetadataRegistry: Record<string, TemplateDefinition> = {
+  'resume-oliver-bennett': {
+    id: 'resume-oliver-bennett',
+    name: 'Oliver Bennett Modern CV',
+    category: 'resume',
+    thumbnailText: 'Oliver Bennett',
+    thumbnailGradient: 'linear-gradient(135deg, #1f2937, #d97706)',
+    thumbnail: '/thumbnails/modern-pro.png',
+    defaultData: defaultResumeData,
+    Component: ResumeModernLayout,
+    photoShape: 'circle',
+    isPremium: false,
+    description: 'A professional, modern two-column CV resume template featuring a light grey sidebar with a circular photo framed over a mustard yellow color block, contact, education, and references. The right column highlights a bold name header "Oliver Bennett", "UI/UX Designer", professional experience, core skills with dot-rating scales, and interests.',
+  },
   'cv-executive-masterclass': {
     id: 'cv-executive-masterclass',
     name: 'Executive Masterclass CV',
