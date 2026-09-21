@@ -33,6 +33,7 @@ import {
   StyleEditor,
 } from '@/components/generator/SectionEditors';
 import { generatePDF } from '@/utils/pdfGenerator';
+import { convertGeneratorToSchema, convertSchemaToCanvas } from '@/utils/documentBridge';
 import { detectGender, getPhotoForGender } from '@/utils/genderPhoto';
 import { showSupportPopup } from '@/components/shared/SupportPopup';
 import {
@@ -434,6 +435,15 @@ export default function GeneratorPage() {
   const previewParentRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
+
+  const handleOpenInCanvas = () => {
+    if (!doc) return;
+    const schema = convertGeneratorToSchema(doc);
+    const canvasDoc = convertSchemaToCanvas(schema);
+    canvasDoc.id = 'custom-generator';
+    localStorage.setItem('dusty_canvas_draft_resume_custom-generator', JSON.stringify(canvasDoc));
+    window.location.href = '/editor/resume/custom-generator';
+  };
 
   const {
     document: doc,
@@ -895,6 +905,9 @@ export default function GeneratorPage() {
           </button>
           <button className={`${styles.iconBtnIconOnly} ${styles.editOnly}`} onClick={redo} disabled={!future.length} title="Redo" aria-label="Redo">
             <Redo2 size={16} />
+          </button>
+          <button className={`${styles.iconBtn} ${styles.editOnly}`} onClick={handleOpenInCanvas} title="Open in Canvas Editor">
+            <Sparkles size={15} /> Open in Canvas
           </button>
           <button className={`${styles.iconBtn} ${styles.editOnly}`} onClick={() => setShowResetModal(true)} title="Reset">
             <RotateCcw size={15} /> Reset

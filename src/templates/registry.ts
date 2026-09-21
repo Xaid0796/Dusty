@@ -3,7 +3,7 @@ import { resumeTemplates } from './resume';
 import { cvTemplates } from './cv';
 import { coverLetterTemplates } from './cover-letter';
 
-// Canonical registry mapping template ID to CanvasDocument
+// Canonical registry mapping template ID to CanvasDocument for backward compatibility
 export const templateRegistry: Record<string, CanvasDocument> = {
   ...resumeTemplates,
   ...cvTemplates,

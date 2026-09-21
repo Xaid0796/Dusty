@@ -19,126 +19,7 @@ const RESUME_OPTIONS = [
   { id: 'william', name: 'William Executive Designer', desc: 'Bold, high-impact header for creative and executive leaders.', gradient: 'linear-gradient(135deg, #581c87, #c084fc)', emoji: '💼' },
 ];
 
-function AdBannerBox() {
-  const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const container = containerRef.current;
-    container.innerHTML = '';
-
-    const adDiv = document.createElement('div');
-    adDiv.id = 'container-00cb33acccce7b29a65480e5dd625a14';
-    container.appendChild(adDiv);
-
-    const script = document.createElement('script');
-    script.async = true;
-    script.setAttribute('data-cfasync', 'false');
-    script.src = 'https://pl31225128.profitableratecpmnetwork.com/00cb33acccce7b29a65480e5dd625a14/invoke.js';
-    container.appendChild(script);
-  }, []);
-
-  return (
-    <div
-      className={styles.card}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px',
-        minHeight: '380px',
-        background: '#ffffff',
-        border: '1px solid var(--border-color)',
-        borderRadius: 'var(--radius-lg)',
-        boxShadow: 'var(--shadow-sm)',
-      }}
-    >
-      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '12px', letterSpacing: '0.05em' }}>
-        Sponsored Advertisement
-      </div>
-      <div
-        ref={containerRef}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          width: '100%',
-          minHeight: '280px',
-          overflow: 'hidden',
-          background: '#f8fafc',
-          borderRadius: '8px',
-          border: '1px dashed #cbd5e1'
-        }}
-      />
-    </div>
-  );
-}
-
-function AdBannerBox2() {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const container = containerRef.current;
-    container.innerHTML = '';
-
-    const script1 = document.createElement('script');
-    script1.type = 'text/javascript';
-    script1.text = `
-      atOptions = {
-        'key' : '79a7be8081332e04df66cb0048c0c9c4',
-        'format' : 'iframe',
-        'height' : 250,
-        'width' : 300,
-        'params' : {}
-      };
-    `;
-    container.appendChild(script1);
-
-    const script2 = document.createElement('script');
-    script2.type = 'text/javascript';
-    script2.src = 'https://www.highrevenueformat.com/79a7be8081332e04df66cb0048c0c9c4/invoke.js';
-    container.appendChild(script2);
-  }, []);
-
-  return (
-    <div
-      className={styles.card}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px',
-        minHeight: '380px',
-        background: '#ffffff',
-        border: '1px solid var(--border-color)',
-        borderRadius: 'var(--radius-lg)',
-        boxShadow: 'var(--shadow-sm)',
-      }}
-    >
-      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '12px', letterSpacing: '0.05em' }}>
-        Sponsored Advertisement
-      </div>
-      <div
-        ref={containerRef}
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          width: '300px',
-          height: '250px',
-          overflow: 'hidden',
-          background: '#f8fafc',
-          borderRadius: '8px',
-          border: '1px dashed #cbd5e1'
-        }}
-      />
-    </div>
-  );
-}
 
 export default function TemplatesPage() {
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'resume' | 'cv' | 'cover-letter'>('all');
@@ -446,7 +327,7 @@ export default function TemplatesPage() {
           {/* Unified Template Card Grid */}
           <div className={styles.grid}>
             {(() => {
-              const items: Array<{ type: 'scratch' } | { type: 'template'; tpl: any } | { type: 'ad1' } | { type: 'ad2' }> = [];
+              const items: Array<{ type: 'scratch' } | { type: 'template'; tpl: any }> = [];
               if (selectedCategory !== 'all' && priceFilter !== 'support') {
                 items.push({ type: 'scratch' });
               }
@@ -455,18 +336,18 @@ export default function TemplatesPage() {
               });
 
               // 6th position - Native Banner
-              if (items.length >= 5) {
-                items.splice(5, 0, { type: 'ad1' });
-              } else {
-                items.push({ type: 'ad1' });
-              }
+              // if (items.length >= 5) {
+              //   items.splice(5, 0, { type: 'ad1' });
+              // } else {
+              //   items.push({ type: 'ad1' });
+              // }
 
               // 12th position - 300x250 Banner
-              if (items.length >= 11) {
-                items.splice(11, 0, { type: 'ad2' });
-              } else if (items.length >= 6) {
-                items.push({ type: 'ad2' });
-              }
+              // if (items.length >= 11) {
+              //   items.splice(11, 0, { type: 'ad2' });
+              // } else if (items.length >= 6) {
+              //   items.push({ type: 'ad2' });
+              // }
 
               if (items.length === 0) {
                 return (
@@ -506,13 +387,13 @@ export default function TemplatesPage() {
                   );
                 }
 
-                if (item.type === 'ad1') {
-                  return <AdBannerBox key={`ad1-${idx}`} />;
-                }
+                // if (item.type === 'ad1') {
+                //   return <AdBannerBox key={`ad1-${idx}`} />;
+                // }
 
-                if (item.type === 'ad2') {
-                  return <AdBannerBox2 key={`ad2-${idx}`} />;
-                }
+                // if (item.type === 'ad2') {
+                //   return <AdBannerBox2 key={`ad2-${idx}`} />;
+                // }
 
                 const tpl = item.tpl;
                 return (

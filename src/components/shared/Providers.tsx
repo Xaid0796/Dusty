@@ -8,10 +8,8 @@ import { CookieConsent } from '@/components/shared/CookieConsent';
 export function Providers({ children }: { children: React.ReactNode }) {
     return (
         <SupportPopupProvider>
-            <AdBlockDetector>
-                {children}
-                <CookieConsent />
-            </AdBlockDetector>
+            {children}
+            <CookieConsent />
         </SupportPopupProvider>
     );
 }

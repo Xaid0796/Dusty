@@ -7,11 +7,12 @@ export function generateStaticParams() {
     templateId: t.id,
   }));
 
-  // Add blank templates
+  // Add blank templates & custom generator
   paths.push({ category: 'resume', templateId: 'blank' });
   paths.push({ category: 'cv', templateId: 'blank' });
   paths.push({ category: 'cover-letter', templateId: 'blank' });
   paths.push({ category: 'resume', templateId: 'resume-neo-modern-gradient-grid' });
+  paths.push({ category: 'resume', templateId: 'custom-generator' });
 
   return paths;
 }

@@ -58,7 +58,7 @@ export function CookieConsent() {
                 gap: '16px'
             }}>
                 <div style={{ fontSize: '13px', lineHeight: '1.5', flex: 1, minWidth: '280px' }}>
-                    We use cookies and similar technologies to enhance your browsing experience, analyze site traffic, and serve personalized ads through Google AdSense. Read our{' '}
+                    We use cookies and similar technologies to enhance your browsing experience, analyze site traffic, and serve you better. Read our{' '}
                     <Link href="/privacy-policy" style={{ color: '#60a5fa', textDecoration: 'underline' }}>
                         Privacy Policy
                     </Link>{' '}

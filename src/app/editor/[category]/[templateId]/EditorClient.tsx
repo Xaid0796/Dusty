@@ -5,6 +5,7 @@ import { Lottie } from 'lottie-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useCanvasStore } from '@/canvas/store';
 import { sampleTemplates } from '@/templates/registry';
+import { getTemplateById } from '@/templates/index';
 import { exportCanvasToPDF } from '@/canvas/pdfExport';
 import { showSupportPopup } from '@/components/shared/SupportPopup';
 import { Toolbar } from './components/Toolbar';
@@ -187,9 +188,21 @@ export default function GenericCanvasEditorPage() {
   };
 
   // Helper to resolve template definition or dynamic blank canvas
-  const getDefaultDocument = (cat: string, id: string): CanvasDocument | null => {
-    const doc = sampleTemplates[id];
-    if (doc) return doc;
+  const getDefaultDocument = async (cat: string, id: string): Promise<CanvasDocument | null> => {
+    // First check static templates (for backward compatibility with sampleTemplates)
+    const staticDoc = sampleTemplates[id];
+    if (staticDoc) return staticDoc;
+
+    // Check unified registry for dynamic loading
+    const templateDef = getTemplateById(id);
+    if (templateDef && templateDef.loadTemplate) {
+      try {
+        return await templateDef.loadTemplate();
+      } catch (error) {
+        console.error(`Failed to load template "${id}":`, error);
+      }
+    }
+
     if (id === 'blank') {
       const categoryNames: Record<string, string> = {
         resume: 'Resume',
@@ -221,25 +234,19 @@ export default function GenericCanvasEditorPage() {
     if (!isClient) return;
 
     const initDoc = async () => {
-      let defaultDoc = getDefaultDocument(category, templateId);
+      let defaultDoc = await getDefaultDocument(category, templateId);
       if (!defaultDoc) {
         console.warn(`Template "${templateId}" not found.`);
         setNotFound(true);
         return;
       }
 
-      if (defaultDoc) {
-        defaultDoc = {
-          ...defaultDoc,
-          id: templateId,
-          category: category as any
-        };
-        setOriginalDocument(defaultDoc);
-      } else {
-        console.warn(`Template "${templateId}" not found.`);
-        setNotFound(true);
-        return;
-      }
+      defaultDoc = {
+        ...defaultDoc,
+        id: templateId,
+        category: category as any
+      };
+      setOriginalDocument(defaultDoc);
 
       const draftKey = `dusty_canvas_draft_${category}_${templateId}`;
       const draftTimestampKey = `${draftKey}_savedAt`;
@@ -526,10 +533,10 @@ export default function GenericCanvasEditorPage() {
     setShowRecoveryModal(false);
   };
 
-  const handleStartOver = () => {
+  const handleStartOver = async () => {
     const draftKey = `dusty_canvas_draft_${category}_${templateId}`;
     localStorage.removeItem(draftKey);
-    const defaultDoc = getDefaultDocument(category, templateId);
+    const defaultDoc = await getDefaultDocument(category, templateId);
     if (defaultDoc) { loadDocument(defaultDoc, true); setSaveStatus('saved'); }
     setShowRecoveryModal(false);
   };
@@ -564,10 +571,10 @@ export default function GenericCanvasEditorPage() {
     router.replace(`/templates?category=${category}`);
   };
 
-  const handleConfirmReset = () => {
+  const handleConfirmReset = async () => {
     const draftKey = `dusty_canvas_draft_${category}_${templateId}`;
     localStorage.removeItem(draftKey);
-    const defaultDoc = getDefaultDocument(category, templateId);
+    const defaultDoc = await getDefaultDocument(category, templateId);
     if (defaultDoc) {
       loadDocument(defaultDoc, true);
       useCanvasStore.setState({ history: [], future: [], selectedId: null, isTextEditing: false, croppingId: null });
