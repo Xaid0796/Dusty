@@ -4,10 +4,9 @@
   left: 0;
   right: 0;
   height: var(--header-height);
-  background-color: rgba(255, 255, 255, 0.92);
+  background-color: rgba(13, 15, 23, 0.95);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border-color);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   z-index: 100;
   display: flex;
   align-items: center;
@@ -42,7 +41,7 @@
 .navLink {
   font-size: 0.93rem;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: #94a3b8;
   transition: all 0.2s ease;
   position: relative;
   padding: 8px 14px;
@@ -50,21 +49,27 @@
 }
 
 .navLink:hover {
-  color: var(--primary-color);
-  background: rgba(37, 99, 235, 0.06);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .navLinkActive {
-  color: var(--primary-color);
+  color: #ffffff;
   font-weight: 600;
-  background: rgba(37, 99, 235, 0.08);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .ctaBtn {
   font-size: 0.88rem;
   padding: 9px 22px;
   margin-left: 12px;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.22);
+  background: #ffffff;
+  color: #0f172a;
+  border: none;
+}
+
+.ctaBtn:hover {
+  background: #f1f5f9;
 }
 
 .donateBtn {
@@ -74,9 +79,9 @@
   padding: 8px 16px;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #e11d48;
-  background: linear-gradient(135deg, #fff1f2, #fce7f3);
-  border: 1px solid #fecdd3;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   cursor: pointer;
   font-family: inherit;
@@ -86,12 +91,10 @@
 }
 
 .donateBtn:hover {
-  background: linear-gradient(135deg, #ffe4e6, #fbcfe8);
-  border-color: #fda4af;
-  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.12);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* ─── Hamburger visible on ALL screen sizes (secondary links live in menu) ── */
 .mobileMenuWrap {
   display: flex;
   align-items: center;
@@ -108,7 +111,7 @@
   min-width: 44px;
   border: none;
   background: transparent;
-  color: var(--text-primary);
+  color: #ffffff;
   cursor: pointer;
   border-radius: 10px;
   transition: background 0.15s;
@@ -116,10 +119,9 @@
 }
 
 .hamburgerBtn:active {
-  background: rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.1);
 }
 
-/* ─── Overflow dropdown menu (visible on ALL screen sizes when open) ────── */
 .overflowMenu {
   display: flex;
   flex-direction: column;
@@ -127,10 +129,10 @@
   top: calc(100% + 8px);
   right: 0;
   width: 260px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: #0d0f17;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
   overflow: hidden;
   z-index: 200;
   padding: 6px;
@@ -142,7 +144,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: #64748b;
   padding: 8px 14px 6px;
 }
 
@@ -153,7 +155,7 @@
   padding: 13px 16px;
   font-size: 0.92rem;
   font-weight: 500;
-  color: var(--text-primary);
+  color: #ffffff;
   border: none;
   background: none;
   cursor: pointer;
@@ -168,27 +170,26 @@
 }
 
 .overflowMenuItem:active {
-  background: #f1f5f9;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .overflowMenuItemActive {
-  color: var(--primary-color);
-  background: rgba(37, 99, 235, 0.06);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
   font-weight: 600;
 }
 
 .overflowChevron {
-  color: #94a3b8;
+  color: #64748b;
   flex-shrink: 0;
 }
 
 .overflowDivider {
   height: 1px;
-  background: #e2e8f0;
+  background: rgba(255, 255, 255, 0.08);
   margin: 4px 8px;
 }
 
-/* ─── Mobile Styles ─────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .header {
     height: auto;
@@ -200,7 +201,6 @@
     padding: 0 16px;
   }
 
-  /* Hide desktop nav completely on small screens */
   .nav {
     display: none;
   }

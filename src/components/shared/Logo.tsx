@@ -11,6 +11,7 @@ interface LogoProps {
   variant?: 'full' | 'icon' | 'compact';
   href?: string | null;
   className?: string;
+  light?: boolean;
 }
 
 export const LogoIcon: React.FC<{ size?: number; className?: string }> = ({
@@ -131,12 +132,13 @@ export const Logo: React.FC<LogoProps> = ({
   variant = 'full',
   href = '/',
   className = '',
+  light = false,
 }) => {
   const sizeClass =
     size === 'sm' ? styles.sizeSm : size === 'lg' ? styles.sizeLg : styles.sizeMd;
 
   const content = (
-    <div className={`${styles.logoWrapper} ${sizeClass} ${className}`}>
+    <div className={`${styles.logoWrapper} ${sizeClass} ${light ? styles.light : ''} ${className}`}>
       <div className={styles.iconBadge}>
         <LogoIcon />
       </div>

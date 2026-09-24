@@ -76,7 +76,7 @@ export const Header: React.FC = () => {
   return (
     <header className={styles.header}>
       <div className={styles.container}>
-        <Logo href="/" size="md" />
+        <Logo href="/" size="md" light={true} />
 
         {/* Primary items kept visible in the bar */}
         <nav className={styles.nav}>
