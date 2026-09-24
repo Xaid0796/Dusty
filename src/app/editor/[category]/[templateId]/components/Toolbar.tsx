@@ -168,6 +168,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           disabled={history.length === 0}
           onClick={undo}
           title="Undo (Ctrl+Z)"
+          aria-label="Undo"
         >
           <Undo2 size={16} />
         </button>
@@ -176,6 +177,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           disabled={future.length === 0}
           onClick={redo}
           title="Redo (Ctrl+Y)"
+          aria-label="Redo"
         >
           <Redo2 size={16} />
         </button>
@@ -226,16 +228,18 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
         {/* Snap, Grid */}
         <button
-          className={`${styles.iconBtn} ${styles.mobileHidden} ${snapToGrid ? styles.active : ''}`}
+          className={styles.iconBtn}
           onClick={onToggleSnap}
           title={snapToGrid ? 'Snap: ON' : 'Snap: OFF'}
+          aria-label={snapToGrid ? 'Snap: ON' : 'Snap: OFF'}
         >
           <Magnet size={16} />
         </button>
         <button
-          className={`${styles.iconBtn} ${styles.mobileHidden} ${showGrid ? styles.active : ''}`}
+          className={styles.iconBtn}
           onClick={onToggleGrid}
           title={showGrid ? 'Grid: ON' : 'Grid: OFF'}
+          aria-label={showGrid ? 'Grid: ON' : 'Grid: OFF'}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />

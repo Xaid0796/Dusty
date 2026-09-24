@@ -59,12 +59,14 @@ export const Header: React.FC = () => {
   const primaryItems = [
     { href: '/', label: 'Home', active: isActive('/') },
     { href: '/templates', label: 'Templates', active: isActive('/templates') || isActive('/editor') },
+    { href: '/guides', label: 'Guides', active: isActive('/guides') },
     { href: '/pdf-tools', label: 'PDF Tools', active: isActive('/pdf-tools') },
   ];
 
   // Grouped inside the three-line (hamburger) menu
   const menuItems = [
     { href: '/templates', label: 'Templates', active: isActive('/templates') || isActive('/editor') },
+    { href: '/guides', label: 'Career Guides', active: isActive('/guides') },
     { href: '/pdf-tools', label: 'PDF Tools', active: isActive('/pdf-tools') },
     { href: '/about', label: 'About', active: isActive('/about') },
     { href: '/contact', label: 'Contact', active: isActive('/contact') },

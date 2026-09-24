@@ -13,25 +13,25 @@ export const Footer: React.FC = () => {
               <Logo href="/" size="md" showTagline={false} light={true} />
             </div>
             <p className={styles.brandDescription}>
-              Professional resume builder, CV templates, and PDF tools to help you land your dream job with confidence and style.
+              Professional resume builder, CV templates, career guides, and PDF tools to help you land your dream job with confidence and style.
             </p>
           </div>
 
           <div className={styles.linksCols}>
             <div className={styles.col}>
-              <h3 className={styles.colTitle}>Product</h3>
+              <h3 className={styles.colTitle}>Product & Guides</h3>
               <ul className={styles.linkList}>
                 <li>
                   <Link href="/templates" className={styles.link}>Resume Templates</Link>
+                </li>
+                <li>
+                  <Link href="/guides" className={styles.link}>Career Guides & Tips</Link>
                 </li>
                 <li>
                   <Link href="/generator" className={styles.link}>Resume Generator</Link>
                 </li>
                 <li>
                   <Link href="/pdf-tools" className={styles.link}>PDF Tools</Link>
-                </li>
-                <li>
-                  <Link href="/templates" className={styles.link}>Template Gallery</Link>
                 </li>
               </ul>
             </div>

@@ -127,11 +127,11 @@ export const ResumePreviewModern: React.FC<ResumePreviewModernProps> = ({ docume
                 {contact.photoUrl && (
                     <div
                         style={{
-                            width: '80px',
-                            height: '80px',
+                            width: '110px',
+                            height: '110px',
                             borderRadius: '50%',
                             overflow: 'hidden',
-                            border: `2px solid ${primaryColor}`,
+                            border: `3px solid ${primaryColor}`,
                             flexShrink: 0,
                         }}
                     >

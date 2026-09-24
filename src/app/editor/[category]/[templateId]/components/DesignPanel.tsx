@@ -433,7 +433,7 @@ export const DesignPanel: React.FC<DesignPanelProps> = ({ onClose }) => {
             <ShapesIcon size={12} />
             Shapes · {SHAPES.length}
           </span>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 7, transition: 'all 0.3s ease-in-out' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, transition: 'all 0.3s ease-in-out' }}>
             {displayedShapes.map((shape) => (
               <button
                 key={shape.id}
@@ -444,33 +444,47 @@ export const DesignPanel: React.FC<DesignPanelProps> = ({ onClose }) => {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: 5,
-                  padding: '9px 4px 7px',
-                  background: 'var(--bg-panel-input)',
+                  gap: 8,
+                  padding: '12px 6px 10px',
+                  background: 'linear-gradient(135deg, var(--bg-panel-input) 0%, rgba(255, 255, 255, 0.05) 100%)',
                   border: '1px solid var(--border-panel)',
-                  borderRadius: 9,
+                  borderRadius: 12,
                   cursor: 'pointer',
-                  transition: 'all 0.15s',
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                   color: 'var(--text-panel)',
-                  fontSize: 9,
+                  fontSize: 10,
                   fontWeight: 600,
-                  letterSpacing: '0.03em',
-                  textTransform: 'uppercase',
+                  letterSpacing: '0.02em',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
                   minWidth: 0,
                   overflow: 'hidden',
                 }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-panel-btn-hover)';
                   (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--primary-color)';
+                  (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)';
+                  (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 12px rgba(99, 102, 241, 0.15)';
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-panel-input)';
+                  (e.currentTarget as HTMLButtonElement).style.background = 'linear-gradient(135deg, var(--bg-panel-input) 0%, rgba(255, 255, 255, 0.05) 100%)';
                   (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-panel)';
+                  (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
+                  (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 2px 4px rgba(0,0,0,0.02)';
                 }}
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" overflow="visible">
-                  {shape.preview}
-                </svg>
+                <div style={{
+                  width: 36,
+                  height: 36,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'var(--bg-panel, rgba(0,0,0,0.03))',
+                  borderRadius: 8,
+                }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" overflow="visible">
+                    {shape.preview}
+                  </svg>
+                </div>
                 <span style={{ lineHeight: 1.2, textAlign: 'center', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {shape.label}
                 </span>

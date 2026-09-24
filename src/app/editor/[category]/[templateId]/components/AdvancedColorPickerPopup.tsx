@@ -316,7 +316,44 @@ export const AdvancedColorPickerPopup: React.FC<AdvancedColorPickerPopupProps> =
                 </div>
 
                 <div style={{ marginBottom: 20 }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-panel-muted)', marginBottom: 8 }}>Preset Colors</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-panel-muted)' }}>Preset Colors</div>
+                        {typeof window !== 'undefined' && 'EyeDropper' in window && (
+                            <button
+                                onClick={async () => {
+                                    try {
+                                        // @ts-ignore
+                                        const eyeDropper = new window.EyeDropper();
+                                        const result = await eyeDropper.open();
+                                        const pickedColor = result?.sRGBHex || result?.sHex;
+                                        if (pickedColor) {
+                                            setHex(pickedColor);
+                                        }
+                                    } catch (e) {
+                                        // User canceled or not supported
+                                    }
+                                }}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 4,
+                                    background: 'var(--bg-panel-input)',
+                                    border: '1px solid var(--border-panel)',
+                                    borderRadius: 4,
+                                    padding: '2px 8px',
+                                    fontSize: 11,
+                                    color: 'var(--text-panel)',
+                                    cursor: 'pointer',
+                                }}
+                                title="Eyedropper tool"
+                            >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M2 22l5.5-5.5M14 6l4 4-9 9-4-4 9-9z" />
+                                </svg>
+                                Pick Screen Color
+                            </button>
+                        )}
+                    </div>
                     <div style={{ display: 'flex', gap: 6, justifyContent: 'space-between' }}>
                         {[
                             '#000000', '#FFFFFF', '#EF4444', '#F97316', '#F59E0B',
