@@ -9,11 +9,19 @@ interface ChatMessage {
     id: number;
     role: 'user' | 'assistant';
     content: string;
+    /** Full reply text, kept while the typewriter animation is streaming `content`. */
+    fullContent?: string;
+    /** True while the typewriter animation is revealing this message. */
+    isStreaming?: boolean;
 }
 
 const GROQ_API_KEY = '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';
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const MODEL_NAME = 'openai/gpt-oss-20b';
+
+/* ── Typewriter tuning ── */
+const TYPE_INTERVAL_MS = 16; // ~60fps tick for a snappy feel
+const TARGET_TICKS = 130;    // long answers still finish within ~2s
 
 const SYSTEM_PROMPT = `You are an AI assistant for DocXume, a 100% free resume and CV builder.
 Knowledge base:
@@ -48,14 +56,15 @@ export function FAQBot() {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const idCounter = useRef(1);
-
-    const scrollToBottom = useCallback(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, []);
+    const typeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const streamingIdRef = useRef<number | null>(null);
 
     useEffect(() => {
-        scrollToBottom();
-    }, [messages, loading, scrollToBottom]);
+        // Track typing so we can follow along instantly while text streams in,
+        // and glide smoothly when whole messages appear.
+        const isTyping = messages.some((m) => m.isStreaming);
+        messagesEndRef.current?.scrollIntoView({ behavior: isTyping ? 'auto' : 'smooth' });
+    }, [messages, loading]);
 
     useEffect(() => {
         if (open && inputRef.current) {
@@ -63,13 +72,59 @@ export function FAQBot() {
         }
     }, [open]);
 
+    // Never leak the typing interval if the component unmounts mid-animation.
+    useEffect(() => {
+        return () => {
+            if (typeTimerRef.current) clearInterval(typeTimerRef.current);
+        };
+    }, []);
+
+    /** Reveal `fullText` inside message `botId` a few characters per frame. */
+    const startTypewriter = useCallback((botId: number, fullText: string) => {
+        // Adaptive speed: short replies type out in well under a second,
+        // long replies cap at ~TARGET_TICKS frames so they never drag.
+        const charsPerTick = Math.max(1, Math.ceil(fullText.length / TARGET_TICKS));
+        let shown = 0;
+        streamingIdRef.current = botId;
+
+        typeTimerRef.current = setInterval(() => {
+            shown = Math.min(shown + charsPerTick, fullText.length);
+            const done = shown >= fullText.length;
+            const slice = fullText.slice(0, shown);
+
+            setMessages((prev) =>
+                prev.map((m) =>
+                    m.id === botId ? { ...m, content: slice, isStreaming: !done } : m
+                )
+            );
+
+            if (done) {
+                if (typeTimerRef.current) clearInterval(typeTimerRef.current);
+                typeTimerRef.current = null;
+                streamingIdRef.current = null;
+            }
+        }, TYPE_INTERVAL_MS);
+    }, []);
+
     const handleSend = useCallback(async (text?: string) => {
         const query = (text ?? input).trim();
         if (!query || loading) return;
 
+        // If a previous reply is still typing, snap it to its final text.
+        if (typeTimerRef.current) {
+            clearInterval(typeTimerRef.current);
+            typeTimerRef.current = null;
+            streamingIdRef.current = null;
+        }
+        const finalized = messages.map((m) =>
+            m.isStreaming && m.fullContent
+                ? { ...m, content: m.fullContent, isStreaming: false }
+                : m
+        );
+
         const userMsg: ChatMessage = { id: idCounter.current++, role: 'user', content: query };
         // Keep last 4 conversations (8 messages: 4 user + 4 assistant)
-        const newMessages = [...messages.slice(-7), userMsg];
+        const newMessages = [...finalized.slice(-7), userMsg];
         setMessages(newMessages);
         setInput('');
         setLoading(true);
@@ -85,7 +140,7 @@ export function FAQBot() {
                     model: MODEL_NAME,
                     messages: [
                         { role: 'system', content: SYSTEM_PROMPT },
-                        ...messages.slice(-7).map(m => ({ role: m.role, content: m.content })),
+                        ...finalized.slice(-7).map(m => ({ role: m.role, content: m.content })),
                         { role: 'user', content: query },
                     ],
                     temperature: 0.2,
@@ -108,13 +163,17 @@ export function FAQBot() {
                 throw new Error('Empty response from API');
             }
 
+            const botId = idCounter.current++;
             const botMsg: ChatMessage = {
-                id: idCounter.current++,
+                id: botId,
                 role: 'assistant',
-                content: answerText,
+                content: '',
+                fullContent: answerText,
+                isStreaming: true,
             };
 
             setMessages((prev) => [...prev, botMsg]);
+            startTypewriter(botId, answerText);
         } catch (err: any) {
             console.error('Groq API error:', err);
             const errorMsg: ChatMessage = {
@@ -126,7 +185,7 @@ export function FAQBot() {
         } finally {
             setLoading(false);
         }
-    }, [input, loading]);
+    }, [input, loading, messages, startTypewriter]);
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -172,6 +231,7 @@ export function FAQBot() {
                                 )}
                                 <div className={`${styles.bubble} ${msg.role === 'user' ? styles.userBubble : styles.botBubble}`}>
                                     {msg.content}
+                                    {msg.isStreaming && <span className={styles.caret} aria-hidden="true" />}
                                 </div>
                             </div>
                         ))}

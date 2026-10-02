@@ -191,6 +191,30 @@
     }
 }
 
+/* ── Typewriter Caret ── */
+.caret {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    margin-left: 2px;
+    vertical-align: -0.15em;
+    background: #4f46e5;
+    border-radius: 1px;
+    animation: caretBlink 0.8s steps(1) infinite;
+}
+
+@keyframes caretBlink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
 /* ── Quick Questions ── */
 .quickQuestions {
     padding: 8px 12px;
