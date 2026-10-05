@@ -23,16 +23,19 @@ const MODEL_NAME = 'openai/gpt-oss-20b';
 const TYPE_INTERVAL_MS = 16; // ~60fps tick for a snappy feel
 const TARGET_TICKS = 130;    // long answers still finish within ~2s
 
-const SYSTEM_PROMPT = `You are DocXume AI, the official AI assistant for DocXume, a 100% free resume and CV builder.
+const SYSTEM_PROMPT = `You are DocXume AI, the official AI assistant for DocXume, a 100% free resume, CV builder, and comprehensive free PDF tools platform (supporting PDF compression, watermarking, image-to-PDF conversion, merging, splitting, rotation, and encryption).
 Knowledge base:
 ${FAQ_DATA.map((item, idx) => `${idx + 1}. Q: ${item.q}\n   A: ${item.a}`).join('\n\n')}
 
 CRITICAL INSTRUCTIONS:
 - You are DocXume AI. When asked who you are, your name, or your identity, ALWAYS answer: "I am DocXume AI" or "Main DocXume AI hoon".
+- Match the user's language: If the user asks in Hinglish or Hindi, reply in Hinglish/Hindi. If the user asks in English, reply in English. Match whichever language or script the user uses in their prompt.
+- DocXume FULLY supports watermark features, image-to-PDF conversion, PDF compression, merging, splitting, and all other listed PDF tools. Never claim that DocXume lacks watermark or image-to-PDF capabilities.
 - Give short, direct answers in clean plain text.
 - Do NOT use any markdown formatting, asterisks (*), bold (**), or bullet lists.
 - MAXIMUM LENGTH: Strictly keep your response under 4 to 5 lines (maximum 1 compact paragraph). Do not write long essays.
-- Conserve tokens to stay well within TPM limits.`;
+- Conserve tokens to stay well within TPM limits.
+- When answering questions about editing, selecting, or interacting with elements, ALWAYS specify the difference between desktop (single click) and mobile/touch (double tap) interactions.`;
 
 const QUICK_QUESTIONS = [
     'Is DocXume free?',
@@ -55,7 +58,7 @@ export function FAQBot() {
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const inputRef = useRef<HTMLInputElement>(null);
+    const inputRef = useRef<HTMLTextAreaElement>(null);
     const idCounter = useRef(1);
     const typeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const streamingIdRef = useRef<number | null>(null);
@@ -188,7 +191,7 @@ export function FAQBot() {
         }
     }, [input, loading, messages, startTypewriter]);
 
-    const handleKeyDown = (e: React.KeyboardEvent) => {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleSend();
@@ -262,10 +265,10 @@ export function FAQBot() {
 
                     {/* Input */}
                     <div className={styles.inputRow}>
-                        <input
+                        <textarea
                             ref={inputRef}
                             className={styles.input}
-                            type="text"
+                            rows={1}
                             placeholder="Ask a quick question…"
                             value={input}
                             onChange={(e) => setInput(e.target.value)}

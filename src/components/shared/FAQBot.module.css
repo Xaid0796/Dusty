@@ -270,14 +270,35 @@
     flex: 1;
     padding: 10px 14px;
     border: 1px solid #d1d5db;
-    border-radius: 24px;
+    border-radius: 18px;
     font-size: 13px;
     outline: none;
     transition: border-color 0.15s ease;
+    resize: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.5;
+    min-height: 40px;
+    max-height: calc(1.5em * 3 + 20px);
+    /* 3 lines + padding */
+    font-family: inherit;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
 }
 
 .input:focus {
     border-color: #4f46e5;
+}
+
+.input::-webkit-scrollbar {
+    width: 4px;
+}
+
+.input::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
 }
 
 .sendBtn {

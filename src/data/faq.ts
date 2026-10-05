@@ -70,4 +70,19 @@ export const FAQ_DATA: FAQItem[] = [
         a: 'Yes, we appreciate your support! While DocXume is free to use, you can make a voluntary contribution via the Support Us button, which provides a QR code for secure payments.',
         keywords: ['donate', 'donation', 'support', 'pay', 'payment', 'qr', 'money'],
     },
+    {
+        q: 'How do I edit text in my resume or document on desktop and mobile?',
+        a: 'On desktop computers, click once on any text element to select and edit it. On mobile devices and touchscreens, you must double tap on the text element to activate editing mode.',
+        keywords: ['edit', 'text', 'change', 'modify', 'type', 'mobile', 'desktop', 'double tap', 'tap', 'click', 'phone', 'touch'],
+    },
+    {
+        q: 'What free PDF tools does DocXume provide?',
+        a: 'DocXume provides a complete suite of 100% free online PDF tools including PDF Compression, Image to PDF conversion, Merge PDF, Split PDF, Rotate PDF, Add Watermark, Encrypt/Protect PDF, Extract Pages, Reorder Pages, and Image to Image conversion.',
+        keywords: ['pdf tools', 'compress', 'watermark', 'image to pdf', 'merge', 'split', 'rotate', 'encrypt', 'extract', 'reorder', 'tools'],
+    },
+    {
+        q: 'Can I add a watermark to my PDF or convert images to PDF?',
+        a: 'Yes! DocXume fully supports adding custom watermarks to PDFs and converting images (JPG, PNG) into PDF files directly through our free PDF Tools suite.',
+        keywords: ['watermark', 'image to pdf', 'convert', 'pdf tools', 'jpg to pdf', 'png to pdf'],
+    },
 ];
