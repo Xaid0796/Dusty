@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { MessageCircle, X, Send, Bot } from 'lucide-react';
-import { FAQ_DATA } from '@/data/faq';
 import styles from './FAQBot.module.css';
 
 interface ChatMessage {
@@ -15,27 +14,11 @@ interface ChatMessage {
     isStreaming?: boolean;
 }
 
-const GROQ_API_KEY = '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';
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const MODEL_NAME = 'openai/gpt-oss-20b';
+const CHAT_API_URL = '/api/chat';
 
 /* ── Typewriter tuning ── */
 const TYPE_INTERVAL_MS = 16; // ~60fps tick for a snappy feel
 const TARGET_TICKS = 130;    // long answers still finish within ~2s
-
-const SYSTEM_PROMPT = `You are DocXume AI, the official AI assistant for DocXume, a 100% free resume, CV builder, and comprehensive free PDF tools platform (supporting PDF compression, watermarking, image-to-PDF conversion, merging, splitting, rotation, and encryption).
-Knowledge base:
-${FAQ_DATA.map((item, idx) => `${idx + 1}. Q: ${item.q}\n   A: ${item.a}`).join('\n\n')}
-
-CRITICAL INSTRUCTIONS:
-- You are DocXume AI. When asked who you are, your name, or your identity, ALWAYS answer: "I am DocXume AI" or "Main DocXume AI hoon".
-- Match the user's language: If the user asks in Hinglish or Hindi, reply in Hinglish/Hindi. If the user asks in English, reply in English. Match whichever language or script the user uses in their prompt.
-- DocXume FULLY supports watermark features, image-to-PDF conversion, PDF compression, merging, splitting, and all other listed PDF tools. Never claim that DocXume lacks watermark or image-to-PDF capabilities.
-- Give short, direct answers in clean plain text.
-- Do NOT use any markdown formatting, asterisks (*), bold (**), or bullet lists.
-- MAXIMUM LENGTH: Strictly keep your response under 4 to 5 lines (maximum 1 compact paragraph). Do not write long essays.
-- Conserve tokens to stay well within TPM limits.
-- When answering questions about editing, selecting, or interacting with elements, ALWAYS specify the difference between desktop (single click) and mobile/touch (double tap) interactions.`;
 
 const QUICK_QUESTIONS = [
     'Is DocXume free?',
@@ -134,37 +117,30 @@ export function FAQBot() {
         setLoading(true);
 
         try {
-            const response = await fetch(GROQ_API_URL, {
+            const response = await fetch(CHAT_API_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${GROQ_API_KEY}`,
                 },
                 body: JSON.stringify({
-                    model: MODEL_NAME,
                     messages: [
-                        { role: 'system', content: SYSTEM_PROMPT },
-                        ...finalized.slice(-7).map(m => ({ role: m.role, content: m.content })),
+                        ...finalized.slice(-7).map((m) => ({ role: m.role, content: m.content })),
                         { role: 'user', content: query },
                     ],
-                    temperature: 0.2,
-                    max_tokens: 256,
-                    reasoning_effort: 'low',
                 }),
             });
 
             if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Groq API error:', response.status, errorText);
-                throw new Error(`API error: ${response.status} - ${errorText}`);
+                const errorData = await response.json().catch(() => null);
+                const errorMessage = errorData?.error || `Request failed with status ${response.status}`;
+                throw new Error(errorMessage);
             }
 
             const data = await response.json();
-            const message = data.choices?.[0]?.message;
-            const answerText = (message?.content ?? message?.reasoning ?? '').trim();
+            const answerText = (data?.content || '').trim();
 
             if (!answerText) {
-                throw new Error('Empty response from API');
+                throw new Error('Empty response from AI service');
             }
 
             const botId = idCounter.current++;
@@ -179,7 +155,7 @@ export function FAQBot() {
             setMessages((prev) => [...prev, botMsg]);
             startTypewriter(botId, answerText);
         } catch (err: any) {
-            console.error('Groq API error:', err);
+            console.error('Chat error:', err);
             const errorMsg: ChatMessage = {
                 id: idCounter.current++,
                 role: 'assistant',
